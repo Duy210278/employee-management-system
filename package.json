@@ -1,0 +1,25 @@
+{
+  "name": "upharma-lo-trinh",
+  "private": true,
+  "description": "Lộ trình Upharma: quản lý khung năng lực, checklist onboarding và lộ trình 4 Level cho NVBH",
+  "packageManager": "pnpm@9.15.9",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "pnpm -F @lotrinh/shared build && concurrently -k -n shared,api,web -c gray,blue,green \"pnpm -F @lotrinh/shared dev\" \"pnpm -F @lotrinh/api dev\" \"pnpm -F @lotrinh/web dev\"",
+    "build": "pnpm -F @lotrinh/shared build && pnpm -F @lotrinh/api build && pnpm -F @lotrinh/web build",
+    "start": "pnpm -F @lotrinh/api start",
+    "test": "pnpm -F @lotrinh/shared build && pnpm -r test",
+    "typecheck": "pnpm -F @lotrinh/shared build && pnpm -r typecheck",
+    "seed:extract": "node seed/extract-n3.mjs",
+    "db:generate": "pnpm -F @lotrinh/api db:generate",
+    "db:migrate": "pnpm -F @lotrinh/api db:migrate",
+    "db:seed": "pnpm -F @lotrinh/shared build && pnpm -F @lotrinh/api db:seed",
+    "db:reset": "pnpm -F @lotrinh/shared build && pnpm -F @lotrinh/api db:reset"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.5",
+    "typescript": "~5.9.3"
+  }
+}

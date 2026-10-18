@@ -1,0 +1,97 @@
+/* Bảng màu và chữ theo mục 15.1–15.2 (lấy trực tiếp từ CSS của N3) */
+:root {
+  color-scheme: light;
+  --bg: #f1f5f5;
+  --surface: #ffffff;
+  --surface2: #f6f9f9;
+  --ink: #13272b;
+  --mut: #5a6f73;
+  --line: #dae3e4;
+  --accent: #0a7b67;
+  --accent-ink: #ffffff;
+  --soft: #dff1ec;
+  --ok: #1c7c4b;
+  --ok-bg: #e1f4ea;
+  --warn: #9a6200;
+  --warn-bg: #fff1d4;
+  --bad: #b93a27;
+  --bad-bg: #fce8e4;
+  --info: #245aa8;
+  --info-bg: #e3edfa;
+  --r-nv: #6b4fb3;
+  --r-nv-bg: #eee8fa;
+  --r-buddy: #0a7b67;
+  --r-buddy-bg: #dff1ec;
+  --r-cht: #245aa8;
+  --r-cht-bg: #e3edfa;
+  --r-qlkv: #9a6200;
+  --r-qlkv-bg: #fff1d4;
+  --r-bp: #b93a27;
+  --r-bp-bg: #fce8e4;
+  --font: 'Be Vietnam Pro', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, Menlo, monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+    --bg: #0d1a1c;
+    --surface: #142326;
+    --surface2: #102022;
+    --ink: #e5efef;
+    --mut: #91a7aa;
+    --line: #26393c;
+    --accent: #3fc3a6;
+    --accent-ink: #06211b;
+    --soft: #14352f;
+    --ok: #55cf92;
+    --ok-bg: #12331f;
+    --warn: #f0b84f;
+    --warn-bg: #3a2d0e;
+    --bad: #ff8a76;
+    --bad-bg: #40201b;
+    --info: #7fb0f0;
+    --info-bg: #162c4a;
+    --r-nv: #b7a2f2;
+    --r-nv-bg: #2a2147;
+    --r-buddy: #3fc3a6;
+    --r-buddy-bg: #14352f;
+    --r-cht: #7fb0f0;
+    --r-cht-bg: #162c4a;
+    --r-qlkv: #f0b84f;
+    --r-qlkv-bg: #3a2d0e;
+    --r-bp: #ff8a76;
+    --r-bp-bg: #40201b;
+  }
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #0d1a1c;
+  --surface: #142326;
+  --surface2: #102022;
+  --ink: #e5efef;
+  --mut: #91a7aa;
+  --line: #26393c;
+  --accent: #3fc3a6;
+  --accent-ink: #06211b;
+  --soft: #14352f;
+  --ok: #55cf92;
+  --ok-bg: #12331f;
+  --warn: #f0b84f;
+  --warn-bg: #3a2d0e;
+  --bad: #ff8a76;
+  --bad-bg: #40201b;
+  --info: #7fb0f0;
+  --info-bg: #162c4a;
+  --r-nv: #b7a2f2;
+  --r-nv-bg: #2a2147;
+  --r-buddy: #3fc3a6;
+  --r-buddy-bg: #14352f;
+  --r-cht: #7fb0f0;
+  --r-cht-bg: #162c4a;
+  --r-qlkv: #f0b84f;
+  --r-qlkv-bg: #3a2d0e;
+  --r-bp: #ff8a76;
+  --r-bp-bg: #40201b;
+}

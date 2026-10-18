@@ -1,0 +1,3653 @@
+{
+  "levels": [
+    {
+      "key": 1,
+      "name": "Nhân viên mới",
+      "phase": "Hội nhập",
+      "motto": "Không làm sai",
+      "durationLabel": "2 tháng",
+      "rangeLabel": "Tháng 1–2",
+      "months": 2,
+      "totalDays": 60,
+      "checklistName": "Buddy Checklist",
+      "kpi": {
+        "total": 30,
+        "coef1": 12,
+        "ratio": 40,
+        "method": "all_months",
+        "windowFrom": 1,
+        "windowTo": 2
+      },
+      "overview": {
+        "goals": [
+          {
+            "title": "Quy trình vận hành",
+            "body": "Thực hiện được 100% bước mở ca, đóng ca, nhập hàng, kiểm kho theo SOP trong 4 tuần đầu."
+          },
+          {
+            "title": "Nhận diện sản phẩm",
+            "body": "Nhận diện và tư vấn đúng 55 SKU Level 1 (xem Phụ lục A.1) — đạt bài thu hoạch ≥ 6/10 trước cuối tháng 2."
+          },
+          {
+            "title": "Kỹ năng tiếp đón",
+            "body": "Áp dụng đúng quy trình bán hàng: Chào – Hỏi – Tư vấn – Đề xuất – Kết thúc trong mọi ca làm việc. Đạt ≥ 80% khi Buddy quan sát."
+          },
+          {
+            "title": "Kiến thức sản phẩm & GPP",
+            "body": "Tra cứu được thông tin sản phẩm; phân biệt Rx/OTC; nắm 5 cảnh báo an toàn thuốc cơ bản. Hoàn thành các module GPP cơ bản (Phụ lục B)."
+          },
+          {
+            "title": "An toàn không lỗi",
+            "body": "Không có lỗi nghiêm trọng về an toàn thuốc (sai thuốc, sai liều) trong 2 tháng đầu."
+          },
+          {
+            "title": "Chỉ tiêu doanh số",
+            "body": "DS tổng ≥ 30 triệu và DS hệ số 1 ≥ 12 triệu — đạt tại tháng đánh giá (cuối Level 1), với điều kiện tối thiểu 2/2 tháng trong Level đạt KPI."
+          }
+        ],
+        "kpiTable": [
+          [
+            "Chỉ tiêu",
+            "Mức tham khảo/tháng",
+            "Ngưỡng cảnh báo",
+            "Người theo dõi"
+          ],
+          [
+            "Doanh số tổng",
+            "30 triệu",
+            "< 24tr",
+            "CHT + QLKV"
+          ],
+          [
+            "DS hệ số 1",
+            "12 triệu",
+            "< 10tr",
+            "CHT + BP Đào tạo"
+          ],
+          [
+            "Tỉ trọng H.số 1",
+            "",
+            "< 30% trong 2 tháng liên tiếp",
+            "CHT"
+          ]
+        ],
+        "responsibilities": [
+          {
+            "heading": "Buddy / Cửa hàng trưởng",
+            "items": [
+              "Phân công Buddy chính thức ngày đầu tiên kèm checklist tuần",
+              "Hướng dẫn SOP vận hành trực tiếp tại quầy",
+              "Kiểm tra thực hành hàng tuần theo checklist có hướng dẫn",
+              "Xác nhận từng mục checklist khi nhân viên đạt",
+              "Phản hồi sai sót ngay trong ca, không để qua ngày",
+              "Đánh giá tổng kết cuối tháng 1 và tháng 2"
+            ]
+          },
+          {
+            "heading": "Khu vực (QLKV)",
+            "items": [
+              "Xác nhận nhà thuốc đã phân công Buddy trong 48h đầu",
+              "Theo dõi tiến độ checklist và LMS qua hệ thống",
+              "Hỗ trợ khi nhà thuốc thiếu nguồn lực kèm cặp",
+              "Cảnh báo khi checklist trễ hạn > 1 tuần"
+            ]
+          },
+          {
+            "heading": "BP Đào tạo",
+            "items": [
+              "Tổ chức lớp định hướng tập trung (online/offline) trong tháng đầu",
+              "Cung cấp checklist onboarding chuẩn hóa theo tuần có hướng dẫn Buddy",
+              "Upload tài liệu 55 SKU L1, module Bệnh học, Nhóm thuốc cơ bản lên LMS",
+              "Xây dựng các bài thu hoạch Level 1",
+              "Xác nhận hoàn thành Level 1"
+            ]
+          }
+        ],
+        "lms": [
+          "Xem module \"Giới thiệu Công ty Cổ phần Upharma\"",
+          "Xem các module hướng dẫn quy trình làm việc (mở ca, đóng ca, POS)",
+          "Đọc tài liệu 55 SKU Level 1 — có quiz đi kèm (đạt ≥ 6/10)",
+          "Xem Triệu chứng bệnh và đơn tham khảo của các bệnh Hô hấp – TMH cơ bản trên POS",
+          "Xem modul các nhóm thuốc cơ bản",
+          "Xem module \"Quy trình về bán hàng\"",
+          "Đạt các bài thu hoạch Level 1 (điểm ≥ 6/10)"
+        ],
+        "counter": [
+          "Tuần 1: Thao tác được POS dưới giám sát Buddy",
+          "Tuần 1: Thực hiện đúng quy trình mở ca",
+          "Tuần 2: Nhận diện đúng ≥ 10/55 SKU khi Buddy hỏi ngẫu nhiên",
+          "Tuần 2: Phân biệt được thuốc kê đơn/OTC",
+          "Tuần 3: Áp dụng quy trình 5 bước khi có khách (Buddy quan sát)",
+          "Tuần 4: Tư vấn được ≥ 30/55 SKU không cần hỏi lại",
+          "Tháng 2: Không có lỗi an toàn thuốc nghiêm trọng",
+          "Tháng 2 (tháng đánh giá): DS tổng ≥ 30tr và DS H.số 1 ≥ 12tr — tối thiểu 2/2 tháng (T1+T2) đạt KPI",
+          "Cuối Level 1: Buddy xác nhận đủ điều kiện lên Level 2"
+        ],
+        "note": "Phụ lục A.1 (danh sách 55 SKU Level 1) và Phụ lục B (module GPP tối thiểu) là tài liệu bắt buộc kèm theo checklist này. Buddy không thể xác nhận \"đạt\" nếu chưa hoàn thành 2 phụ lục trên."
+      },
+      "reviewCriteria": [
+        {
+          "name": "Nhận diện sản phẩm",
+          "threshold": "≥ 50/55 SKU",
+          "source": "Kiểm tra trực tiếp Ca 65"
+        },
+        {
+          "name": "Quy trình bán hàng",
+          "threshold": "≥ 85% giao dịch (T3)",
+          "source": "Bảng quan sát GD"
+        },
+        {
+          "name": "Kiểm tra LMS tổng kết",
+          "threshold": "≥ 60 điểm",
+          "source": "Hệ thống LMS"
+        },
+        {
+          "name": "An toàn thuốc",
+          "threshold": "Không có lỗi nghiêm trọng",
+          "source": "Sổ sự cố / Quản lý"
+        },
+        {
+          "name": "Phản ánh khách hàng",
+          "threshold": "Không có phản ánh tiêu cực T3",
+          "source": "Sổ phản ánh / hệ thống"
+        },
+        {
+          "name": "Vận hành độc lập",
+          "threshold": "5 ca liên tiếp không cần Buddy",
+          "source": "Ghi chú Buddy"
+        }
+      ],
+      "review": {
+        "flow": "Buddy hoặc CHT điền. CHT ký đề xuất, QLKV phê duyệt, BP Đào tạo xác nhận và lưu hồ sơ, nhân viên ký đã nhận kết quả.",
+        "when": "Từ khi mở giai đoạn cuối của Level",
+        "prompts": [
+          {
+            "key": "strengths",
+            "text": "Điểm mạnh nổi bật (≥ 2 điểm cụ thể, kèm ví dụ)",
+            "minPoints": 2
+          },
+          {
+            "key": "improve",
+            "text": "Điểm cần phát triển (≥ 2 điểm, không chung chung)",
+            "minPoints": 2
+          },
+          {
+            "key": "potential",
+            "text": "Tiềm năng phù hợp vai trò nào trong tương lai",
+            "minPoints": 0
+          }
+        ],
+        "passLabel": "Đủ điều kiện lên Level 2",
+        "allowFail": true,
+        "extension": {
+          "enabled": true,
+          "months": 1,
+          "maxTimes": 2,
+          "maxGoals": 3
+        },
+        "signers": [
+          "cht",
+          "qlkv",
+          "bp",
+          "nv"
+        ]
+      },
+      "stages": [
+        {
+          "key": "L1-S1",
+          "order": 1,
+          "name": "Định hướng & Làm quen môi trường",
+          "label": "Tuần 1",
+          "offsetStart": 0,
+          "offsetEnd": 7,
+          "shiftFrom": 1,
+          "shiftTo": 6,
+          "goal": "Nhân viên hiểu cấu trúc nhà thuốc, đăng nhập được hệ thống, nắm quy trình mở/đóng ca. Hoàn thành module GPP trước khi tiếp xúc khách hàng độc lập.",
+          "signers": [
+            "cht"
+          ],
+          "items": [
+            {
+              "key": "L1-1-1",
+              "order": 1,
+              "category": "Hành chính",
+              "content": "Nhận việc tại nhà thuốc (có mặt tại nhà thuốc trong ngày nhận việc và đúng ca làm việc đã trao đổi)",
+              "guidance": "Chuẩn bị trước ngày đầu. Kiểm tra đủ 3 mục.",
+              "verifiers": [
+                "buddy"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 1,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L1-1-2",
+              "order": 2,
+              "category": "Hành chính",
+              "content": "Tham quan toàn bộ mặt bằng nhà thuốc (khu thuốc OTC, thuốc kê đơn, mỹ phẩm, TPCN, TBYT, khu tự chọn, quầy thu ngân)",
+              "guidance": "Đi cùng, giải thích chức năng từng khu (~20 phút).",
+              "verifiers": [
+                "buddy"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 1,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L1-1-3",
+              "order": 3,
+              "category": "Hành chính",
+              "content": "Làm quen và biết tên toàn bộ đồng nghiệp trong ca đầu",
+              "guidance": "Giới thiệu trực tiếp đầu Ca 1. Hỏi lại cuối ca.",
+              "verifiers": [
+                "buddy"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 2,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L1-1-4",
+              "order": 4,
+              "category": "Hành chính",
+              "content": "Nắm nội quy ca: giờ bắt đầu, giờ nghỉ, quy định điện thoại, trang phục",
+              "guidance": "Đưa bản nội quy, đọc cùng, hỏi lại 2–3 điểm.",
+              "verifiers": [
+                "buddy"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 2,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L1-1-5",
+              "order": 5,
+              "category": "GPP",
+              "content": "Xem module GPP cơ bản (Quy trình bán hàng) trên LMS TRƯỚC KHI tiếp xúc khách hàng độc lập (Phụ lục B)\nTrường hợp chưa hoàn thành module Quy trình bán hàng, NV có thể tiếp xúc với khách nhưng có Buddy giám sát.",
+              "guidance": "Buddy xác nhận với BP Đào tạo. Không được bỏ qua.",
+              "verifiers": [
+                "bp"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 3,
+              "gpp": true,
+              "required": true,
+              "allowNa": false,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L1-1-6",
+              "order": 6,
+              "category": "Hệ thống",
+              "content": "Tạo tài khoản và đăng nhập được LMS lần đầu (vào được trang chủ)",
+              "guidance": "Hỗ trợ cài app hoặc mở web. Đảm bảo nhân viên tự đăng nhập được trước khi kết thúc Ca 1.",
+              "verifiers": [
+                "buddy"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 3,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L1-1-7",
+              "order": 7,
+              "category": "Hệ thống",
+              "content": "Đăng nhập được phần mềm POS, ST Upharma với tài khoản cá nhân",
+              "guidance": "Hướng dẫn từng bước: mở phần mềm → nhập tài khoản → vào được màn hình chính.",
+              "verifiers": [
+                "buddy"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 4,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L1-1-8",
+              "order": 8,
+              "category": "Hệ thống",
+              "content": "Biết tra cứu sản phẩm trên phần mềm (tìm theo tên, mã sản phẩm)",
+              "guidance": "Cho nhân viên thực hành tìm 5 sản phẩm bất kỳ trên hệ thống.",
+              "verifiers": [
+                "buddy"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 4,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L1-1-9",
+              "order": 9,
+              "category": "Quy trình",
+              "content": "Quan sát quy trình mở ca (Ca 2), tự làm dưới giám sát (Ca 3)",
+              "guidance": "Ca 2: quan sát. Ca 3: tự làm có Buddy đứng cạnh.",
+              "verifiers": [
+                "buddy"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 5,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L1-1-10",
+              "order": 10,
+              "category": "Quy trình",
+              "content": "Quan sát quy trình đóng ca (Ca 2), tự làm dưới giám sát (Ca 3)",
+              "guidance": "Tương tự mở ca.",
+              "verifiers": [
+                "buddy"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 5,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L1-1-11",
+              "order": 11,
+              "category": "Quy trình",
+              "content": "Biết vị trí lưu trữ: SOP in sẵn, SOP trên phần mềm",
+              "guidance": "Hướng dẫn nhân viên để họ tự mở và đọc thử.",
+              "verifiers": [
+                "buddy"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 6,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L1-1-12",
+              "order": 12,
+              "category": "LMS",
+              "content": "Xem module \"Giới thiệu Công ty Cổ phần Upharma\" trên LMS. Nhân viên tự tổng kết ra các ý chính sau khi xem module",
+              "guidance": "Nhân viên tự làm trong giờ thấp điểm hoặc sau ca. Buddy kiểm tra kết quả trước Ca 4.",
+              "verifiers": [
+                "buddy"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 6,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "lms",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L1-1-13",
+              "order": 13,
+              "category": "LMS",
+              "content": "Xem các modul hướng dẫn quy trình làm việc trên LMS",
+              "guidance": "Xem xong trước khi thực hành tại quầy (Ca 3).",
+              "verifiers": [
+                "buddy"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 7,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "lms",
+              "evidence": "none",
+              "dependsOn": []
+            }
+          ]
+        },
+        {
+          "key": "L1-S2",
+          "order": 2,
+          "name": "Kiến thức sản phẩm nhóm 1 & An toàn thuốc",
+          "label": "Tuần 2",
+          "offsetStart": 7,
+          "offsetEnd": 14,
+          "shiftFrom": 7,
+          "shiftTo": 12,
+          "goal": "Phân biệt Rx/OTC, nắm 5 cảnh báo an toàn, nhận diện và tư vấn được tối thiểu 10/55 SKU nhóm đầu tiên.",
+          "signers": [
+            "cht"
+          ],
+          "items": [
+            {
+              "key": "L1-2-1",
+              "order": 1,
+              "category": "An toàn thuốc",
+              "content": "Phân biệt được thuốc kê đơn (Rx) và thuốc không kê đơn (OTC), thuốc KSĐB — đúng khi Buddy chỉ 10 sản phẩm ngẫu nhiên",
+              "guidance": "Kiểm tra bằng cách chỉ ngẫu nhiên 10 SP trên kệ. Ghi điểm.",
+              "verifiers": [
+                "buddy"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 8,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L1-2-2",
+              "order": 2,
+              "category": "An toàn thuốc",
+              "content": "Biết tra cứu Triệu chứng bệnh và đơn tham khảo của các bệnh Hô hấp – TMH cơ bản",
+              "guidance": "Hỏi: \"Tờ HDSD của SP X nói gì về liều dùng cho trẻ em?\" NV tự tra.",
+              "verifiers": [
+                "buddy"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 9,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L1-2-3",
+              "order": 3,
+              "category": "An toàn thuốc",
+              "content": "Nắm 5 cảnh báo an toàn thuốc cơ bản: (1) Hỏi tiền sử bệnh, (2) Hỏi tiền sử dị ứng, (3) Cảnh báo tương tác cơ bản NSAID - NSAID và Corticoid - Quinolon, (4) Không dùng kháng sinh không đủ liệu trình, (5) Phụ nữ có thai hỏi bác sĩ trước",
+              "guidance": "Kiểm tra bằng tình huống: \"Khách đang uống X hỏi mua Y — em xử lý thế nào?\"",
+              "verifiers": [
+                "buddy"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 9,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L1-2-4",
+              "order": 4,
+              "category": "Sản phẩm nhóm 1",
+              "content": "Nhận diện đúng tối thiểu 10 SKU nhóm level 1: tên biệt dược, hoạt chất chính, hàm lượng phổ biến",
+              "guidance": "Chỉ trực tiếp trên kệ. Test: Buddy đọc tên hoạt chất, NV tìm đúng SP.",
+              "verifiers": [
+                "buddy"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 10,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L1-2-5",
+              "order": 5,
+              "category": "Sản phẩm nhóm 1",
+              "content": "Mô tả được công dụng chính và đối tượng dùng của tối thiểu 10 SKU nhóm level 1",
+              "guidance": "Roleplay Ca 9: Buddy đóng vai khách đưa ra tình huống bệnh level 1→ NV tư vấn có SKU đã học.",
+              "verifiers": [
+                "buddy"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 11,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L1-2-6",
+              "order": 6,
+              "category": "Sản phẩm nhóm 1",
+              "content": "Biết vị trí kệ trưng bày của toàn bộ SKU đã học (kệ nào, hàng mấy)",
+              "guidance": "Bài tập: Đưa list tên SP, NV tự đi tìm và viết vị trí. Thời gian: 15 phút.",
+              "verifiers": [
+                "buddy"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 12,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L1-2-7",
+              "order": 7,
+              "category": "Quy trình",
+              "content": "Tự thực hiện quy trình mở ca hoàn chỉnh không cần nhắc (lần đầu tiên)",
+              "guidance": "Quan sát từ xa. Ghi lại điểm còn thiếu để phản hồi sau ca.",
+              "verifiers": [
+                "buddy"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 12,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L1-2-8",
+              "order": 8,
+              "category": "LMS",
+              "content": "Hoàn thành tối thiểu 10 module SKU Level 1 và đạt quiz ≥ 60/100",
+              "guidance": "Kiểm tra điểm trên LMS. Nếu < 60: ôn lại, làm lại trước Ca 12.",
+              "verifiers": [
+                "buddy"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 13,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "lms",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L1-2-9",
+              "order": 9,
+              "category": "LMS",
+              "content": "Xem modul về các nhóm thuốc cơ bản level 1. Nhân viên tự tổng hợp lại các ý chính sau khi xem modul",
+              "guidance": "Đạt mới được tick mục an toàn thuốc tuần này.",
+              "verifiers": [
+                "buddy"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 14,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "lms",
+              "evidence": "none",
+              "dependsOn": []
+            }
+          ]
+        },
+        {
+          "key": "L1-S3",
+          "order": 3,
+          "name": "Kỹ năng tiếp đón & Quy trình bán hàng",
+          "label": "Tuần 3",
+          "offsetStart": 14,
+          "offsetEnd": 21,
+          "shiftFrom": 13,
+          "shiftTo": 18,
+          "goal": "Áp dụng quy trình bán hàng trong ≥ 5 giao dịch thực tế có Buddy quan sát và chấm Rubric (Phụ lục C).",
+          "signers": [
+            "cht"
+          ],
+          "items": [
+            {
+              "key": "L1-3-1",
+              "order": 1,
+              "category": "Kỹ năng BH",
+              "content": "Thuộc quy trình 5 bước không nhìn tài liệu: Chào–Hỏi–Tư vấn–Đề xuất–Kết thúc",
+              "guidance": "Yêu cầu NV trình bày đầu Ca 13. Nếu chưa thuộc: cho 10 phút đọc lại.",
+              "verifiers": [
+                "buddy"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 15,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L1-3-2",
+              "order": 2,
+              "category": "Kỹ năng BH",
+              "content": "Thực hành quy trình bán hàng trong ≥ 5 giao dịch thực tế — Buddy chấm Rubric Phụ lục C từng giao dịch",
+              "guidance": "Ghi điểm Rubric (1–3 mỗi tiêu chí). Đạt: ≥ 10/15 điểm. Phản hồi ngay sau ca.",
+              "verifiers": [
+                "buddy"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 15,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L1-3-3",
+              "order": 3,
+              "category": "Kỹ năng BH",
+              "content": "Biết đặt câu hỏi khai thác nhu cầu: Ai dùng? Triệu chứng? Đã dùng gì chưa? Dị ứng?",
+              "guidance": "Roleplay 3 TH: người cao tuổi mua thuốc, mẹ mua cho con sốt, khách tái mua.",
+              "verifiers": [
+                "buddy"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 16,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L1-3-4",
+              "order": 4,
+              "category": "Kỹ năng BH",
+              "content": "Biết từ chối bán đơn có tương tác — đúng quy định, lịch sự, không mất khách",
+              "guidance": "Roleplay: Khách nài nỉ \"Tôi vẫn hay mua thuốc này.\" NV có giữ lập trường không?",
+              "verifiers": [
+                "buddy"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 17,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L1-3-5",
+              "order": 5,
+              "category": "SKU",
+              "content": "Mở rộng lên tối thiểu 30 SKU: tư vấn được công dụng, đối tượng, cảnh báo chính của cả 30 SKU",
+              "guidance": "Test đầu Ca 18: Buddy hỏi ngẫu nhiên 10 trong 30 SKU. Đạt: ≥ 8/10.",
+              "verifiers": [
+                "buddy"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 18,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L1-3-6",
+              "order": 6,
+              "category": "Quy trình",
+              "content": "Thực hiện đúng quy trình POS: quét mã → nhập SL → thu tiền → in HĐ (≥ 10 GD thực tế)",
+              "guidance": "Đếm số GD NV tự xử lý trong Ca 13–16. Mục tiêu: ≥ 10 GD không cần nhắc.",
+              "verifiers": [
+                "buddy"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 18,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L1-3-7",
+              "order": 7,
+              "category": "Quy trình",
+              "content": "Biết quy trình khi POS lỗi/mất mạng (ghi tay, báo cáo, đồng bộ sau)",
+              "guidance": "Hướng dẫn + thực hành giả định 1 lần: tắt mạng và xử lý.",
+              "verifiers": [
+                "buddy"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 19,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L1-3-8",
+              "order": 8,
+              "category": "Quy trình",
+              "content": "Tự thực hiện đầy đủ quy trình mở ca VÀ đóng ca không cần nhắc nhở (3 ca liên tiếp)",
+              "guidance": "Ghi lại Ca nào nhân viên tự làm được hoàn toàn. Mục tiêu đạt trước cuối tuần 3.",
+              "verifiers": [
+                "buddy"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 20,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L1-3-9",
+              "order": 9,
+              "category": "LMS",
+              "content": "Hoàn thành module \"Quy trình bán hàng 5 bước\" + xem video roleplay mẫu",
+              "guidance": "Xem trước Ca 13 để có nền tảng lý thuyết trước khi thực hành.",
+              "verifiers": [
+                "buddy"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 20,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "lms",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L1-3-10",
+              "order": 10,
+              "category": "LMS",
+              "content": "Hoàn thành tối thiểu 30 module SKU Level 1 và đạt quiz ≥ 60/100",
+              "guidance": "Kiểm tra điểm trên LMS. Nếu < 60: ôn lại, làm lại trước Ca 18.",
+              "verifiers": [
+                "buddy"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 21,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "lms",
+              "evidence": "none",
+              "dependsOn": []
+            }
+          ]
+        },
+        {
+          "key": "L1-S4",
+          "order": 4,
+          "name": "Củng cố & Kiểm tra cuối Tháng 1",
+          "label": "Tuần 4",
+          "offsetStart": 21,
+          "offsetEnd": 30,
+          "shiftFrom": 19,
+          "shiftTo": 24,
+          "goal": "Tự vận hành được ca làm việc cơ bản. Đạt bài thu hoạch Level 1 ≥ 6/10. Sẵn sàng nhận phản hồi chính thức.",
+          "signers": [
+            "cht"
+          ],
+          "items": [
+            {
+              "key": "L1-4-1",
+              "order": 1,
+              "category": "Củng cố",
+              "content": "Tự thực hiện đầy đủ mở ca + đóng ca không cần nhắc trong 3 ca liên tiếp",
+              "guidance": "Buddy quan sát từ xa. Ghi số lần phải nhắc.",
+              "verifiers": [
+                "buddy"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 22,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L1-4-2",
+              "order": 2,
+              "category": "Củng cố",
+              "content": "Tự vận hành quầy 1 giờ độc lập (Buddy có mặt nhưng không can thiệp trừ khẩn cấp)",
+              "guidance": "Chọn giờ thấp điểm. Thông báo trước cho NV. Ghi số lần cần hỗ trợ.",
+              "verifiers": [
+                "buddy"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 23,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L1-4-3",
+              "order": 3,
+              "category": "SKU",
+              "content": "Kiểm tra nhanh 30 SKU: nhận diện đúng ≥ 27/30 (90%) khi Buddy test ngẫu nhiên",
+              "guidance": "Test bằng hỏi đáp. Ghi điểm.",
+              "verifiers": [
+                "buddy"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 24,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L1-4-4",
+              "order": 4,
+              "category": "Rubric BH",
+              "content": "% tuân thủ quy trình bán hàng theo Rubric Phụ lục C đạt ≥ 80% (≥ 3 lần quan sát tuần 4)",
+              "guidance": "Tổng hợp điểm Rubric: ≥ 4/5 lần quan sát đạt ≥ 10/15 điểm.",
+              "verifiers": [
+                "buddy"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 25,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L1-4-5",
+              "order": 5,
+              "category": "An toàn",
+              "content": "Không có lỗi an toàn thuốc nghiêm trọng trong tuần 4",
+              "guidance": "Nếu có: ghi lại, báo CHT ngay. Xem xét gia hạn tuần 4.",
+              "verifiers": [
+                "buddy",
+                "cht"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 26,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L1-4-6",
+              "order": 6,
+              "category": "Doanh số",
+              "content": "DS tổng ≥ 30 triệu VNĐ trong tháng 1 (miễn chỉ tiêu nếu vào ngày 15+)",
+              "guidance": "CHT pull báo cáo POS. Nếu vào nửa tháng: điều chỉnh pro-rata.",
+              "verifiers": [
+                "cht"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 27,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L1-4-7",
+              "order": 7,
+              "category": "LMS",
+              "content": "Hoàn thành 55 bài thu hoạch SKU Level 1 — đạt ≥ 60/100",
+              "guidance": "NV báo điểm cho Buddy. Nếu < 60: ôn 3 ngày, làm lại 1 lần.",
+              "verifiers": [
+                "buddy"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 28,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "lms",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L1-4-8",
+              "order": 8,
+              "category": "Đánh giá",
+              "content": "Buddy hoàn thành Phiếu đánh giá Tháng 1 (tab Phiếu đánh giá) → nộp CHT trước Ca 24",
+              "guidance": "Điền đủ phần định lượng (điểm Rubric, điểm LMS) VÀ định tính (nhận xét).",
+              "verifiers": [
+                "buddy"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 29,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L1-4-9",
+              "order": 9,
+              "category": "Đánh giá",
+              "content": "CHT gặp riêng NV 15 phút: phản hồi Tháng 1, đặt 3 mục tiêu cụ thể cho Tháng 2",
+              "guidance": "CHT xác nhận đã thực hiện",
+              "verifiers": [
+                "cht"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 30,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            }
+          ]
+        },
+        {
+          "key": "L1-S5",
+          "order": 5,
+          "name": "Mở rộng SKU & Tình huống nâng cao",
+          "label": "Tháng 2 – Giai đoạn 1 (Tuần 5–8)",
+          "offsetStart": 30,
+          "offsetEnd": 45,
+          "shiftFrom": 25,
+          "shiftTo": 48,
+          "goal": "Nâng lên đủ 45 SKU Level 1, bắt đầu đạt chỉ tiêu doanh số, xử lý được tình huống khó hơn.",
+          "signers": [
+            "cht"
+          ],
+          "items": [
+            {
+              "key": "L1-5-1",
+              "order": 1,
+              "category": "SKU",
+              "content": "Hiểu 55 SKU Level 1 đầy đủ (Phụ lục A.1): nhận diện, công dụng, đối tượng, cảnh báo",
+              "guidance": "Test cuối tuần 6: Buddy test ngẫu nhiên 30/55 SKU. Đạt: ≥ 25/30.",
+              "verifiers": [
+                "buddy"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 32,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L1-5-2",
+              "order": 2,
+              "category": "SKU",
+              "content": "Nắm ≥ 2 sản phẩm thay thế cho mỗi nhóm thuốc chính (generic/brand tương đương)",
+              "guidance": "Hỏi: \"Nếu hết X thì khách dùng gì thay thế cùng hoạt chất?\"",
+              "verifiers": [
+                "buddy"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 33,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L1-5-3",
+              "order": 3,
+              "category": "Kỹ năng BH",
+              "content": "Thực hành và đạt ≥ 2 trong 3 tình huống roleplay về kỹ năng giao tiếp: (1) Khách kỹ tính, (2) Khách hách dịch, (3) Khách thờ ơ, do dự",
+              "guidance": "Buddy đóng vai. Đánh giá: NV giữ được chuyên nghiệp và tư vấn đúng không?",
+              "verifiers": [
+                "buddy"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 35,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L1-5-4",
+              "order": 4,
+              "category": "Kỹ năng BH",
+              "content": "Biết cách giao tiếp đúng ngữ cảnh với khách hàng",
+              "guidance": "Quan sát 5 GD thực tế. Buddy đếm số lần NV giao tiếp tốt và chưa tốt với khách hàng.",
+              "verifiers": [
+                "buddy"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 37,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L1-5-5",
+              "order": 5,
+              "category": "Quy trình",
+              "content": "Tham gia ít nhất 1 lần nhập hàng thực tế: kiểm tra phiếu điều chuyển nội bộ, nhập kho, cập nhật tem giá (nếu cần)",
+              "guidance": "Hướng dẫn từng bước. NV làm trực tiếp có Buddy đứng cạnh.",
+              "verifiers": [
+                "buddy"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 38,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L1-5-6",
+              "order": 6,
+              "category": "Quy trình",
+              "content": "Biết cách tra cứu và báo cáo tình trạng sản phẩm cận date / hết hạn đúng quy trình",
+              "guidance": "Hướng dẫn: nhìn hạn dùng, ngưỡng cận date của cửa hàng, kênh báo cáo nội bộ.",
+              "verifiers": [
+                "buddy"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 40,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L1-5-7",
+              "order": 7,
+              "category": "Doanh số",
+              "content": "DS tổng ≥ 30 triệu VNĐ và DS H.số 1 ≥ 12 triệu VNĐ trong Tháng 2 – giai đoạn 1 (mốc tham khảo giữa kỳ)",
+              "guidance": "CHT pull POS cuối tháng. Chia sẻ kết quả với NV và Buddy đầu Tháng 3.",
+              "verifiers": [
+                "cht"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 42,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L1-5-8",
+              "order": 8,
+              "category": "LMS",
+              "content": "Xem module \"Kỹ năng giao tiếp cơ bản của Dược sĩ\" trên LMS",
+              "guidance": "Xem trước khi thực hành roleplay.",
+              "verifiers": [
+                "buddy"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 43,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "lms",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L1-5-9",
+              "order": 9,
+              "category": "Đánh giá",
+              "content": "Viết 3 điều muốn cải thiện → gửi Buddy đọc",
+              "guidance": "Buddy cho phản hồi bằng lời trực tiếp đầu ca.",
+              "verifiers": [
+                "buddy"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 45,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            }
+          ]
+        },
+        {
+          "key": "L1-S6",
+          "order": 6,
+          "name": "Tự vận hành & Đánh giá lên Level 2",
+          "label": "Tháng 2 – Giai đoạn 2 (Tuần 9–12)",
+          "offsetStart": 45,
+          "offsetEnd": 60,
+          "shiftFrom": 49,
+          "shiftTo": 72,
+          "goal": "Vận hành độc lập, đạt bài thu hoạch Level 1 ≥ 6/10, được Buddy + CHT xác nhận đủ điều kiện.",
+          "signers": [
+            "cht"
+          ],
+          "items": [
+            {
+              "key": "L1-6-1",
+              "order": 1,
+              "category": "Tự vận hành",
+              "content": "Tự vận hành ca làm việc độc lập 5 ca liên tiếp (Buddy ở khu vực khác, không can thiệp)",
+              "guidance": "Buddy thông báo trước: \"Tuần này em tự làm.\" Ghi số ca tự làm được hoàn toàn.",
+              "verifiers": [
+                "buddy"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 47,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L1-6-2",
+              "order": 2,
+              "category": "SKU",
+              "content": "Đạt kiểm tra chính thức 55 SKU: nhận diện đúng ≥ 50/55 VÀ tư vấn đúng 15 SKU ngẫu nhiên",
+              "guidance": "Kiểm tra chính thức tại Ca 65. Buddy + CHT cùng có mặt. Ký biên bản.",
+              "verifiers": [
+                "buddy",
+                "cht"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 48,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L1-6-3",
+              "order": 3,
+              "category": "Rubric BH",
+              "content": "Đạt tỉ lệ tuân thủ các bước bán hàng theo Rubric ≥ 85% trong Tháng 2 (≥ 3 lần quan sát chính thức)",
+              "guidance": "Tổng hợp từ tab Bảng quan sát GD.",
+              "verifiers": [
+                "buddy"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 49,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L1-6-4",
+              "order": 4,
+              "category": "Chất lượng",
+              "content": "Không có phản ánh tiêu cực từ khách hàng trong Tháng 2",
+              "guidance": "CHT rà soát từ hệ thống hoặc từ nhân viên trong nhà thuốc phản hồi.",
+              "verifiers": [
+                "cht"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 51,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L1-6-5",
+              "order": 5,
+              "category": "An toàn",
+              "content": "Xác nhận không có lỗi an toàn thuốc nghiêm trọng trong toàn bộ 3 tháng",
+              "guidance": "CHT rà soát từ hệ thống hoặc từ nhân viên trong nhà thuốc phản hồi.",
+              "verifiers": [
+                "cht"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 53,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L1-6-6",
+              "order": 6,
+              "category": "Doanh số",
+              "content": "DS tổng ≥ 30 triệu VNĐ và DS H.số 1 ≥ 12 triệu VNĐ — TẠI THÁNG ĐÁNH GIÁ (cuối Level 1); yêu cầu tối thiểu 2/2 tháng (Tháng 1 + Tháng 2) đạt KPI",
+              "guidance": "CHT tổng hợp dữ liệu từ POS.",
+              "verifiers": [
+                "cht"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 54,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L1-6-7",
+              "order": 7,
+              "category": "LMS",
+              "content": "Rà soát và Hoàn thành toàn bộ bài thu hoạch Level 1 — đạt ≥ 60/100",
+              "guidance": "Gửi kết quả cho Buddy và CHT.",
+              "verifiers": [
+                "buddy"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 55,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "lms",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L1-6-8",
+              "order": 8,
+              "category": "Đánh giá",
+              "content": "Buddy hoàn thành Phiếu đánh giá tổng kết Level 1 (gồm điểm Rubric + Buddy Performance Score từ NV)",
+              "guidance": "Không chỉ tick. Viết ≥ 2 câu điểm mạnh + ≥ 2 câu điểm cần phát triển.",
+              "verifiers": [
+                "buddy"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 57,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L1-6-9",
+              "order": 9,
+              "category": "Đánh giá",
+              "content": "CHT ký Phiếu chuyển Level: ĐỦ ĐIỀU KIỆN hoặc GIA HẠN (ghi rõ lý do + ≤ 3 mục tiêu cụ thể)",
+              "guidance": "Nếu gia hạn: lập kế hoạch 1 tháng. Không gia hạn quá 2 lần.",
+              "verifiers": [
+                "cht"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 59,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L1-6-10",
+              "order": 10,
+              "category": "Đánh giá",
+              "content": "Họp thông báo kết quả (CHT + Buddy + NV, 15 phút): xác nhận bước tiếp theo",
+              "guidance": "Thái độ tích cực dù kết quả nào.",
+              "verifiers": [
+                "buddy",
+                "cht"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 60,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": 2,
+      "name": "Nhân viên vững nghề",
+      "phase": "Phát triển",
+      "motto": "Làm đúng độc lập",
+      "durationLabel": "9 tháng",
+      "rangeLabel": "Tháng 4–12",
+      "months": 9,
+      "totalDays": 274,
+      "checklistName": "CHT Checklist",
+      "kpi": {
+        "total": 100,
+        "coef1": 30,
+        "ratio": 30,
+        "method": "average",
+        "windowFrom": 8,
+        "windowTo": 9
+      },
+      "overview": {
+        "goals": [
+          {
+            "title": "Tư vấn độc lập",
+            "body": "Tự xử lý ≥ 80% tình huống tư vấn thông thường không cần hỏi lại cấp trên — đo bằng Rubric quan sát 3 ca/tháng (xem Phụ lục C)."
+          },
+          {
+            "title": "Upsell & cross-sell",
+            "body": "Đề xuất sản phẩm bổ sung phù hợp trong ≥ 60% giao dịch phù hợp (T4–6) và ≥ 70% (T7–9). Đạt chỉ tiêu Giá trị trung bình đơn tương đương với cửa hàng."
+          },
+          {
+            "title": "Xử lý tình huống phức tạp",
+            "body": "Xử lý khiếu nại, hoàn trả, câu hỏi sâu về tác dụng phụ đúng quy trình, bình tĩnh, không leo thang không cần thiết."
+          },
+          {
+            "title": "Chương trình khuyến mãi",
+            "body": "Nắm và áp dụng đúng ≥ 1 chương trình KM/chương trình Thẻ khách hàng đang chạy mỗi tháng — không cần nhắc."
+          },
+          {
+            "title": "Chất lượng dịch vụ",
+            "body": "Không có phàn nàn nào bị khách hàng báo thẳng lên CHT/QLKV trong cả Level 2."
+          },
+          {
+            "title": "Kiến thức sản phẩm & GPP",
+            "body": "Nhận diện và tư vấn đúng 98 SKU Level 2 (xem Phụ lục A.2) — đạt bài thu hoạch ≥ 6/10. Hoàn thành các module GPP tối thiểu (Phụ lục B)."
+          },
+          {
+            "title": "Chỉ tiêu doanh số",
+            "body": "Điều kiện chính thức lên Level 3 — kết quả TRUNG BÌNH Tháng 11–12: DS tổng ≥ 100 triệu; DS hệ số 1 ≥ 30 triệu. (Chỉ tiêu ≥ 2/3 tháng mỗi giai đoạn ở mục 3.2 chỉ mang tính theo dõi/tham khảo trong suốt Level 2.)"
+          }
+        ],
+        "kpiTable": [
+          [
+            "Chỉ tiêu",
+            "Mức tham khảo/tháng",
+            "Ghi chú xu hướng",
+            "Người theo dõi"
+          ],
+          [
+            "Doanh số tổng",
+            "100 triệu",
+            "Không có mức tối thiểu cố định hàng tháng — theo dõi xu hướng để đảm bảo TRUNG BÌNH T11–12 đạt ≥ 100tr",
+            "CHT + QLKV"
+          ],
+          [
+            "DS hệ số 1",
+            "30 triệu",
+            "Không có mức tối thiểu cố định hàng tháng — theo dõi xu hướng để đảm bảo TRUNG BÌNH T11–12 đạt ≥ 30tr",
+            "CHT + BP Đào tạo"
+          ],
+          [
+            "Tỉ trọng H.số 1",
+            "",
+            "Không áp dụng ngưỡng % cố định theo tháng — chỉ cần tỉ trọng trung bình T11–12 đạt ≥ 30%",
+            "CHT"
+          ]
+        ],
+        "responsibilities": [
+          {
+            "heading": "Buddy / Cửa hàng trưởng",
+            "items": [
+              "Giao tình huống thực tế có giám sát theo Rubric (Phụ lục C)",
+              "Phản hồi định kỳ hàng tháng có biên bản",
+              "Cho nhân viên dẫn dắt ca bán hàng ngắn",
+              "Theo dõi KPI doanh số và Giá trị trung bình đơn hàng tuần",
+              "Đánh giá 360° từ đồng nghiệp cùng ca cuối quý"
+            ]
+          },
+          {
+            "heading": "Khu vực (QLKV)",
+            "items": [
+              "Chia sẻ kinh nghiệm liên cửa hàng hàng quý",
+              "Theo dõi KPI tư vấn và doanh thu theo nhân viên",
+              "Cảnh báo sớm NV có nguy cơ không lên Level 3"
+            ]
+          },
+          {
+            "heading": "BP Đào tạo",
+            "items": [
+              "Upload tài liệu 98 SKU, module Bệnh học, Nhóm thuốc L2, module GPP lên LMS",
+              "Đào tạo kỹ năng bán hàng nâng cao 1–2 lần/năm",
+              "Cập nhật module sản phẩm mới khi ra hàng",
+              "Xây dựng và vận hành các bài thu hoạch Level 2",
+              "Theo dõi tỉ lệ hoàn thành LMS theo cửa hàng"
+            ]
+          }
+        ],
+        "lms": [
+          "Đọc tài liệu module \"Kỹ năng bán hàng chuẩn quy trình\"",
+          "Đọc tài liệu \"Kỹ năng tăng doanh số, bán kèm, bán chéo\"",
+          "Xem Triệu chứng bệnh và Đơn tham khảo các bệnh lý Level 2 trên POS",
+          "Xem Quy định – Quy trình đổi trả hàng hoá",
+          "Đọc tài liệu 98 SKU Level 2 — có quiz đi kèm (đạt ≥ 6/10)",
+          "Đọc tài liệu chương trình khuyến mãi hiện hành",
+          "Đạt bài thu hoạch Level 2 (điểm ≥ 6/10)"
+        ],
+        "counter": [
+          "T4–6: NV tư vấn ≥ 80% độc lập (Rubric Phụ lục C, quan sát 3 ca)",
+          "T4–6: NV đề xuất upsell/cross-sell ≥ 60% GD phù hợp",
+          "T7–9: NV đề xuất upsell/cross-sell ≥ 70% GD phù hợp",
+          "T7–9: NV nắm đúng ≥ 1 CT khuyến mãi tháng (kiểm tra đầu tháng)",
+          "T10–12: Không cần nhắc về quy trình cơ bản",
+          "T11–12: TRUNG BÌNH DS tổng ≥ 100tr và DS H.số 1 ≥ 30tr — điều kiện chính thức lên Level 3",
+          "Cuối Level 2: CHT xác nhận đủ điều kiện lên Level 3"
+        ],
+        "note": "Từ Level 2 trở đi, vai trò xác nhận chính là Cửa hàng trưởng (CHT), không còn là Buddy. Rubric đánh giá tư vấn (Phụ lục C) phải được dùng nhất quán để tránh đánh giá không đồng đều giữa các CHT."
+      },
+      "reviewCriteria": [
+        {
+          "name": "Vận hành độc lập",
+          "threshold": "≤ 1 lần hỗ trợ/tuần (T10–12)",
+          "source": "Sổ nhật ký ca"
+        },
+        {
+          "name": "Tự xử lý tình huống",
+          "threshold": "≥ 80% không leo thang (10 ca quan sát)",
+          "source": "Bảng quan sát CHT"
+        },
+        {
+          "name": "KPI (giá trị trung bình đơn)",
+          "threshold": "≥ ngưỡng CH trong 3 tháng liên tiếp",
+          "source": "Báo cáo POS"
+        },
+        {
+          "name": "Điểm đánh giá chất lượng dịch vụ",
+          "threshold": "≥ ngưỡng tối thiểu cửa hàng, 2 kỳ liên tiếp",
+          "source": "Hệ thống / CHT đo"
+        },
+        {
+          "name": "Kiến thức sản phẩm",
+          "threshold": "≥ 85% SKU khi test ngẫu nhiên",
+          "source": "Kiểm tra trực tiếp"
+        },
+        {
+          "name": "Bài kiểm tra LMS",
+          "threshold": "≥ 60 điểm",
+          "source": "Hệ thống LMS"
+        },
+        {
+          "name": "Phản ánh khách hàng",
+          "threshold": "Không có phản ánh tiêu cực T10–12",
+          "source": "Sổ phản ánh"
+        },
+        {
+          "name": "Tư duy chủ động",
+          "threshold": "Tự đề xuất ≥ 1 ý kiến cải tiến",
+          "source": "CHT ghi nhận"
+        }
+      ],
+      "review": {
+        "flow": "Buddy hoặc CHT điền. CHT ký đề xuất, QLKV phê duyệt, BP Đào tạo xác nhận và lưu hồ sơ, nhân viên ký đã nhận kết quả.",
+        "when": "Từ khi mở giai đoạn cuối của Level",
+        "prompts": [
+          {
+            "key": "strengths",
+            "text": "Điểm mạnh nổi bật (≥ 2 điểm cụ thể, kèm ví dụ)",
+            "minPoints": 2
+          },
+          {
+            "key": "improve",
+            "text": "Điểm cần phát triển (≥ 2 điểm, không chung chung)",
+            "minPoints": 2
+          },
+          {
+            "key": "potential",
+            "text": "Tiềm năng phù hợp vai trò nào trong tương lai · năng lực dẫn dắt, huấn luyện người khác",
+            "minPoints": 0
+          }
+        ],
+        "passLabel": "Đủ điều kiện lên Level 3",
+        "allowFail": true,
+        "extension": {
+          "enabled": true,
+          "months": 1,
+          "maxTimes": 2,
+          "maxGoals": 3
+        },
+        "signers": [
+          "cht",
+          "qlkv",
+          "bp",
+          "nv"
+        ]
+      },
+      "stages": [
+        {
+          "key": "L2-S1",
+          "order": 1,
+          "name": "Củng cố độc lập & Kỹ năng bán hàng chuyên sâu",
+          "label": "Tháng 4–6",
+          "offsetStart": 0,
+          "offsetEnd": 91,
+          "goal": "NV tự vận hành hoàn toàn; bắt đầu đạt chỉ tiêu doanh số 100tr/tháng lần đầu tiên.",
+          "signers": [
+            "cht"
+          ],
+          "items": [
+            {
+              "key": "L2-1-1",
+              "order": 1,
+              "category": "Vận hành",
+              "content": "Vận hành ca làm việc hoàn toàn không cần hỏi CHT — đo bằng số lần cần hỗ trợ/tuần: mục tiêu ≤ 1 lần/tuần đến cuối tháng 6",
+              "guidance": "CHT ghi số lần hỗ trợ (CHT phải trực tiếp can thiệp xử lý tình huống hoặc ra quyết định thay NV) mỗi tuần. T3 - 4 ≤ 3 lần/tuần → T5 ≤ 2 → T6 ≤ 1. \n\"Hỗ trợ\": Xử lý khiếu nại của KH, xử lý đổi trả hàng, các bước trong quy trình bán hàng, tư vấn sử dụng thuốc và các sản phẩm khác cho KH, thao tác POS,...",
+              "verifiers": [
+                "cht"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 8,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L2-1-2",
+              "order": 2,
+              "category": "Vận hành",
+              "content": "Tự xử lý ≥ 80% tình huống tại quầy không leo thang (Rubric Phụ lục C, 10 ca ngẫu nhiên)",
+              "guidance": "CHT chọn ngẫu nhiên 2 ca/tuần để quan sát. Ghi tỉ lệ tự xử lý vs. cần hỗ trợ.",
+              "verifiers": [
+                "cht"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 17,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L2-1-3",
+              "order": 3,
+              "category": "Doanh số",
+              "content": "Theo dõi DS tổng hàng tháng trong 3 tháng đầu Level 2 — số liệu tham khảo, KHÔNG phải chỉ tiêu bắt buộc từng tháng (chỉ tiêu chính thức = TRUNG BÌNH Tháng 11–12, xem mục #22)",
+              "guidance": "CHT tổng hợp dữ liệu từ POS hàng tháng, chia sẻ kết quả với NV đầu tháng sau.",
+              "verifiers": [
+                "cht"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 25,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L2-1-4",
+              "order": 4,
+              "category": "Doanh số",
+              "content": "Theo dõi DS hệ số 1 hàng tháng trong 3 tháng đầu Level 2 — số liệu tham khảo, KHÔNG phải chỉ tiêu bắt buộc từng tháng (chỉ tiêu chính thức = TRUNG BÌNH Tháng 11–12, xem mục #22)",
+              "guidance": "CHT kiểm tra cơ cấu: NV đang né bán H.số 1 vì lý do gì?",
+              "verifiers": [
+                "cht"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 33,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L2-1-5",
+              "order": 5,
+              "category": "Kỹ năng BH",
+              "content": "Upsell/cross-sell đúng ngữ cảnh trong ≥ 60% GD phù hợp (quan sát 10 ca T5–6)",
+              "guidance": "Định nghĩa \"GD phù hợp\": khách mua đơn tư vấn: thuốc cảm, tiêu hóa, vitamin, khách mua theo đơn nhưng tư vấn thêm/đổi được sản phẩm HS1 hoặc sản phẩm hết hàng...Không tính GD theo đơn, khách không có thông tin, GD tự chọn.",
+              "verifiers": [
+                "cht"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 41,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L2-1-6",
+              "order": 6,
+              "category": "Xử lý TH",
+              "content": "Ghi lại và báo cáo CHT ≥ 3 tình huống khiếu nại/phản ánh đã xử lý trong T4–6",
+              "guidance": "CHT xem từng ca: xử lý đúng quy trình không? Phản hồi trong 1 ngày.",
+              "verifiers": [
+                "cht"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 50,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L2-1-7",
+              "order": 7,
+              "category": "Chương trình",
+              "content": "Nắm và áp dụng đúng ≥ 1 CT khuyến mãi/loyalty đang chạy mỗi tháng — không cần nhắc",
+              "guidance": "CHT hỏi đầu mỗi tháng: \"Tháng này có CT gì? Điều kiện ra sao?\" Không được nhìn tài liệu.",
+              "verifiers": [
+                "cht"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 58,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L2-1-8",
+              "order": 8,
+              "category": "LMS",
+              "content": "Đọc trước module \"Kỹ năng bán hàng bán hàng tăng doanh số, bán kèm, bán chéo\" trên LMS\nĐọc tài liệu module \"Kỹ năng bán hàng chuẩn quy trình\" trên LMS",
+              "guidance": "NV báo cho CHT sau khi đã đọc. CHT kiểm tra các kiến thức của module. Nếu chưa đạt: đọc lại trong 1 tuần.\nNV nộp nhật ký học cho CHT đọc trước buổi họp phản hồi tháng 4.",
+              "verifiers": [
+                "cht"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 66,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "lms",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L2-1-9",
+              "order": 9,
+              "category": "LMS",
+              "content": "Hoàn thành tối thiểu 35 bài thu hoạch SKU Level 2 — đạt ≥ 60/100",
+              "guidance": "NV báo điểm cho Buddy. Nếu < 60: ôn 3 ngày, làm lại 1 lần.",
+              "verifiers": [
+                "cht"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 74,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "lms",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L2-1-10",
+              "order": 10,
+              "category": "Đánh giá",
+              "content": "Họp phản hồi tháng 4 (CHT + NV, 20 phút): ghi nhận điểm mạnh, 2 điểm cải thiện cụ thể, kế hoạch tháng 5",
+              "guidance": "CHT chuẩn bị trước: xem báo cáo POS, số liệu hỗ trợ tuần, điểm và tiến độ LMS.",
+              "verifiers": [
+                "cht"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 83,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L2-1-11",
+              "order": 11,
+              "category": "Đánh giá",
+              "content": "Họp phản hồi tháng 6 (CHT + NV + QLKV tham dự): tổng kết giai đoạn 1 của Level 2, đặt mục tiêu tháng 7–9",
+              "guidance": "QLKV tham dự để nắm tiến độ. QLKV có thể đặt thêm câu hỏi cho NV.",
+              "verifiers": [
+                "cht",
+                "qlkv"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 91,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            }
+          ]
+        },
+        {
+          "key": "L2-S2",
+          "order": 2,
+          "name": "Tình huống phức tạp & Mở rộng kiến thức sản phẩm",
+          "label": "Tháng 7–9",
+          "offsetStart": 91,
+          "offsetEnd": 183,
+          "goal": "Xử lý được tình huống phức tạp, đạt điểm CSAT lần đầu, nắm 107 SKU Level 2.",
+          "signers": [
+            "cht"
+          ],
+          "items": [
+            {
+              "key": "L2-2-1",
+              "order": 1,
+              "category": "Xử lý TH",
+              "content": "Xử lý độc lập ≥ 1 ca hoàn trả/đổi hàng đúng quy trình — không cần CHT can thiệp",
+              "guidance": "CHT ghi nhận ca: đúng quy trình? Thái độ? Khách hài lòng không?",
+              "verifiers": [
+                "cht"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 100,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L2-2-2",
+              "order": 2,
+              "category": "Kiến thức",
+              "content": "Trả lời đúng câu hỏi sâu về tác dụng phụ của 10 SP phổ biến nhất (CHT test ngẫu nhiên)",
+              "guidance": "CHT hỏi bất ngờ đầu ca. Đạt: ≥ 8/10.",
+              "verifiers": [
+                "cht"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 109,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L2-2-3",
+              "order": 3,
+              "category": "Kiến thức sản phẩm",
+              "content": "Cập nhật thông tin sản phẩm mới trong 72h sau khi có thông báo từ CHT / BP Đào tạo",
+              "guidance": "Sau 72h: hỏi ngẫu nhiên 3 SP mới. NV phải biết tên, công dụng, đối tượng.",
+              "verifiers": [
+                "cht"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 119,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L2-2-4",
+              "order": 4,
+              "category": "SKU",
+              "content": "Mở rộng lên 98 SKU Level 2 (Phụ lục A.2): nhận diện, công dụng, đối tượng, tư vấn",
+              "guidance": "Test cuối T8: 20 SP ngẫu nhiên trong 98 SKU. Đạt: ≥ 16/20.",
+              "verifiers": [
+                "cht"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 128,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L2-2-5",
+              "order": 5,
+              "category": "Doanh số",
+              "content": "Theo dõi DS tổng và DS hệ số 1 hàng tháng trong T7–9 — số liệu tham khảo, KHÔNG phải chỉ tiêu bắt buộc (chỉ tiêu chính thức = TRUNG BÌNH Tháng 11–12, xem mục #22)",
+              "guidance": "CHT tổng hợp dữ liệu từ POS, chia sẻ với NV và QLKV.",
+              "verifiers": [
+                "cht"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 137,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L2-2-6",
+              "order": 6,
+              "category": "Chất lượng dịch vụ",
+              "content": "Không có khiếu nại nghiêm trọng liên quan đến chất lượng dịch vụ",
+              "guidance": "CHT quan sát thái độ khách sau 5 GD/tuần và chấm 1–5.",
+              "verifiers": [
+                "cht"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 146,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L2-2-7",
+              "order": 7,
+              "category": "Quy trình",
+              "content": "Tham gia và thực hiện đúng 1 lần kiểm kho định kỳ: đếm, đối chiếu, báo cáo lệch (có CHT hướng dẫn lần đầu)",
+              "guidance": "CHT phân công NV làm 1 kệ trong đợt kiểm kho chính thức. Đánh giá: đúng số lượng, đúng mẫu báo cáo.",
+              "verifiers": [
+                "cht"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 155,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L2-2-8",
+              "order": 8,
+              "category": "LMS",
+              "content": "Xem các module cập nhật sản phẩm mới trên LMS",
+              "guidance": "BP Đào tạo upload module. NV hoàn thành trước khi CHT test sản phẩm nhóm mới.",
+              "verifiers": [
+                "cht"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 165,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "lms",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L2-2-9",
+              "order": 9,
+              "category": "LMS",
+              "content": "Hoàn thành tối thiểu 70 bài thu hoạch SKU Level 2 — đạt ≥ 60/100",
+              "guidance": "NV báo điểm cho Buddy. Nếu < 60: ôn 3 ngày, làm lại 1 lần.",
+              "verifiers": [
+                "cht"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 174,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "lms",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L2-2-10",
+              "order": 10,
+              "category": "Đánh giá",
+              "content": "Họp phản hồi Quý 2 (CHT + QLKV + NV, 30 phút): KPI T7–9, CSAT, kế hoạch T10–12",
+              "guidance": "QLKV dẫn dắt. CHT chuẩn bị số liệu. Biên bản 3 bên ký.",
+              "verifiers": [
+                "cht",
+                "qlkv"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 183,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            }
+          ]
+        },
+        {
+          "key": "L2-S3",
+          "order": 3,
+          "name": "Ổn định KPI & Chuẩn bị đánh giá lên Level 3",
+          "label": "Tháng 10–12",
+          "offsetStart": 183,
+          "offsetEnd": 274,
+          "goal": "Duy trì KPI ổn định, bắt đầu có tư duy chủ động — sẵn sàng cho bước chuyển sang Level 3.",
+          "signers": [
+            "cht"
+          ],
+          "items": [
+            {
+              "key": "L2-3-1",
+              "order": 1,
+              "category": "KPI",
+              "content": "DS tổng ≥ 100 triệu và DS H.số 1 ≥ 30 triệu — tính theo TRUNG BÌNH Tháng 11–12 (điều kiện CHÍNH THỨC lên Level 3, không yêu cầu từng tháng riêng lẻ)",
+              "guidance": "CHT tổng hợp dữ liệu Tháng 11 và Tháng 12 từ POS, tính trung bình 2 tháng. Nếu trung bình dưới ngưỡng: họp trao đổi nguyên nhân ngay trong tuần.",
+              "verifiers": [
+                "cht"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 192,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L2-3-2",
+              "order": 2,
+              "category": "KPI",
+              "content": "Duy trì điểm đánh giá về chất lượng dịch vụ trong 2 kỳ đánh giá liên tiếp (tháng 10 và tháng 11)",
+              "guidance": "—",
+              "verifiers": [
+                "cht"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 201,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L2-3-3",
+              "order": 3,
+              "category": "Chủ động",
+              "content": "Tự phát hiện và báo cáo CHT ít nhất 1 vấn đề tồn kho / sắp hết hàng / sản phẩm cận date TRƯỚC khi bị nhắc",
+              "guidance": "Ví dụ: \"SP X sắp hết, cần đặt thêm không?\" — đây là tư duy chủ động.\nThiếu chủ động: CHT/nhân viên khác phải yêu cầu  ≥ 2 lần giảm tồn kho, đẩy bán hàng cận date, đẩy bán hàng chậm luân chuyển, dự trù hàng,...",
+              "verifiers": [
+                "cht"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 210,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L2-3-4",
+              "order": 4,
+              "category": "Chủ động",
+              "content": "Không có phản ánh tiêu cực nghiêm trọng từ khách hàng được ghi nhận trong tháng 10–12",
+              "guidance": "CHT kiểm tra feedback từ hệ thống hoặc ghi nhận feedback trực tiếp từ khách hàng. Nếu có: phân loại nguyên nhân, không đơn giản là phạt.",
+              "verifiers": [
+                "cht"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 219,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L2-3-5",
+              "order": 5,
+              "category": "Chủ động",
+              "content": "Tự đề xuất ít nhất 1 ý kiến cải tiến nhỏ cho cửa hàng (không cần được duyệt, chỉ cần chủ động đề xuất)",
+              "guidance": "Ví dụ: sắp xếp lại kệ SP bán chạy, thêm biển nhắc nhở, cải thiện quy trình giao ca. CHT ghi nhận và phản hồi.",
+              "verifiers": [
+                "cht"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 229,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L2-3-6",
+              "order": 6,
+              "category": "Đào tạo",
+              "content": "Tham gia ≥ 1 buổi đào tạo sản phẩm chuyên sâu do BP Đào tạo tổ chức",
+              "guidance": "BP Đào tạo lên lịch ≥ 1 tuần trước. CHT đảm bảo xếp ca cho NV tham dự.",
+              "verifiers": [
+                "bp"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 238,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L2-3-7",
+              "order": 7,
+              "category": "LMS",
+              "content": "Rà soát và Hoàn thành toàn bộ bài thu hoạch Level 2 — đạt ≥ 60/100",
+              "guidance": "NV gửi kết quả cho CHT.",
+              "verifiers": [
+                "cht"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 247,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "lms",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L2-3-8",
+              "order": 8,
+              "category": "Đánh giá",
+              "content": "CHT hoàn thành \"Phiếu đánh giá tổng kết Level 2\" (bao gồm phần đánh giá tiềm năng Level 3)",
+              "guidance": "Phần tiềm năng Level 3 quan trọng: NV có khả năng kèm cặp người khác không? Có tư duy cải tiến không?",
+              "verifiers": [
+                "cht"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 256,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L2-3-9",
+              "order": 9,
+              "category": "Đánh giá",
+              "content": "QLKV xem xét phiếu đánh giá và xác nhận quyết định chuyển Level 2 → 3 (hoặc gia hạn có kế hoạch)",
+              "guidance": "QLKV có thể phỏng vấn NV trực tiếp 15 phút trước khi ký quyết định.",
+              "verifiers": [
+                "qlkv"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 265,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L2-3-10",
+              "order": 10,
+              "category": "Đánh giá",
+              "content": "Họp thông báo kết quả Level 2 (CHT + QLKV + NV): xác nhận bước tiếp theo, thái độ tích cực dù kết quả nào",
+              "guidance": "QLKV thông báo. CHT chuẩn bị tóm tắt hành trình 9 tháng. Không phán xét — chỉ xác nhận kết quả và hỗ trợ.",
+              "verifiers": [
+                "cht",
+                "qlkv"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 274,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": 3,
+      "name": "Nhân viên nòng cốt",
+      "phase": "Trưởng thành",
+      "motto": "Chủ động dẫn dắt",
+      "durationLabel": "12 tháng",
+      "rangeLabel": "Tháng 13–24",
+      "months": 12,
+      "totalDays": 365,
+      "checklistName": "CHT Checklist",
+      "kpi": {
+        "total": 125,
+        "coef1": 45,
+        "ratio": 36,
+        "method": "average",
+        "windowFrom": 11,
+        "windowTo": 12
+      },
+      "overview": {
+        "goals": [
+          {
+            "title": "Dẫn dắt có kết quả",
+            "body": "Hướng dẫn ≥ 1 NV Level 1 theo checklist chuẩn hóa — NV đó đạt mục tiêu tuần 4."
+          },
+          {
+            "title": "Tự phân tích",
+            "body": "Tự đánh giá điểm yếu mỗi quý và đề xuất kế hoạch cải thiện cụ thể không cần nhắc nhở."
+          },
+          {
+            "title": "Đóng góp cải tiến",
+            "body": "Đề xuất ≥ 1 cải tiến quy trình cửa hàng cụ thể và được CHT xác nhận đã triển khai thực tế."
+          },
+          {
+            "title": "Chỉ tiêu doanh số",
+            "body": "Điều kiện chính thức lên Level 4 — kết quả TRUNG BÌNH Tháng 23–24: DS tổng ≥ 125 triệu; DS hệ số 1 ≥ 45 triệu. (Chỉ tiêu ≥ 9/12 tháng ở mục 4.2 chỉ mang tính theo dõi/tham khảo trong suốt Level 3.)"
+          }
+        ],
+        "kpiTable": [
+          [
+            "Chỉ tiêu",
+            "Mức tham khảo/tháng",
+            "Ghi chú xu hướng",
+            "Người theo dõi"
+          ],
+          [
+            "Doanh số tổng",
+            "125 triệu",
+            "Không có mức tối thiểu cố định hàng tháng — theo dõi xu hướng để đảm bảo TRUNG BÌNH T23–24 đạt ≥ 125tr",
+            "CHT + QLKV"
+          ],
+          [
+            "DS hệ số 1",
+            "45 triệu",
+            "Không có mức tối thiểu cố định hàng tháng — theo dõi xu hướng để đảm bảo TRUNG BÌNH T23–24 đạt ≥ 45tr",
+            "CHT + BP Đào tạo"
+          ],
+          [
+            "Tỉ trọng H.số 1",
+            "",
+            "Không áp dụng ngưỡng % cố định theo tháng — chỉ cần tỉ trọng trung bình T23–24 đạt ≥ 36%",
+            "CHT"
+          ]
+        ],
+        "responsibilities": [
+          {
+            "heading": "Buddy / Cửa hàng trưởng",
+            "items": [
+              "Giao vai trò hướng dẫn chính thức kèm checklist Level 1 chuẩn hóa",
+              "Tạo không gian thử nghiệm cải tiến nhỏ trong ca",
+              "Ghi nhận đóng góp vào biên bản họp cửa hàng",
+              "Đề xuất chính thức lên Level 4 khi đủ điều kiện"
+            ]
+          },
+          {
+            "heading": "Khu vực (QLKV)",
+            "items": [
+              "Mời tham gia làm người đào tạo cơ sở",
+              "Đánh giá tiềm năng trở thành CHT"
+            ]
+          },
+          {
+            "heading": "BP Đào tạo",
+            "items": [
+              "Upload tài liệu 66 SKU, module Bệnh học, Nhóm thuốc L3, module GPP lên LMS; cập nhật module sản phẩm mới khi ra hàng",
+              "Cung cấp bộ công cụ kèm cặp chuẩn hóa (checklist + rubric)",
+              "Tổ chức lớp kỹ năng và cấp chứng nhận nội bộ Level 3",
+              "Theo dõi điểm Buddy Performance từ NV mới (Phụ lục D)"
+            ]
+          }
+        ],
+        "lms": [
+          "Xem module \"Kỹ năng xử lý khiếu nại của khách hàng\"",
+          "Xem module \"Nâng tầm trải nghiệm khách hàng\"",
+          "Hoàn thành các khóa học về 66 SKU trên LMS",
+          "Xem Triệu chứng bệnh và Đơn tham khảo các bệnh lý Level 3 trên POS",
+          "Làm các bài thu hoạch Level 3 (điểm ≥ 6/10)"
+        ],
+        "counter": [
+          "T13–15: Nhận NV Level 1 để hướng dẫn ≥ 1 nội dung theo checklist",
+          "T13–15: NV Level 1 được hướng dẫn đạt mục tiêu tuần 4",
+          "T16–18: NV nộp ≥ 1 đề xuất cải tiến quy trình cụ thể",
+          "T19–21: Đề xuất được triển khai hoặc thí điểm",
+          "T23–24: TRUNG BÌNH DS tổng ≥ 125tr và DS H.số 1 ≥ 45tr — điều kiện chính thức lên Level 4",
+          "Cuối Level 3: CHT + QLKV xác nhận đủ điều kiện lên Level 4"
+        ],
+        "note": "Tên checklist thống nhất từ Level 3 trở đi: \"CHT Checklist\" (không còn gọi là Buddy Checklist). Buddy Performance Score (Phụ lục D) — NV mới đánh giá ngược người hướng dẫn sau 30 ngày — là điều kiện cần thiết để CHT xác nhận hoàn thành Level 3."
+      },
+      "reviewCriteria": [
+        {
+          "name": "Kèm cặp thành công",
+          "threshold": "≥ 1 NV Level 1 lên Level 2 dưới sự hướng dẫn",
+          "source": "Phiếu đánh giá level của nhân viên được kèm cặp\nBáo cáo kết quả buddy trên web member"
+        },
+        {
+          "name": "Cải tiến quy trình",
+          "threshold": "≥ 1 đề xuất được triển khai thực tế",
+          "source": "CHT ghi nhận"
+        },
+        {
+          "name": "KPI ổn định",
+          "threshold": "≥ 4/6 tháng đạt ngưỡng (T16–21)",
+          "source": "Báo cáo POS"
+        },
+        {
+          "name": "KPI cuối Level 3",
+          "threshold": "Không tháng nào dưới ngưỡng (T22–24)",
+          "source": "Báo cáo POS"
+        },
+        {
+          "name": "Bài kiểm tra LMS",
+          "threshold": "≥ 6 điểm",
+          "source": "Hệ thống LMS"
+        },
+        {
+          "name": "Phản ánh khách hàng",
+          "threshold": "Không có phản ánh nghiêm trọng 6 tháng cuối",
+          "source": "Sổ phản ánh"
+        },
+        {
+          "name": "Tự đề xuất Kế hoạch phát triển cá nhân",
+          "threshold": "Có Kế hoạch phát triển cá nhân sơ bộ được CHT xem xét",
+          "source": "CHT lưu hồ sơ"
+        }
+      ],
+      "review": {
+        "flow": "Buddy hoặc CHT điền. CHT ký đề xuất, QLKV phê duyệt, BP Đào tạo xác nhận và lưu hồ sơ, nhân viên ký đã nhận kết quả.",
+        "when": "Từ khi mở giai đoạn cuối của Level",
+        "prompts": [
+          {
+            "key": "strengths",
+            "text": "Điểm mạnh nổi bật (≥ 2 điểm cụ thể, kèm ví dụ)",
+            "minPoints": 2
+          },
+          {
+            "key": "improve",
+            "text": "Điểm cần phát triển (≥ 2 điểm, không chung chung)",
+            "minPoints": 2
+          },
+          {
+            "key": "potential",
+            "text": "Tiềm năng phù hợp vai trò nào trong tương lai · năng lực dẫn dắt, huấn luyện người khác",
+            "minPoints": 0
+          }
+        ],
+        "passLabel": "Đủ điều kiện lên Level 4",
+        "allowFail": true,
+        "extension": {
+          "enabled": true,
+          "months": 1,
+          "maxTimes": 2,
+          "maxGoals": 3
+        },
+        "signers": [
+          "cht",
+          "qlkv",
+          "bp",
+          "nv"
+        ]
+      },
+      "stages": [
+        {
+          "key": "L3-S1",
+          "order": 1,
+          "name": "Nhận vai trò kèm cặp & Bắt đầu chuyên sâu",
+          "label": "Tháng 13–15",
+          "offsetStart": 0,
+          "offsetEnd": 91,
+          "goal": "Chính thức đảm nhận kèm cặp NV Level 1 theo checklist chuẩn hóa; chọn và bắt đầu nhóm trị liệu chuyên sâu.",
+          "signers": [
+            "cht"
+          ],
+          "items": [
+            {
+              "key": "L3-1-1",
+              "order": 1,
+              "category": "Kèm cặp",
+              "content": "Nhận phân công kèm cặp chính thức ≥ 1 NV Level 1 — CHT giao kèm Buddy Checklist chuẩn hóa (Buddy Checklist L1)",
+              "guidance": "Sau khi CHT phân công kèm cặp, NV đăng ký trên web member và đọc Buddy checklist level 1trước khi kèm cặp",
+              "verifiers": [
+                "cht"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 11,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L3-1-2",
+              "order": 2,
+              "category": "Kèm cặp",
+              "content": "Hướng dẫn đúng nội dung tuần 1 cho NV mới theo Buddy Checklist (không bỏ bước, không bịa)",
+              "guidance": "CHT spot-check 1 lần trong tuần 1 của NV mới: NV Level 3 đang thực hiện đúng checklist không?",
+              "verifiers": [
+                "cht"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 23,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L3-1-3",
+              "order": 3,
+              "category": "Kèm cặp",
+              "content": "NV mới dưới sự hướng dẫn đạt mục tiêu tuần 4 của Level 1 (CHT xác nhận)",
+              "guidance": "Kết quả NV mới = bằng chứng năng lực kèm cặp của Level 3.",
+              "verifiers": [
+                "cht"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 34,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L3-1-4",
+              "order": 4,
+              "category": "Tự phân tích",
+              "content": "Tự đánh giá điểm yếu sau T13 và nộp bản phân tích ngắn cho CHT (1 trang, ≤ 300 từ) hoặc trình bày miệng có CHT ghi biên bản ngắn",
+              "guidance": "CHT đọc và/hoặc phản hồi bằng lời. Không chấm điểm — kiểm tra NV có tự nhận thức không.",
+              "verifiers": [
+                "cht"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 46,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L3-1-5",
+              "order": 5,
+              "category": "Doanh số",
+              "content": "Theo dõi DS tổng và DS hệ số 1 hàng tháng trong T13–15 — số liệu tham khảo, KHÔNG phải chỉ tiêu bắt buộc (chỉ tiêu chính thức = TRUNG BÌNH Tháng 23–24, xem mục #18)",
+              "guidance": "CHT pull POS hàng tháng. Nếu 2 tháng dưới ngưỡng: họp ngay trong tuần.",
+              "verifiers": [
+                "cht"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 57,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L3-1-6",
+              "order": 6,
+              "category": "LMS",
+              "content": "Xem trước module \"Kỹ năng xử lý khiếu nại khách hàng\"",
+              "guidance": "—",
+              "verifiers": [
+                "cht"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 68,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "lms",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L3-1-7",
+              "order": 7,
+              "category": "LMS",
+              "content": "Hoàn thành tối thiểu 22 bài thu hoạch SKU Level 3 — đạt ≥ 60/100",
+              "guidance": "NV báo điểm cho Buddy. Nếu < 60: ôn 3 ngày, làm lại 1 lần.",
+              "verifiers": [
+                "cht"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 80,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "lms",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L3-1-8",
+              "order": 8,
+              "category": "Đánh giá",
+              "content": "Họp 3 tháng (CHT + NV Level 3, 30 phút): đánh giá vai trò kèm cặp, điều chỉnh kế hoạch chuyên sâu",
+              "guidance": "CHT hỏi: \"Em thấy khó nhất khi hướng dẫn người khác là điều gì?\" Ghi lại để có kế hoạch hỗ trợ.",
+              "verifiers": [
+                "cht"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 91,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            }
+          ]
+        },
+        {
+          "key": "L3-S2",
+          "order": 2,
+          "name": "Cải tiến quy trình & Hoàn thành chuyên sâu",
+          "label": "Tháng 16–21",
+          "offsetStart": 91,
+          "offsetEnd": 274,
+          "goal": "Có ≥ 1 cải tiến được triển khai thực tế; hoàn thành bài kiểm tra nhóm trị liệu chuyên sâu ≥ 8/10.",
+          "signers": [
+            "cht"
+          ],
+          "items": [
+            {
+              "key": "L3-2-1",
+              "order": 1,
+              "category": "Cải tiến",
+              "content": "Nộp ≥ 1 đề xuất cải tiến quy trình: cụ thể, có mô tả vấn đề hiện tại và giải pháp đề xuất",
+              "guidance": "CHT không gợi ý trước. NV phải tự quan sát và phát hiện. Ví dụ: \"Dán nhãn đỏ SP cận date giảm bỏ hàng.\"",
+              "verifiers": [
+                "cht"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 117,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L3-2-2",
+              "order": 2,
+              "category": "Cải tiến",
+              "content": "≥ 1 đề xuất được CHT duyệt và thí điểm trong cửa hàng",
+              "guidance": "Nếu không có đề xuất phù hợp: CHT nêu 1 vấn đề thực tế, yêu cầu NV đề xuất giải pháp.",
+              "verifiers": [
+                "cht"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 143,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L3-2-3",
+              "order": 3,
+              "category": "Kèm cặp",
+              "content": "Hoàn thành kèm cặp ≥ 1 NV Level 1 từ đầu đến khi NV đó lên Level 2",
+              "guidance": "CHT xác nhận kết quả. NV mới không đạt: phân tích nguyên nhân khách quan vs chủ quan.",
+              "verifiers": [
+                "cht"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 169,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L3-2-4",
+              "order": 4,
+              "category": "Buddy Score",
+              "content": "NV mới đánh giá ngược người kèm cặp (Buddy Performance Score Phụ lục D) — kết quả ≥ 3.5/5",
+              "guidance": "CHT thu thập phiếu đánh giá từ NV mới sau 30 ngày. Chia sẻ kết quả với NV Level 3.",
+              "verifiers": [
+                "cht"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 196,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L3-2-5",
+              "order": 5,
+              "category": "Doanh số",
+              "content": "Theo dõi DS tổng và DS hệ số 1 hàng tháng trong T16–21 — số liệu tham khảo, KHÔNG phải chỉ tiêu bắt buộc (chỉ tiêu chính thức = TRUNG BÌNH Tháng 23–24, xem mục #18)",
+              "guidance": "CHT theo dõi hàng tháng. ≥ 2 tháng liên tiếp dưới ngưỡng: họp ngay.",
+              "verifiers": [
+                "cht"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 222,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L3-2-6",
+              "order": 6,
+              "category": "LMS",
+              "content": "Hoàn thành tối thiểu 44 bài thu hoạch SKU Level 3 — đạt ≥ 60/100",
+              "guidance": "NV báo điểm cho Buddy. Nếu < 60: ôn 3 ngày, làm lại 1 lần.",
+              "verifiers": [
+                "cht"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 248,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "lms",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L3-2-7",
+              "order": 7,
+              "category": "Đánh giá",
+              "content": "Họp giữa kỳ T18 (CHT + QLKV + NV, 30 phút): đánh giá tiến độ, điều chỉnh kế hoạch 6 tháng còn lại",
+              "guidance": "QLKV dẫn dắt. CHT chuẩn bị: số lần kèm cặp, kết quả cải tiến, % KPI, điểm chuyên sâu.",
+              "verifiers": [
+                "cht",
+                "qlkv"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 274,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            }
+          ]
+        },
+        {
+          "key": "L3-S3",
+          "order": 3,
+          "name": "Ổn định chuẩn mực & Đánh giá lên Level 4",
+          "label": "Tháng 22–24",
+          "offsetStart": 274,
+          "offsetEnd": 365,
+          "goal": "Là điểm tựa thực sự của cửa hàng; sẵn sàng đảm nhận vai trò chuyên gia Level 4.",
+          "signers": [
+            "cht"
+          ],
+          "items": [
+            {
+              "key": "L3-3-1",
+              "order": 1,
+              "category": "Chuẩn mực",
+              "content": "DS tổng ≥ 125 triệu và DS H.số 1 ≥ 45 triệu — tính theo TRUNG BÌNH Tháng 23–24 (điều kiện CHÍNH THỨC lên Level 4)",
+              "guidance": "CHT tổng hợp dữ liệu Tháng 23 và Tháng 24 từ POS, tính trung bình 2 tháng.",
+              "verifiers": [
+                "cht"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 284,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L3-3-2",
+              "order": 2,
+              "category": "Chuẩn mực",
+              "content": "Duy trì KPI cá nhân ≥ ngưỡng cửa hàng trong toàn bộ tháng 22–24 (không tháng nào dưới ngưỡng)",
+              "guidance": "—",
+              "verifiers": [
+                "cht"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 294,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L3-3-3",
+              "order": 3,
+              "category": "Chuẩn mực",
+              "content": "Không có phản ánh tiêu cực nghiêm trọng từ khách hàng trong 6 tháng cuối Level 3",
+              "guidance": "CHT kiểm tra lỗi từ hệ thống phản ánh hoặc ghi nhận trực tiếp từ khách hàng.",
+              "verifiers": [
+                "cht"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 304,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L3-3-4",
+              "order": 4,
+              "category": "Kèm cặp",
+              "content": "Đã kèm cặp thành công ≥ 1 NV Level 1 lên Level 2 (tính lũy kế cả Level 3)",
+              "guidance": "CHT xác nhận trên web member.",
+              "verifiers": [
+                "cht"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 314,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L3-3-5",
+              "order": 5,
+              "category": "Phát triển",
+              "content": "Tự đề xuất IDP sơ bộ cho Level 4: chuyên môn sâu, đào tạo viên nội bộ, hoặc CHT",
+              "guidance": "CHT thảo luận và phản hồi. Gửi IDP sơ bộ cho QLKV trước họp tổng kết.",
+              "verifiers": [
+                "cht"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 325,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L3-3-6",
+              "order": 6,
+              "category": "LMS",
+              "content": "Rà soát và Hoàn thành toàn bộ các bài thu hoạch Level 3 — đạt ≥ 60/100",
+              "guidance": "BP Đào tạo xác nhận kết quả.",
+              "verifiers": [
+                "cht"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 335,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "lms",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L3-3-7",
+              "order": 7,
+              "category": "Đánh giá",
+              "content": "CHT hoàn thành Phiếu đánh giá tổng kết Level 3 (gồm năng lực kèm cặp + điểm Buddy Performance Score)",
+              "guidance": "—",
+              "verifiers": [
+                "cht"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 345,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L3-3-8",
+              "order": 8,
+              "category": "Đánh giá",
+              "content": "QLKV phỏng vấn ngắn NV 15–20 phút trước khi ký xác nhận chuyển Level 3→4",
+              "guidance": "QLKV chuẩn bị 3–5 câu tình huống thực tế liên quan đến vai trò Level 4.",
+              "verifiers": [
+                "qlkv"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 355,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L3-3-9",
+              "order": 9,
+              "category": "Đánh giá",
+              "content": "Họp tổng kết Level 3 (CHT + QLKV + BP Đào tạo + NV): xác nhận kết quả và lộ trình Level 4",
+              "guidance": "BP Đào tạo tham dự (online/trực tiếp) hoặc nhận báo cáo để xác nhận kết quả học tập. QLKV thông báo quyết định.",
+              "verifiers": [
+                "cht",
+                "qlkv"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 365,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": 4,
+      "name": "Nhân viên chuyên gia",
+      "phase": "Chuyên gia",
+      "motto": "Trở thành chuẩn mực",
+      "durationLabel": "12 tháng",
+      "rangeLabel": "Tháng 25–36",
+      "months": 12,
+      "totalDays": 365,
+      "checklistName": "CHT Checklist",
+      "kpi": {
+        "total": 150,
+        "coef1": 55,
+        "ratio": 37,
+        "method": "average",
+        "windowFrom": 11,
+        "windowTo": 12
+      },
+      "overview": {
+        "goals": [
+          {
+            "title": "Huấn luyện có cấu trúc",
+            "body": "Huấn luyện được ≥ 2 NV Level 1 hoặc 2 trong ≥ 2 nội dung có cấu trúc (có checklist, mục tiêu đo lường, biên bản)."
+          },
+          {
+            "title": "Đóng góp tài liệu & SOP",
+            "body": "Tham gia phản biện hoặc đồng tác giả ≥ 1 tài liệu đào tạo/SOP của cửa hàng hoặc khu vực — có xác nhận của BP Đào tạo."
+          },
+          {
+            "title": "Quản lý ngành hàng",
+            "body": "Quản lý tốt ≥ 1 nhóm SP/ngành hàng: nhập liệu đúng, trưng bày chuẩn planogram, theo dõi tồn kho và hạn dùng — báo cáo tháng đúng hạn."
+          },
+          {
+            "title": "Kế hoạch phát triển cá nhân (IDP)",
+            "body": "Có IDP 12 tháng đã được CHT + QLKV ký duyệt, theo hướng chuyên môn sâu hoặc quản lý — xem Career Path Map Phụ lục E."
+          },
+          {
+            "title": "Chỉ tiêu doanh số",
+            "body": "Điều kiện xác nhận chính thức — kết quả TRUNG BÌNH Tháng 35–36: DS tổng ≥ 150 triệu; DS hệ số 1 ≥ 55 triệu. (Chỉ tiêu duy trì hàng tháng ở mục 5.2 chỉ mang tính theo dõi/tham khảo trong suốt Level 4.)"
+          }
+        ],
+        "kpiTable": [
+          [
+            "Chỉ tiêu",
+            "Mức tham khảo/tháng",
+            "Ghi chú xu hướng",
+            "Người theo dõi"
+          ],
+          [
+            "Doanh số tổng",
+            "150 triệu",
+            "Không có mức tối thiểu cố định hàng tháng — theo dõi xu hướng để đảm bảo TRUNG BÌNH T35–36 đạt ≥ 150tr",
+            "CHT + QLKV"
+          ],
+          [
+            "DS hệ số 1",
+            "55 triệu",
+            "Không có mức tối thiểu cố định hàng tháng — theo dõi xu hướng để đảm bảo TRUNG BÌNH T35–36 đạt ≥ 55tr",
+            "CHT + BP Đào tạo"
+          ],
+          [
+            "Tỉ trọng H.số 1",
+            "",
+            "Không áp dụng ngưỡng % cố định theo tháng — chỉ cần tỉ trọng trung bình T35–36 đạt ≥ 37%",
+            "CHT"
+          ]
+        ],
+        "responsibilities": [
+          {
+            "heading": "Buddy / Cửa hàng trưởng",
+            "items": [
+              "Đưa vào quy trình đánh giá đồng nghiệp (peer review)",
+              "Tham khảo ý kiến khi thay đổi SOP/chương trình KM",
+              "Đồng xây dựng IDP mỗi 6 tháng"
+            ]
+          },
+          {
+            "heading": "Khu vực (QLKV)",
+            "items": [
+              "Xem xét vai trò đào tạo vùng hoặc CHT",
+              "Mời tham gia workshop thiết kế nội dung đào tạo",
+              "Ưu tiên trong chương trình đào tạo nhân lực mầm"
+            ]
+          },
+          {
+            "heading": "BP Đào tạo",
+            "items": [
+              "Upload tài liệu 27 SKU, module Bệnh học, Nhóm thuốc L4, module GPP lên LMS; cập nhật module sản phẩm mới khi ra hàng",
+              "Mời đồng tác giả module, xác nhận đóng góp tài liệu",
+              "Cấp chứng nhận chuyên gia nội bộ Level 4",
+              "Xây dựng và truyền thông Career Path Map (Phụ lục E)"
+            ]
+          }
+        ],
+        "lms": [
+          "Xem module \"Kĩ năng tương tác, phục vụ và làm hài lòng những đối tượng khách hàng có yêu cầu cao\"",
+          "Hoàn thành module về 27 SKU",
+          "Xem Triệu chứng bệnh và Đơn tham khảo các bệnh lý Level 4 trên POS",
+          "Xem các module liên quan đến Bệnh học và tư vấn điều trị Bệnh học Level 4",
+          "Hoàn thành bài thu hoạch Level 4 (điểm ≥ 6/10)"
+        ],
+        "counter": [
+          "Q1: Hoàn thành IDP 12 tháng được CHT + QLKV ký duyệt",
+          "Q2: Đóng góp ≥ 1 tài liệu/SOP — BP Đào tạo xác nhận",
+          "Q3: Ngành hàng được đánh giá đạt chuẩn (báo cáo, tồn kho, planogram)",
+          "T35–36: TRUNG BÌNH DS tổng ≥ 150tr và DS H.số 1 ≥ 55tr — điều kiện xác nhận chính thức đạt chuẩn Level 4",
+          "Năm 2+: Xem xét Career Path Map (Phụ lục E) và vai trò mở rộng"
+        ],
+        "note": "Duy trì DS tổng ≥ 150tr và DS H.số 1 ≥ 55tr/tháng chỉ là số tham khảo để CHT theo dõi xu hướng; điều kiện xác nhận chính thức đạt chuẩn Level 4 luôn dùng kết quả TRUNG BÌNH Tháng 35–36."
+      },
+      "reviewCriteria": [
+        {
+          "name": "Huấn luyện có kết quả",
+          "threshold": "≥ 2/2 NV được giao đạt milestone",
+          "source": "CHT theo dõi"
+        },
+        {
+          "name": "Quản lý ngành hàng",
+          "threshold": "Báo cáo đúng hạn, 0 lỗi tồn kho nghiêm trọng (6 tháng)",
+          "source": "CHT kiểm tra"
+        },
+        {
+          "name": "Đóng góp tài liệu",
+          "threshold": "≥ 1 chương trình khuyến mãi / SOP được xác nhận",
+          "source": "CHT"
+        },
+        {
+          "name": "Là chuẩn mực",
+          "threshold": "CHT dùng làm ví dụ ≥ 1 lần/tháng",
+          "source": "Họp nhóm"
+        },
+        {
+          "name": "KPI cá nhân",
+          "threshold": "≥ ngưỡng cửa hàng trong toàn bộ 12 tháng",
+          "source": "Báo cáo POS"
+        },
+        {
+          "name": "Đánh giá 360°",
+          "threshold": "Kết quả tích cực từ đồng nghiệp + CHT + QLKV",
+          "source": "Phiếu 360°"
+        },
+        {
+          "name": "Kế hoạch phát triển cá nhân năm 1",
+          "threshold": "Đạt ≥ 70% mục tiêu đề ra trong Kế hoạch phát triển cá nhân",
+          "source": "Kế hoạch phát triển cá nhân đã ký"
+        },
+        {
+          "name": "Chứng nhận nội bộ",
+          "threshold": "Đủ điều kiện nhận chứng nhận chuyên gia",
+          "source": "BP Đào tạo"
+        }
+      ],
+      "review": {
+        "flow": "Buddy hoặc CHT điền. CHT ký đề xuất, QLKV phê duyệt, BP Đào tạo xác nhận và lưu hồ sơ, nhân viên ký đã nhận kết quả.",
+        "when": "Từ khi mở giai đoạn cuối của Level",
+        "prompts": [
+          {
+            "key": "strengths",
+            "text": "Điểm mạnh nổi bật (≥ 2 điểm cụ thể, kèm ví dụ)",
+            "minPoints": 2
+          },
+          {
+            "key": "improve",
+            "text": "Điểm cần phát triển (≥ 2 điểm, không chung chung)",
+            "minPoints": 2
+          },
+          {
+            "key": "potential",
+            "text": "Tiềm năng phù hợp vai trò nào trong tương lai · năng lực dẫn dắt, huấn luyện người khác",
+            "minPoints": 0
+          }
+        ],
+        "passLabel": "Đạt chuẩn Level 4",
+        "allowFail": true,
+        "extension": {
+          "enabled": true,
+          "months": 1,
+          "maxTimes": 2,
+          "maxGoals": 3
+        },
+        "signers": [
+          "cht",
+          "qlkv",
+          "bp",
+          "nv"
+        ]
+      },
+      "stages": [
+        {
+          "key": "L4-S1",
+          "order": 1,
+          "name": "Thiết lập vai trò chuyên gia & IDP",
+          "label": "Quý 1 (Tháng 25–27)",
+          "offsetStart": 0,
+          "offsetEnd": 91,
+          "goal": "Nhận IDP chính thức 3 bên ký, phân công ngành hàng, bắt đầu huấn luyện có cấu trúc.",
+          "signers": [
+            "cht"
+          ],
+          "items": [
+            {
+              "key": "L4-1-1",
+              "order": 1,
+              "category": "IDP",
+              "content": "Cùng CHT và QLKV xây dựng IDP 12 tháng: mục tiêu cụ thể + đo lường được + timeline + cam kết hỗ trợ",
+              "guidance": "CHT chuẩn bị khung IDP trước. QLKV tham dự buổi xây dựng IDP. Kế hoạch phát triển cá nhân phải có: mục tiêu phát triển + cách đo + hỗ trợ cần + timeline.",
+              "verifiers": [
+                "cht",
+                "qlkv"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 11,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L4-1-2",
+              "order": 2,
+              "category": "IDP",
+              "content": "IDP được CHT, QLKV và BP Đào tạo ký duyệt trong T25",
+              "guidance": "BP Đào tạo ký cam kết cung cấp nguồn lực học tập trong IDP.",
+              "verifiers": [
+                "cht",
+                "qlkv"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 23,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L4-1-3",
+              "order": 3,
+              "category": "Ngành hàng",
+              "content": "Nhận phân công quản lý ≥ 1 nhóm SP/ngành hàng chính thức kèm mô tả trách nhiệm rõ ràng",
+              "guidance": "CHT bàn giao trong họp nhóm: ngành hàng nào, trách nhiệm gì, KPI ngành hàng là gì.",
+              "verifiers": [
+                "cht"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 34,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L4-1-4",
+              "order": 4,
+              "category": "Ngành hàng",
+              "content": "Nắm toàn bộ danh mục ngành hàng trong 2 tuần đầu: vị trí, tồn kho, hạn dùng, SP chủ lực",
+              "guidance": "CHT test sau 2 tuần: hỏi 10 SP ngẫu nhiên. Đạt: biết vị trí, tồn kho, hạn dùng của ≥ 9/10.",
+              "verifiers": [
+                "cht"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 46,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L4-1-5",
+              "order": 5,
+              "category": "Huấn luyện",
+              "content": "Nhận phân công huấn luyện ≥ 2 NV (Level 1 hoặc 2) trong ≥ 2 nội dung CÓ CẤU TRÚC",
+              "guidance": "Có cấu trúc = có checklist + mục tiêu đo lường + kết quả đánh giá (phiếu đánh giá).",
+              "verifiers": [
+                "cht"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 57,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L4-1-6",
+              "order": 6,
+              "category": "Doanh số",
+              "content": "Theo dõi DS tổng và DS hệ số 1 hàng tháng trong T25–27 — số liệu tham khảo, KHÔNG phải chỉ tiêu bắt buộc (chỉ tiêu chính thức = TRUNG BÌNH Tháng 35–36, xem mục #21)",
+              "guidance": "CHT pull POS. Đây là tháng đầu NV đảm nhận thêm vai trò — theo dõi sát để hỗ trợ kịp.",
+              "verifiers": [
+                "cht"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 68,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L4-1-7",
+              "order": 7,
+              "category": "LMS",
+              "content": "Hoàn thành tối thiểu 9 bài thu hoạch SKU Level 4 — đạt ≥ 60/100",
+              "guidance": "NV báo điểm cho Buddy. Nếu < 60: ôn 3 ngày, làm lại 1 lần.",
+              "verifiers": [
+                "cht"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 80,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "lms",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L4-1-8",
+              "order": 8,
+              "category": "Đánh giá",
+              "content": "Họp khởi động Level 4 (CHT + QLKV + BP Đào tạo + NV): xác nhận IDP, phân công, lịch huấn luyện",
+              "guidance": "Biên bản đầy đủ. Mỗi bên cam kết rõ ràng.",
+              "verifiers": [
+                "cht",
+                "qlkv"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 91,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            }
+          ]
+        },
+        {
+          "key": "L4-S2",
+          "order": 2,
+          "name": "Chuẩn mực thực hành & Đóng góp tài liệu",
+          "label": "Quý 2–3 (Tháng 28–33)",
+          "offsetStart": 91,
+          "offsetEnd": 274,
+          "goal": "Được CHT và đồng nghiệp nhìn nhận là chuẩn mực; đóng góp ≥ 1 tài liệu vào hệ thống.",
+          "signers": [
+            "cht"
+          ],
+          "items": [
+            {
+              "key": "L4-2-1",
+              "order": 1,
+              "category": "Chuẩn mực",
+              "content": "CHT sử dụng NV Level 4 làm ví dụ minh hoạ cho nhân viên khác ≥ 1 lần/tháng — ghi nhận vào phiếu đánh giá trong checklist",
+              "guidance": "CHT chủ động ghi nhận mỗi lần dùng NV Level 4 làm ví dụ. Không cần NV biết trước — đây là hành vi tự nhiên.",
+              "verifiers": [
+                "cht"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 114,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L4-2-2",
+              "order": 2,
+              "category": "Huấn luyện",
+              "content": "≥ 2/2 nhân viên được giao huấn luyện đạt cột mốc Level tương ứng trong kỳ này",
+              "guidance": "CHT theo dõi tiến độ của NV được huấn luyện. Nếu 1 NV không đạt: phân tích nguyên nhân — không tự động đổ lỗi cho NV Level 4.",
+              "verifiers": [
+                "cht"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 137,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L4-2-3",
+              "order": 3,
+              "category": "Tài liệu",
+              "content": "Tham gia phản biện hoặc đóng góp nội dung ≥ 1 tài liệu đào tạo/SOP — BP Đào tạo xác nhận",
+              "guidance": "Đóng góp có thể là: bổ sung tình huống thực tế, phát hiện nội dung lỗi thời, viết thêm ví dụ.",
+              "verifiers": [
+                "bp"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 160,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L4-2-4",
+              "order": 4,
+              "category": "Ngành hàng",
+              "content": "Báo cáo ngành hàng đúng hạn và không có lỗi tồn kho nghiêm trọng trong toàn quý",
+              "guidance": "CHT kiểm tra cuối tháng. Lỗi nghiêm trọng = hết hàng không báo trước, hàng hết hạn không xử lý.",
+              "verifiers": [
+                "cht"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 183,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L4-2-5",
+              "order": 5,
+              "category": "Ngành hàng",
+              "content": "Đề xuất ≥ 1 cải tiến quản lý ngành hàng (planogram, đặt hàng, ký hiệu cận date) và được thí điểm",
+              "guidance": "—",
+              "verifiers": [
+                "cht"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 205,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L4-2-6",
+              "order": 6,
+              "category": "Doanh số",
+              "content": "Theo dõi DS tổng và DS hệ số 1 hàng tháng trong T28–33 — số liệu tham khảo, KHÔNG phải chỉ tiêu bắt buộc (chỉ tiêu chính thức = TRUNG BÌNH Tháng 35–36, xem mục #21)",
+              "guidance": "CHT theo dõi hàng tháng. NV Level 4 duy trì KPI tốt trong khi đảm nhận huấn luyện.",
+              "verifiers": [
+                "cht"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 228,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L4-2-7",
+              "order": 7,
+              "category": "360°",
+              "content": "Thực hiện đánh giá 360° (đồng nghiệp + CHT + QLKV): CHT chia sẻ kết quả trong buổi 1-1",
+              "guidance": "QLKV thiết kế mẫu 360°. CHT thu thập từ đồng nghiệp. Chia sẻ riêng, không công khai điểm.",
+              "verifiers": [
+                "cht",
+                "qlkv"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 251,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L4-2-8",
+              "order": 8,
+              "category": "LMS",
+              "content": "Rà soát và Hoàn thành toàn bộ các bài thu hoạch Level 4 — đạt ≥ 60/100",
+              "guidance": "—",
+              "verifiers": [
+                "bp"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 274,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "lms",
+              "evidence": "none",
+              "dependsOn": []
+            }
+          ]
+        },
+        {
+          "key": "L4-S3",
+          "order": 3,
+          "name": "Tái xét IDP & Career Path Map",
+          "label": "Quý 4+ (Tháng 34+)",
+          "offsetStart": 274,
+          "offsetEnd": 365,
+          "goal": "Xác định con đường phát triển tiếp theo theo Career Path Map (Phụ lục E): chuyên gia, đào tạo viên, hoặc CHT.",
+          "signers": [
+            "cht"
+          ],
+          "items": [
+            {
+              "key": "L4-3-1",
+              "order": 1,
+              "category": "IDP",
+              "content": "Tái xét IDP sau 12 tháng: đánh giá mục tiêu đã đạt, mục tiêu chưa đạt và lý do, điều chỉnh cho 12 tháng tiếp",
+              "guidance": "CHT + QLKV cùng tham dự. Đánh giá khách quan — không phán xét.",
+              "verifiers": [
+                "cht",
+                "qlkv"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 287,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L4-3-2",
+              "order": 2,
+              "category": "Career Path",
+              "content": "NV chọn hướng phát triển tiếp theo (Phụ lục E): Chuyên gia SP / Đào tạo viên nội bộ / CHT",
+              "guidance": "QLKV và CHT lắng nghe trước khi tư vấn. Quyết định phải xuất phát từ NV. Ghi vào IDP năm 2.",
+              "verifiers": [
+                "qlkv"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 300,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L4-3-3",
+              "order": 3,
+              "category": "Career Path",
+              "content": "Đăng ký chương trình phát triển phù hợp với hướng đã chọn",
+              "guidance": "BP Đào tạo cung cấp lộ trình học tập tương ứng.",
+              "verifiers": [
+                "bp"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 313,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L4-3-4",
+              "order": 4,
+              "category": "Tài liệu",
+              "content": "Đồng tác giả hoặc đóng góp chính thức ≥ 1 module đào tạo chuẩn hóa trong năm 2",
+              "guidance": "BP Đào tạo mời tham gia chính thức. Tên NV được ghi nhận trong tài liệu.",
+              "verifiers": [
+                "bp"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 326,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L4-3-5",
+              "order": 5,
+              "category": "Doanh số",
+              "content": "DS tổng ≥ 150 triệu và DS H.số 1 ≥ 55 triệu — tính theo TRUNG BÌNH Tháng 35–36 (điều kiện CHÍNH THỨC xác nhận đạt chuẩn Level 4)",
+              "guidance": "CHT tổng hợp dữ liệu Tháng 35 và Tháng 36 từ POS, tính trung bình 2 tháng.",
+              "verifiers": [
+                "cht"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 339,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L4-3-6",
+              "order": 6,
+              "category": "Chứng nhận",
+              "content": "Nhận chứng nhận chuyên gia nội bộ từ BP Đào tạo — nếu đủ điều kiện: IDP năm 1 đạt ≥ 70%, 360° tích cực.\nTiêu chí điểm cộng: có đóng góp tài liệu",
+              "guidance": "BP Đào tạo xét duyệt. QLKV ký xác nhận. Công bố nội bộ.",
+              "verifiers": [
+                "bp"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 352,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            },
+            {
+              "key": "L4-3-7",
+              "order": 7,
+              "category": "Đánh giá",
+              "content": "Họp tổng kết Level 4 năm đầu (CHT + QLKV + BP Đào tạo + HR nếu có): xem xét lộ trình thăng tiến chính thức",
+              "guidance": "CHT chuẩn bị hồ sơ đầy đủ: KPI 12 tháng, 360°, số NV đã huấn luyện, đóng góp tài liệu.",
+              "verifiers": [
+                "cht",
+                "qlkv"
+              ],
+              "requireNvFirst": true,
+              "dueOffset": 365,
+              "gpp": false,
+              "required": true,
+              "allowNa": true,
+              "dataSource": "manual",
+              "evidence": "none",
+              "dependsOn": []
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "scheduleParams": {
+    "remindDays": 3,
+    "escalateDays": 7,
+    "signOpenBefore": 3,
+    "signDueAfter": 3,
+    "posDataDay": 5,
+    "exemptFromDay": 15,
+    "upcomingDays": 14,
+    "graceDays": 14,
+    "shiftsPerWeek": 6
+  },
+  "rubric": {
+    "scaleMax": 3,
+    "passTotal": 10,
+    "forbidOne": true,
+    "minObsPerMonth": 3,
+    "targetRate": 80,
+    "criteria": [
+      {
+        "key": "needs",
+        "name": "Khai thác nhu cầu",
+        "d1": "Không hỏi hoặc hỏi sai",
+        "d2": "Hỏi đủ 3–4 câu cơ bản",
+        "d3": "Hỏi sâu, phát hiện nhu cầu tiềm ẩn",
+        "critical": false
+      },
+      {
+        "key": "advice",
+        "name": "Tư vấn sản phẩm",
+        "d1": "Tư vấn sai hoặc không đủ thông tin",
+        "d2": "Đúng sản phẩm, công dụng cơ bản",
+        "d3": "Đúng + cá nhân hoá cho đối tượng khách",
+        "critical": false
+      },
+      {
+        "key": "safety",
+        "name": "An toàn thuốc",
+        "d1": "Bỏ qua cảnh báo quan trọng",
+        "d2": "Đề cập cảnh báo",
+        "d3": "Chủ động cảnh báo phù hợp",
+        "critical": true
+      },
+      {
+        "key": "upsell",
+        "name": "Upsell / Cross-sell",
+        "d1": "Không đề xuất khi có cơ hội rõ",
+        "d2": "Đề xuất nhưng chưa có lý do thuyết phục",
+        "d3": "Đề xuất tự nhiên, có lý do rõ ràng",
+        "critical": false
+      },
+      {
+        "key": "closing",
+        "name": "Kết thúc giao dịch",
+        "d1": "Không dặn dò",
+        "d2": "Dặn dò cơ bản",
+        "d3": "Dặn dò đầy đủ, mời quay lại",
+        "critical": false
+      }
+    ]
+  },
+  "framework": {
+    "intro": [
+      "Tài liệu này giải quyết bốn vấn đề cốt lõi của thực trạng hiện tại:",
+      "Nhân viên không biết mình cần làm gì — thiết lập mục tiêu hành vi cụ thể, đo lường được theo từng Level",
+      "Nhà thuốc đùn đẩy trách nhiệm đào tạo — phân công rõ 3 bên không thể đùn đẩy: Buddy/CHT – Khu vực – BP Đào tạo",
+      "Buddy hướng dẫn bằng bản năng — cung cấp checklist theo tuần/ca làm việc với hướng dẫn cụ thể",
+      "Thiếu tuân thủ GPP pháp lý — tích hợp module GPP bắt buộc và hồ sơ chứng minh đào tạo — xem Phụ lục B"
+    ],
+    "levelTable": [
+      [
+        "Level",
+        "Thời gian",
+        "Giai đoạn",
+        "Định nghĩa cốt lõi — hành vi quan sát được"
+      ],
+      [
+        "Level 1",
+        "0–2 tháng",
+        "Hội nhập",
+        "Không làm sai — thực hiện đúng 100% quy trình cơ bản, tư vấn đúng 55 SKU, không lỗi an toàn thuốc"
+      ],
+      [
+        "Level 2",
+        "4–12 tháng",
+        "Phát triển",
+        "Làm đúng độc lập — tự xử lý ≥ 80% tình huống, đạt chỉ tiêu doanh số, không cần nhắc nhở về quy trình"
+      ],
+      [
+        "Level 3",
+        "13–24 tháng",
+        "Trưởng thành",
+        "Chủ động dẫn dắt — kèm cặp NV Level 1, đề xuất cải tiến được triển khai, đạt chuyên sâu nhóm trị liệu"
+      ],
+      [
+        "Level 4",
+        "",
+        "Chuyên gia",
+        "Trở thành chuẩn mực — truyền nghề có cấu trúc, quản lý ngành hàng, đóng góp tài liệu hệ thống"
+      ]
+    ],
+    "responsibilityTable": [
+      [
+        "Buddy (L1–L2)",
+        "Cửa hàng trưởng (L2–L4)",
+        "Khu vực (QLKV)",
+        "BP Đào tạo"
+      ],
+      [
+        "Kèm cặp thực hành hàng ngày, quan sát trực tiếp, xác nhận checklist tuần",
+        "Quan sát, phản hồi, theo dõi KPI, xác nhận chuyển Level từ L2 trở đi",
+        "Theo dõi hệ thống, hỗ trợ cửa hàng, xác nhận quyết định quan trọng",
+        "Nội dung chuẩn hóa, LMS, lớp học, kiểm tra, chứng nhận, GPP"
+      ]
+    ],
+    "kpiTable": [
+      [
+        "Level",
+        "DS tổng",
+        "DS hệ số 1",
+        "Tỉ trọng H.số 1",
+        "Cách xác nhận đạt chỉ tiêu",
+        "Mục đích thiết kế"
+      ],
+      [
+        "L1",
+        "30 triệu",
+        "12 triệu",
+        "40%",
+        "Tại tháng đánh giá (cuối Level 1) — tối thiểu 2/2 tháng đạt KPI",
+        "Xây thói quen tư vấn đúng danh mục chiến lược ngay từ đầu"
+      ],
+      [
+        "L2",
+        "100 triệu",
+        "30 triệu",
+        "30%",
+        "Trung bình Tháng 11–12",
+        "Mở rộng danh mục, nhưng giá trị H.số 1 tăng 2.5x so với L1"
+      ],
+      [
+        "L3",
+        "125 triệu",
+        "45 triệu",
+        "36%",
+        "Trung bình Tháng 23–24",
+        "Duy trì KPI cá nhân trong khi đảm nhận thêm vai trò kèm cặp"
+      ],
+      [
+        "L4",
+        "150 triệu",
+        "55 triệu",
+        "37%",
+        "Trung bình Tháng 35–36",
+        "Dẫn dắt văn hoá bán đúng danh mục — không chỉ bán nhiều"
+      ]
+    ]
+  }
+}
