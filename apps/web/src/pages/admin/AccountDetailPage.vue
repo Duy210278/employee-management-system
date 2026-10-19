@@ -13,7 +13,8 @@ import { useQueryClient } from '@tanstack/vue-query';
 import { computed, reactive, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { ApiError } from '@/api/client';
-import { userApi, useUser } from '@/api/queries';
+import { userApi, useStaffProfile, useUser } from '@/api/queries';
+import StaffRunForm from '@/components/StaffRunForm.vue';
 import { useToast } from '@/composables/toast';
 import { fmtDateTime } from '@/format';
 import ScopePicker from './ScopePicker.vue';
@@ -54,6 +55,21 @@ const affected = computed(() =>
 );
 const candidates = (a: AssignmentView) => (d.value?.candidates[a.role] ?? []).filter((c) => c.id !== id.value && !(a.role === 'buddy' && c.id === a.staffUserId));
 const isReviewed = computed(() => !!d.value && !['pending', 'rejected'].includes(d.value.user.status));
+
+// Lộ trình và checklist của tài khoản NV (mục 9.1): chưa có hồ sơ thì gán checklist ngay tại đây
+const isActiveNv = computed(() => d.value?.user.role === 'nv' && d.value.user.status === 'active');
+const staffId = computed(() => (isActiveNv.value ? (d.value?.user.staffId ?? null) : null));
+const { data: profile } = useStaffProfile(staffId);
+const runText = computed(() => {
+  const r = profile.value?.run;
+  const l = profile.value?.level;
+  if (!r || !l) return '';
+  const day = r.dayIndex < 0 ? `bắt đầu sau ${-r.dayIndex} ngày` : `ngày ${r.dayIndex + 1}/${l.totalDays}`;
+  return `Level ${r.levelKey} · ${l.name} (${l.checklistName} v${r.versionCode}) · ${day} · ${r.progress.done}/${r.progress.total} mục (${Math.round(r.progress.pct * 100)}%)`;
+});
+const accountForForm = computed(() =>
+  d.value ? { id: d.value.user.id, fullName: d.value.user.fullName, employeeCode: d.value.user.employeeCode, storeId: d.value.user.requested?.storeId ?? null } : undefined,
+);
 
 async function act(fn: () => Promise<UserDetailResponse>, done: string) {
   busy.value = true;
@@ -131,6 +147,29 @@ function reject() {
           <textarea v-model="rejectNote" rows="3" placeholder="Lý do từ chối (bắt buộc)" aria-label="Lý do từ chối"></textarea>
           <div><button class="btn bad" type="button" :disabled="busy" @click="reject">Từ chối đăng ký</button></div>
         </div>
+      </div>
+
+      <!-- Lộ trình và checklist (tài khoản NV đang hoạt động) -->
+      <div v-if="isActiveNv" class="card pad stack" :style="d.user.staffId ? '' : 'border-color: var(--accent)'">
+        <div class="h2">Lộ trình và checklist</div>
+        <template v-if="d.user.staffId">
+          <div class="rowf sp">
+            <div>
+              <template v-if="profile?.staff.active === false">Hồ sơ đã ngừng theo dõi.</template>
+              <template v-else-if="runText">Đang theo <b>{{ runText }}</b></template>
+              <template v-else>Đang tải lộ trình…</template>
+            </div>
+            <div class="rowf">
+              <RouterLink class="btn sm" :to="{ path: `/nhan-su/${d.user.staffId}`, query: { tab: 'check' } }">Mở checklist</RouterLink>
+              <RouterLink class="btn sm" :to="{ path: `/nhan-su/${d.user.staffId}`, query: { tab: 'manage' } }">Phân công & tạm dừng</RouterLink>
+            </div>
+          </div>
+          <div class="sm mut">Lên Level tiếp theo qua phiếu đánh giá ở tab "Chuyển Level"; đổi Buddy, CHT, QLKV hoặc tạm dừng ở tab "Phân công & tạm dừng".</div>
+        </template>
+        <template v-else>
+          <div class="sm mut">Tài khoản chưa có hồ sơ nhân viên nên chưa có checklist. Chọn Level, nhà thuốc và người phụ trách để gán checklist.</div>
+          <StaffRunForm v-if="accountForForm" :key="d.user.id" :account="accountForForm" submit-label="Gán checklist" />
+        </template>
       </div>
 
       <!-- Sửa tài khoản (mục 5.3) -->
