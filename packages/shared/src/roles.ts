@@ -6,8 +6,8 @@ export type AccountRole = (typeof ACCOUNT_ROLES)[number];
 export const TASK_ROLES = ['nv', 'buddy', 'cht', 'qlkv', 'bp'] as const;
 export type TaskRole = (typeof TASK_ROLES)[number];
 
-/** Vai trò phân công trên lượt Level (bảng run_assignments). */
-export const ASSIGNMENT_ROLES = ['buddy', 'cht', 'qlkv'] as const;
+/** Vai trò phân công trên lượt Level (bảng run_assignments). trainer: người phụ trách Đào tạo (lượt CHT) */
+export const ASSIGNMENT_ROLES = ['buddy', 'cht', 'qlkv', 'trainer'] as const;
 export type AssignmentRole = (typeof ASSIGNMENT_ROLES)[number];
 
 export const ROLE_LABEL: Record<TaskRole, string> = {
@@ -37,7 +37,7 @@ export const USER_STATUS_LABEL: Record<UserStatus, string> = {
   rejected: 'Bị từ chối',
 };
 
-export const ASSIGNMENT_LABEL: Record<AssignmentRole, string> = { buddy: 'Buddy', cht: 'Cửa hàng trưởng', qlkv: 'QLKV' };
+export const ASSIGNMENT_LABEL: Record<AssignmentRole, string> = { buddy: 'Buddy', cht: 'Cửa hàng trưởng', qlkv: 'QLKV', trainer: 'Người phụ trách Đào tạo' };
 
 /**
  * Tài khoản còn giữ được một phân công trên lượt Level không (mục 5.4 điều 3, R20):
@@ -46,5 +46,6 @@ export const ASSIGNMENT_LABEL: Record<AssignmentRole, string> = { buddy: 'Buddy'
 export function canHoldAssignment(role: AssignmentRole, user: { role: AccountRole; status: UserStatus; canBuddy: boolean }): boolean {
   if (user.status !== 'active') return false;
   if (role === 'buddy') return user.canBuddy || user.role === 'cht';
+  if (role === 'trainer') return user.role === 'bp';
   return user.role === role;
 }

@@ -1,4 +1,5 @@
 import { diffDays, type IsoDate } from '../dates';
+import { isChtTrack, type Track } from '../schemas/version';
 
 /**
  * Quy tắc cảnh báo (mục 11.6, mặc định theo N3 và N1 F.2). Hàm thuần: API tính cho trang Cảnh báo, Nhân sự, Hồ sơ NV.
@@ -18,7 +19,9 @@ export type AlertKey =
   | 'rubric_low'
   | 'inactive'
   | 'level_overrun'
-  | 'stage_sign_late';
+  | 'stage_sign_late'
+  | 'attrition_high'
+  | 'attrition_medium';
 
 export interface Alert {
   key: AlertKey;
@@ -39,6 +42,8 @@ export const ALERT_RULES: { key: AlertKey; severity: AlertSeverity; label: strin
   { key: 'inactive', severity: 'yellow', label: 'NV Level 1 không đăng nhập quá 5 ngày' },
   { key: 'level_overrun', severity: 'yellow', label: 'Quá thời gian Level 14 ngày chưa có quyết định' },
   { key: 'stage_sign_late', severity: 'yellow', label: 'Quá hạn ký cuối giai đoạn' },
+  { key: 'attrition_high', severity: 'red', label: 'CHT mới có nguy cơ nghỉ việc cao (đánh giá tuần đầu)' },
+  { key: 'attrition_medium', severity: 'yellow', label: 'CHT mới có nguy cơ nghỉ việc trung bình (đánh giá tuần đầu)' },
 ];
 
 export const SALES_LOW_RATE = 0.8;
@@ -69,21 +74,29 @@ export interface AlertInput {
   /** Ngày đăng nhập gần nhất của NV (theo đồng hồ nghiệp vụ) */
   lastSeen: IsoDate | null;
   lateStageSigns: number;
+  /** Loại lộ trình; lượt CHT không có CHT, Buddy bắt buộc */
+  track?: Track;
+  /** Nguy cơ nghỉ việc trong đánh giá tuần đầu của lượt CHT */
+  attritionRisk?: 'low' | 'medium' | 'high' | null;
 }
 
 export function computeAlerts(i: AlertInput): Alert[] {
   const out: Alert[] = [];
   const add = (key: AlertKey, severity: AlertSeverity, message: string) => out.push({ key, severity, message });
   const started = i.dayIndex >= 0;
+  const cht = !!i.track && isChtTrack(i.track);
 
   const gpp = i.overdue.filter((t) => t.gpp).length;
   if (gpp) add('gpp_overdue', 'red', `${gpp} mục GPP quá hạn`);
-  if (i.open && i.levelKey <= 2 && !i.hasBuddy && i.dayIndex >= NO_BUDDY_DAYS) add('no_buddy', 'red', `Level ${i.levelKey} chưa có Buddy sau 48 giờ`);
+  if (!cht && i.open && i.levelKey <= 2 && !i.hasBuddy && i.dayIndex >= NO_BUDDY_DAYS) add('no_buddy', 'red', `Level ${i.levelKey} chưa có Buddy sau 48 giờ`);
   const late = i.overdue.filter((t) => t.days > i.escalateDays);
   if (late.length) add('overdue_escalate', 'red', `${late.length} mục trễ hạn hơn ${i.escalateDays} ngày (trễ nhất ${Math.max(...late.map((t) => t.days))} ngày)`);
   if (i.safetyErrors) add('safety_error', 'red', `${i.safetyErrors} ca quan sát có lỗi an toàn thuốc nghiêm trọng`);
 
-  if (i.open && !i.hasCht) add('no_cht', 'yellow', 'Chưa gắn Cửa hàng trưởng');
+  if (i.attritionRisk === 'high') add('attrition_high', 'red', 'Đánh giá tuần đầu: nguy cơ nghỉ việc cao, cần can thiệp ngay');
+
+  if (!cht && i.open && !i.hasCht) add('no_cht', 'yellow', 'Chưa gắn Cửa hàng trưởng');
+  if (i.attritionRisk === 'medium') add('attrition_medium', 'yellow', 'Đánh giá tuần đầu: nguy cơ nghỉ việc trung bình, cần theo dõi');
   if (!late.length && i.overdue.length) add('overdue', 'yellow', `${i.overdue.length} mục trễ hạn`);
 
   const entered = i.sales.filter((s) => s.total !== null).sort((a, b) => a.month - b.month);

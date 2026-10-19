@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ROLE_SHORT, type TaskView } from '@lotrinh/shared';
+import { roleShortFor, SESSION_LABEL, type TaskView } from '@lotrinh/shared';
 import { computed, ref } from 'vue';
 import { taskApi, useMe, useMutate, useTaskEvents } from '@/api/queries';
 import { useToast } from '@/composables/toast';
@@ -32,17 +32,18 @@ const chk = computed(() => {
   if (t.value.state.overdueDays > 0) return { cls: 'late', mark: '' };
   return { cls: '', mark: '' };
 });
-const waitingLabel = computed(() => a.value.waitingFor.map((r) => ROLE_SHORT[r]).join(' + '));
+const short = (r: TaskView['requiredRoles'][number]) => roleShortFor(r, t.value.track);
+const waitingLabel = computed(() => a.value.waitingFor.map(short).join(' + '));
 /** Mục cần làm lại / cần hỗ trợ / chờ phụ thuộc mà còn trễ hạn thì vẫn hiện số ngày trễ */
 const extraOverdue = computed(() => ['rework', 'help', 'blocked'].includes(t.value.state.code) && t.value.state.overdueDays > 0);
 
 const confirmLabel = computed(() => {
   const slot = a.value.confirmAs;
   if (!slot) return '';
-  if (slot.role === 'nv') return slot.proxyRole ? 'Báo hoàn thành thay NV' : 'Tôi đã làm xong';
-  if (slot.proxyRole) return `Xác nhận thay ${ROLE_SHORT[slot.role]}`;
+  if (slot.role === 'nv') return slot.proxyRole ? `Báo hoàn thành thay ${short('nv')}` : 'Tôi đã làm xong';
+  if (slot.proxyRole) return `Xác nhận thay ${short(slot.role)}`;
   const mine = me.value?.user.role;
-  return mine === slot.role ? 'Xác nhận đạt' : `Xác nhận đạt (${ROLE_SHORT[slot.role]})`;
+  return mine === slot.role ? 'Xác nhận đạt' : `Xác nhận đạt (${short(slot.role)})`;
 });
 
 async function run(fn: () => Promise<unknown>, success: string) {
@@ -81,7 +82,8 @@ const markNa = () => requireNote('Nhập lý do bỏ qua vào ô ghi chú') && r
       <div class="t">
         <p :class="{ gpp: t.gpp }" :style="{ fontWeight: a.confirmAs ? 600 : 500 }">{{ t.content }}</p>
         <div class="meta">
-          <RoleChip v-for="r in t.requiredRoles" :key="r" :role="r" :state="confirmedRoles.includes(r) ? 'done' : 'pending'" />
+          <RoleChip v-for="r in t.requiredRoles" :key="r" :role="r" :track="t.track" :state="confirmedRoles.includes(r) ? 'done' : 'pending'" />
+          <span v-if="t.session" class="pill info">{{ SESSION_LABEL[t.session] }}</span>
           <span class="pill">{{ t.category }}</span>
           <span v-if="t.gpp" class="pill bad">GPP bắt buộc</span>
           <StatePill :state="t.state" />
@@ -94,6 +96,13 @@ const markNa = () => requireNote('Nhập lý do bỏ qua vào ô ghi chú') && r
     </div>
 
     <div v-if="open" class="more">
+      <div v-if="t.supporter || t.link" class="sm">
+        <template v-if="t.supporter"><b>Người hỗ trợ:</b> {{ t.supporter }}</template>
+        <template v-if="t.link">
+          <template v-if="t.supporter"> · </template>
+          <a :href="t.link" target="_blank" rel="noopener">Tài liệu hướng dẫn ↗</a>
+        </template>
+      </div>
       <div v-if="t.guidance">
         <b class="sm">Hướng dẫn thực hiện</b>
         <div class="sm mut" style="white-space: pre-line">{{ t.guidance }}</div>
@@ -109,8 +118,8 @@ const markNa = () => requireNote('Nhập lý do bỏ qua vào ô ghi chú') && r
       <div v-if="t.blockedBy.length" class="alert"><div>Chỉ xác nhận được sau khi xong: {{ t.blockedBy.join(', ') }}</div></div>
       <div v-if="t.confirmations.length" class="sm">
         <div v-for="c in t.confirmations" :key="c.role">
-          <RoleChip :role="c.role" state="done" /> {{ c.userName }}
-          <span v-if="c.proxyRole" class="mut">({{ ROLE_SHORT[c.proxyRole] }} xác nhận thay)</span>
+          <RoleChip :role="c.role" :track="t.track" state="done" /> {{ c.userName }}
+          <span v-if="c.proxyRole" class="mut">({{ short(c.proxyRole) }} xác nhận thay)</span>
           <span class="mut"> · {{ fmtDateTime(c.at) }}</span>
           <span v-if="c.note" class="mut"> · {{ c.note }}</span>
         </div>
@@ -118,7 +127,7 @@ const markNa = () => requireNote('Nhập lý do bỏ qua vào ô ghi chú') && r
       <div v-if="events?.length" class="sm mut">
         <b class="sm" style="color: var(--ink)">Lịch sử</b>
         <div v-for="e in events" :key="e.id">
-          {{ fmtDateTime(e.at) }} · <b>{{ e.userName }}</b><template v-if="e.role"> ({{ ROLE_SHORT[e.role] }})</template> · {{ e.actionLabel
+          {{ fmtDateTime(e.at) }} · <b>{{ e.userName }}</b><template v-if="e.role"> ({{ short(e.role) }})</template> · {{ e.actionLabel
           }}<template v-if="e.note">: {{ e.note }}</template>
         </div>
       </div>

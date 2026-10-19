@@ -147,7 +147,14 @@ Làm theo **lát cắt dọc**: mỗi lát gồm cả API lẫn giao diện, xon
 > - Lệch so với đặc tả: quy tắc cảnh báo cố định trong mã (chưa cấu hình theo phiên bản ở "Thiết lập chung"); danh sách tài khoản chỉ BP ĐT xem (ma trận cho CHT/QLKV xem trong phạm vi); chưa có OTP, Mailpit, đổi mật khẩu.
 > - Còn lại: Buddy Score (cả cảnh báo kèm theo), chuyển phiên bản cho NV đang dở Level (8.4), xem trước điện thoại (7.6), giai đoạn 5.
 >
-> **Bổ sung (19/10/2026):** đổi ngày hiệu lực của bản đã duyệt mà chưa tới ngày (`PUT /versions/:id/effective`, quyền như người duyệt): giữ thứ tự phiên bản, đổi ngày kết thúc của bản bị thay thế, chặn khi có lượt Level bắt đầu trong khoảng ngày bị đổi; 4 test API. Triển khai bản demo lên Render + Neon (`render.yaml`).
+> **Bổ sung (19/10/2026):** đổi ngày hiệu lực của bản đã duyệt mà chưa tới ngày (`PUT /versions/:id/effective`, quyền như người duyệt): giữ thứ tự phiên bản, đổi ngày kết thúc của bản bị thay thế, chặn khi có lượt Level bắt đầu trong khoảng ngày bị đổi; 4 test API. Triển khai bản demo lên Render + Neon (`render.yaml`). Gán checklist cho tài khoản NV ngay trong trang Quản trị.
+>
+> **Bổ sung (19/10/2026): Onboarding Cửa hàng trưởng.** Nguồn: `docs/nguon/Onboarding_CHT_MoiTuyen_[TenCHT].xlsx`, `Onboarding_CHT_TuNVBH_[TenCHT].xlsx` (trích bằng `seed/extract-cht.py`).
+> - Phiên bản có thêm `chtTracks` (CHT mới tuyển `CM`, thăng tiến từ NVBH `CT`; mỗi ngày D+n là một giai đoạn; cảm xúc nhật ký, tiêu chí đánh giá tuần đầu). Kiểm tra CK-16 (link), CK-17 (thông tin CHT); phân loại thay đổi tính tiêu chí/diễn đạt như checklist Level. Trình soạn: tab "Checklist CHT".
+> - Lượt có `track` + `meta`; bộ máy lượt Level dùng lại qua `levelForTrack`. Vai trò mới **Người phụ trách Đào tạo** (`trainer`, tài khoản BP ĐT): việc của "Đào tạo" chỉ giao cho người này. Không có doanh số, Rubric, phiếu chuyển Level, ký giai đoạn cho lượt CHT.
+> - Bảng `run_journal` (nhật ký check-in), `run_evaluations` (đánh giá tuần đầu, nguy cơ nghỉ việc → cảnh báo `attrition_high/medium`); QLKV xác nhận khi checklist xong việc bắt buộc → lượt `passed`. Thăng chức: lượt NVBH đang mở đóng `promoted`, dùng lại hồ sơ. Migration 0005.
+> - Giao diện: Quản trị → tài khoản CHT → "Gán checklist CHT"; hồ sơ có tab Nhật ký theo dõi, Đánh giá tuần đầu; CHT có tab "Lộ trình của tôi".
+> - 182 test đạt (85 lõi nghiệp vụ, 97 API, gồm 9 test onboarding CHT).
 
 | Ngày | Việc | Kết quả kiểm tra được |
 |---|---|---|

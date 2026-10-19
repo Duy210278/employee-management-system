@@ -17,7 +17,7 @@ import type { Db } from '../../db/client';
 import { DB } from '../../db/db.provider';
 import { observations, users } from '../../db/schema';
 import { AccessService } from '../access/access.service';
-import { RunContextService, type RunContext } from '../runs/run-context.service';
+import { assertNvbh, RunContextService, type RunContext } from '../runs/run-context.service';
 
 /** Ca quan sát Rubric (mục 11.5 tab Quan sát Rubric, Phụ lục C, R16) */
 @Injectable()
@@ -37,6 +37,7 @@ export class ObservationsService {
 
   async list(user: SessionUser, runId: number): Promise<ObservationsResponse> {
     const ctx = await this.runs.load(runId);
+    assertNvbh(ctx, 'quan sát Rubric');
     await this.access.assertCanViewRun(user, ctx);
     const today = await this.clock.today();
     const rubric = rubricOf(ctx.content);
@@ -66,6 +67,7 @@ export class ObservationsService {
 
   async add(user: SessionUser, runId: number, body: ObservationBodyT): Promise<ObservationsResponse> {
     const ctx = await this.runs.load(runId);
+    assertNvbh(ctx, 'quan sát Rubric');
     await this.access.assertCanViewRun(user, ctx);
     const today = await this.clock.today();
     if (!this.canAdd(user, ctx, today)) throw forbidden('CANNOT_OBSERVE', 'Chỉ Buddy, CHT, QLKV phụ trách lượt đang chạy được ghi ca quan sát');

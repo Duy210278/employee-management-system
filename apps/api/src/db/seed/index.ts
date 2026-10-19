@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {
   addDays,
+  DEFAULT_CHT_TRACKS,
   levelItems,
   requiredRoles,
   VersionContentSchema,
@@ -19,6 +20,7 @@ import {
   credentials,
   levelRuns,
   observations,
+  runJournal,
   runPauses,
   runTasks,
   salesMonthly,
@@ -36,6 +38,7 @@ import {
   HELP_NOTE,
   HIRE_BEFORE_LEVEL_START,
   LAST_SEEN_DAYS_AGO,
+  SEED_CHT,
   SEED_PAUSE,
   REWORK_NOTE,
   SEED_AREAS,
@@ -53,8 +56,9 @@ const SEED_CONTENT_PATH = path.resolve(__dirname, '../../../../../seed/v2.1.json
 /** Thời điểm theo giờ Việt Nam của một ngày nghiệp vụ */
 const at = (date: IsoDate, hhmm: string) => new Date(`${date}T${hhmm}:00+07:00`);
 
+/** Bộ lộ trình khởi tạo: 4 Level NVBH (trích từ N3) và hai checklist onboarding CHT (trích từ Excel của BP ĐT) */
 export function loadSeedContent() {
-  return VersionContentSchema.parse(JSON.parse(fs.readFileSync(SEED_CONTENT_PATH, 'utf8')));
+  return VersionContentSchema.parse({ ...JSON.parse(fs.readFileSync(SEED_CONTENT_PATH, 'utf8')), chtTracks: structuredClone(DEFAULT_CHT_TRACKS) });
 }
 
 /** Nạp dữ liệu mẫu vào cơ sở dữ liệu trống. Ngày bắt đầu Level tính lùi từ `today`. */
@@ -146,6 +150,45 @@ export async function seedDatabase(db: Db, today: IsoDate): Promise<void> {
       const day = -s.startOffset;
       if (day >= 0) await tx.update(levelRuns).set({ ackBy: u.id, ackAt: at(start, '08:30') }).where(eq(levelRuns.id, run.id));
       await seedProgress(tx, { level, start, today, day, tasks, plan: s.plan, staffUserId: u.id, people, adminId, runId: run.id, signOff: content.scheduleParams.signDueAfter });
+    }
+
+    // Onboarding CHT mới tuyển đang chạy (docs/nguon/Onboarding_CHT_MoiTuyen_[TenCHT].xlsx)
+    {
+      const u = user(SEED_CHT.user);
+      const start = addDays(today, SEED_CHT.startOffset);
+      const [st] = await tx
+        .insert(staff)
+        .values({ userId: u.id, employeeCode: u.employeeCode, fullName: u.fullName, storeId: storeId.get(SEED_CHT.store)!, hireDate: start, currentLevel: 1 })
+        .returning();
+      // Checklist CHT không có bước "CHT xác nhận"; seedProgress cần đủ người cho mọi vai trò nên điền BP ĐT
+      const people = { buddy: null, cht: adminId, qlkv: user(SEED_CHT.qlkv).id };
+      const { run, level, tasks } = await createRun(tx, {
+        staffId: st.id,
+        levelKey: 1,
+        track: SEED_CHT.track,
+        meta: { trainingMode: SEED_CHT.trainingMode, previousStoreName: null, seniorityMonths: null },
+        startDate: start,
+        version: { id: version.id, criteriaLine: version.criteriaLine!, content },
+        people: { qlkv: people.qlkv, trainer: user(SEED_CHT.trainer).id },
+        createdBy: adminId,
+      });
+      await tx.update(levelRuns).set({ ackBy: u.id, ackAt: at(start, '08:30') }).where(eq(levelRuns.id, run.id));
+      await seedProgress(tx, { level, start, today, day: -SEED_CHT.startOffset, tasks, plan: { waiting: 1 }, staffUserId: u.id, people, adminId, runId: run.id, signOff: 0 });
+      const trainerId = user(SEED_CHT.trainer).id;
+      await tx.insert(runJournal).values(
+        SEED_CHT.journal.map((j) => ({
+          runId: run.id,
+          day: j.day,
+          mood: j.mood,
+          difficulties: j.difficulties,
+          actions: j.actions,
+          managerNote: j.managerNote,
+          updatedBy: trainerId,
+          updatedAt: at(addDays(start, j.day), '17:45'),
+          managerBy: j.managerNote ? people.qlkv : null,
+          managerAt: j.managerNote ? at(addDays(start, j.day), '20:00') : null,
+        })),
+      );
     }
 
     // Một đề xuất tạm dừng đang chờ QLKV duyệt (mục 9.3)

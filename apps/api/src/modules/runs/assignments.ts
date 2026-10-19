@@ -95,5 +95,6 @@ export async function assignmentCandidates(db: DbLike): Promise<Record<Assignmen
     buddy: active.filter((u) => canHoldAssignment('buddy', u)).map(opt),
     cht: active.filter((u) => u.role === 'cht').map(opt),
     qlkv: active.filter((u) => u.role === 'qlkv').map(opt),
+    trainer: active.filter((u) => u.role === 'bp').map(opt),
   };
 }

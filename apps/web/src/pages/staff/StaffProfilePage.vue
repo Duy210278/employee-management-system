@@ -1,8 +1,12 @@
 <script setup lang="ts">
+import { runTitle } from '@lotrinh/shared';
 import { computed, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useMe, useStaffProfile } from '@/api/queries';
 import ReviewTab from '@/components/assessment/ReviewTab.vue';
+import ChtEvaluation from '@/components/cht/ChtEvaluation.vue';
+import ChtJournal from '@/components/cht/ChtJournal.vue';
+import ChtOverview from '@/components/cht/ChtOverview.vue';
 import RubricTab from '@/components/assessment/RubricTab.vue';
 import SalesTab from '@/components/assessment/SalesTab.vue';
 import LevelOverview from '@/components/LevelOverview.vue';
@@ -25,17 +29,7 @@ const run = computed(() => p.value?.run ?? null);
 const pct = computed(() => Math.round((run.value?.progress.pct ?? 0) * 100));
 const hasRed = computed(() => !!p.value?.alerts.some((a) => a.severity === 'red'));
 
-type Tab = 'over' | 'check' | 'sales' | 'rubric' | 'review' | 'history' | 'manage';
-const tabs = computed<{ key: Tab; label: string }[]>(() => [
-  { key: 'over', label: 'Tổng quan' },
-  { key: 'check', label: 'Checklist' },
-  { key: 'sales', label: 'Doanh số' },
-  { key: 'rubric', label: 'Quan sát Rubric' },
-  { key: 'review', label: 'Chuyển Level' },
-  { key: 'history', label: 'Lịch sử lượt' },
-  // Đổi phân công, tạm dừng, chuyển cửa hàng, ngừng theo dõi (mục 9.3): CHT, QLKV trong phạm vi, BP ĐT
-  ...(p.value?.canManage ? [{ key: 'manage' as const, label: 'Phân công & tạm dừng' }] : []),
-]);
+type Tab = 'over' | 'check' | 'sales' | 'rubric' | 'review' | 'cht-journal' | 'cht-review' | 'history' | 'manage';
 
 /** Bộ chọn Level để xem lại các Level đã qua (mục 11.5); mặc định lượt hiện tại. Lưu trên URL để mở thẳng từ "Chữ ký chờ bạn" */
 const selectedRunId = computed(() => {
@@ -43,6 +37,26 @@ const selectedRunId = computed(() => {
   return p.value?.history.some((h) => h.runId === q) ? q : (run.value?.id ?? null);
 });
 const selected = computed(() => p.value?.history.find((h) => h.runId === selectedRunId.value) ?? null);
+/** Lượt onboarding CHT có nhật ký và đánh giá tuần đầu thay cho doanh số, Rubric, phiếu chuyển Level */
+const selectedCht = computed(() => (selected.value?.track ?? run.value?.track ?? 'nvbh') !== 'nvbh');
+const tabs = computed<{ key: Tab; label: string }[]>(() => [
+  { key: 'over', label: 'Tổng quan' },
+  { key: 'check', label: 'Checklist' },
+  ...(selectedCht.value
+    ? [
+        { key: 'cht-journal' as const, label: 'Nhật ký theo dõi' },
+        { key: 'cht-review' as const, label: 'Đánh giá tuần đầu' },
+      ]
+    : [
+        { key: 'sales' as const, label: 'Doanh số' },
+        { key: 'rubric' as const, label: 'Quan sát Rubric' },
+        { key: 'review' as const, label: 'Chuyển Level' },
+      ]),
+  { key: 'history', label: 'Lịch sử lượt' },
+  // Đổi phân công, tạm dừng, chuyển cửa hàng, ngừng theo dõi (mục 9.3): CHT, QLKV trong phạm vi, BP ĐT
+  ...(p.value?.canManage ? [{ key: 'manage' as const, label: 'Phân công & tạm dừng' }] : []),
+]);
+
 const viewingCurrent = computed(() => selectedRunId.value === run.value?.id);
 /** NV phải đọc Tổng quan của lượt hiện tại trước khi các tab khác mở (mục 9.4) */
 const gated = computed(() => !!p.value?.isSelf && viewingCurrent.value && !!run.value && !run.value.acknowledged);
@@ -66,6 +80,7 @@ const STATUS_LABEL: Record<string, string> = {
   extended: 'Gia hạn',
   failed: 'Không đạt',
   stopped: 'Dừng',
+  promoted: 'Thăng chức CHT',
 };
 </script>
 
@@ -97,22 +112,27 @@ const STATUS_LABEL: Record<string, string> = {
           </div>
           <div class="rowf">
             <span class="pill info">
-              Level {{ run.levelKey }} ·
+              {{ runTitle(run) }} ·
               {{ run.dayIndex < 0 ? `bắt đầu ${fmtDate(run.startDate, refYear)}` : `ngày ${run.dayIndex + 1}/${p.level.totalDays}` }}
             </span>
             <span class="pill" :class="run.acknowledged ? 'ok' : 'warn'">{{ run.acknowledged ? 'Đã đọc tổng quan' : 'Chưa đọc tổng quan' }}</span>
             <span class="pill">{{ p.level.checklistName }} v{{ run.versionCode }}</span>
           </div>
         </div>
-        <div class="rowf sm">
+        <div v-if="run.track === 'nvbh'" class="rowf sm">
           <span><RoleChip role="buddy" /> {{ p.people.buddy ?? 'chưa gắn' }}</span>
           <span><RoleChip role="cht" /> {{ p.people.cht ?? 'chưa gắn' }}</span>
           <span><RoleChip role="qlkv" /> {{ p.people.qlkv ?? 'chưa gắn' }}</span>
         </div>
-        <PathBar :path="p.path" :for-staff="p.isSelf" :ref-year="refYear" />
+        <div v-else class="rowf sm">
+          <span><RoleChip role="bp" :track="run.track" /> {{ p.people.trainer ?? 'chưa gắn' }}</span>
+          <span><RoleChip role="qlkv" /> {{ p.people.qlkv ?? 'chưa gắn' }}</span>
+          <span><RoleChip role="buddy" /> {{ p.people.buddy ?? 'không có' }}</span>
+        </div>
+        <PathBar v-if="p.path.length" :path="p.path" :for-staff="p.isSelf" :ref-year="refYear" />
         <div class="rowf">
           <div class="bar grow"><i :style="{ width: pct + '%' }"></i></div>
-          <span class="sm mut">Level {{ run.levelKey }}: {{ run.progress.done }}/{{ run.progress.total }} mục · {{ pct }}%</span>
+          <span class="sm mut">{{ runTitle(run) }}: {{ run.progress.done }}/{{ run.progress.total }} mục · {{ pct }}%</span>
         </div>
         <div v-if="!p.staff.active" class="alert">
           <div><b>Đã ngừng theo dõi</b><template v-if="p.staff.stopReason">: {{ p.staff.stopReason }}</template>. Dữ liệu được giữ nguyên để tra cứu.</div>
@@ -129,7 +149,7 @@ const STATUS_LABEL: Record<string, string> = {
       </div>
 
       <div v-if="gated" class="alert">
-        <div>Hãy đọc <b>Tổng quan Level {{ run.levelKey }}</b> và xác nhận ở cuối trang. Các mục còn lại sẽ mở sau đó.</div>
+        <div>Hãy đọc <b>Tổng quan {{ runTitle(run) }}</b> và xác nhận ở cuối trang. Các mục còn lại sẽ mở sau đó.</div>
       </div>
       <div class="rowf sp">
         <div class="sub" role="tablist">
@@ -154,20 +174,25 @@ const STATUS_LABEL: Record<string, string> = {
             :aria-current="h.runId === selectedRunId"
             @click="go({ run: h.runId })"
           >
-            Level {{ h.levelKey }}<template v-if="h.status !== 'active'"> · {{ STATUS_LABEL[h.status] ?? h.status }}</template>
+            {{ runTitle(h) }}<template v-if="h.status !== 'active'"> · {{ STATUS_LABEL[h.status] ?? h.status }}</template>
           </button>
         </div>
       </div>
       <div v-if="!viewingCurrent && selected" class="alert info">
-        <div>Đang xem lại <b>Level {{ selected.levelKey }}</b> ({{ fmtDate(selected.startDate, refYear) }} → {{ fmtDate(selected.plannedEnd, refYear) }}).</div>
+        <div>Đang xem lại <b>{{ runTitle(selected) }}</b> ({{ fmtDate(selected.startDate, refYear) }} → {{ fmtDate(selected.plannedEnd, refYear) }}).</div>
       </div>
 
       <template v-if="selectedRunId !== null">
-        <LevelOverview v-if="tab === 'over'" :key="`o${selectedRunId}`" :run-id="selectedRunId" :ref-year="refYear" />
+        <template v-if="tab === 'over'">
+          <ChtOverview v-if="selectedCht" :key="`co${selectedRunId}`" :run-id="selectedRunId" :ref-year="refYear" />
+          <LevelOverview v-else :key="`o${selectedRunId}`" :run-id="selectedRunId" :ref-year="refYear" />
+        </template>
         <StageChecklist v-else-if="tab === 'check'" :key="`c${selectedRunId}`" :run-id="selectedRunId" :ref-year="refYear" />
         <SalesTab v-else-if="tab === 'sales'" :key="`s${selectedRunId}`" :run-id="selectedRunId" />
         <RubricTab v-else-if="tab === 'rubric'" :key="`r${selectedRunId}`" :run-id="selectedRunId" />
         <ReviewTab v-else-if="tab === 'review'" :key="`v${selectedRunId}`" :run-id="selectedRunId" />
+        <ChtJournal v-else-if="tab === 'cht-journal'" :key="`j${selectedRunId}`" :run-id="selectedRunId" :ref-year="refYear" />
+        <ChtEvaluation v-else-if="tab === 'cht-review'" :key="`e${selectedRunId}`" :run-id="selectedRunId" />
         <RunManagePanel v-else-if="tab === 'manage' && run" :key="`m${run.id}`" :run-id="run.id" :staff-id="p.staff.id" :staff-name="p.staff.fullName" />
       </template>
       <div v-if="tab === 'history'" class="card">
@@ -178,7 +203,7 @@ const STATUS_LABEL: Record<string, string> = {
           <tbody>
             <tr v-for="h in p.history" :key="h.runId">
               <td data-l="Level">
-                <button class="linkbtn" type="button" @click="go({ run: h.runId, tab: 'check' })"><b>Level {{ h.levelKey }}</b> · {{ h.levelName }}</button>
+                <button class="linkbtn" type="button" @click="go({ run: h.runId, tab: 'check' })"><b>{{ runTitle(h) }}</b> · {{ h.levelName }}</button>
               </td>
               <td data-l="Phiên bản">v{{ h.versionCode }}</td>
               <td data-l="Bắt đầu">{{ fmtDate(h.startDate, refYear) }}</td>

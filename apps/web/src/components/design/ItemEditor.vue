@@ -1,12 +1,17 @@
 <script setup lang="ts">
-import { addDays, ROLE_SHORT, VERIFIER_ROLES, type Item, type Level, type Stage } from '@lotrinh/shared';
+import { addDays, roleShortFor, SESSION_LABEL, VERIFIER_ROLES, type Item, type Stage, type Track } from '@lotrinh/shared';
 import { computed, ref, watch } from 'vue';
 import { useToast } from '@/composables/toast';
 import { useDesigner } from '@/designer/editor';
-import { intOf, moveToStage, moveWithin, removeItem, renameKey, setGpp } from '@/designer/ops';
+import { intOf, isChtOwner, moveToStage, moveWithin, removeItem, renameKey, setGpp, type StageOwner } from '@/designer/ops';
 
-/** Một đầu việc trong trình soạn checklist (mục 7.1, 7.3) */
-const props = defineProps<{ item: Item; index: number; stage: Stage; level: Level }>();
+/** Một đầu việc trong trình soạn checklist (mục 7.1, 7.3); checklist CHT có thêm buổi, người hỗ trợ, tài liệu hướng dẫn */
+const props = defineProps<{ item: Item; index: number; stage: Stage; level: StageOwner }>();
+const cht = computed(() => isChtOwner(props.level));
+const track = computed<Track>(() => (isChtOwner(props.level) ? props.level.key : 'nvbh'));
+/** CHT: người học là CHT nên không chọn CHT làm người xác nhận; Đào tạo đứng đầu */
+const verifierRoles = computed(() => (cht.value ? (['bp', 'qlkv', 'buddy'] as const) : VERIFIER_ROLES));
+const short = (r: Parameters<typeof roleShortFor>[0]) => roleShortFor(r, track.value);
 const d = useDesigner();
 const toast = useToast();
 const issues = computed(() => d.issuesFor({ itemKey: props.item.key }));
@@ -79,9 +84,9 @@ const exampleDate = computed(() => {
         <span class="p" data-field="verifiers" tabindex="-1">
           Xác nhận
           <span class="rowf" style="gap: 4px">
-            <span class="rl nv" title="Phần nhân viên">NV</span>
+            <span class="rl nv" :title="cht ? 'Phần của CHT' : 'Phần nhân viên'">{{ short('nv') }}</span>
             <button
-              v-for="r in VERIFIER_ROLES"
+              v-for="r in verifierRoles"
               :key="r"
               type="button"
               class="rl chipbtn"
@@ -90,23 +95,40 @@ const exampleDate = computed(() => {
               :disabled="ro"
               @click="toggleVerifier(r)"
             >
-              {{ item.verifiers.includes(r) ? '✓ ' : '' }}{{ ROLE_SHORT[r] }}
+              {{ item.verifiers.includes(r) ? '✓ ' : '' }}{{ short(r) }}
             </button>
           </span>
         </span>
-        <label class="p cb"><input v-model="item.requireNvFirst" type="checkbox" :disabled="ro" /> NV báo trước</label>
+        <label class="p cb"><input v-model="item.requireNvFirst" type="checkbox" :disabled="ro" /> {{ short('nv') }} báo trước</label>
+        <template v-if="cht">
+          <label class="p">
+            Buổi
+            <select :value="item.session ?? ''" :disabled="ro" @change="item.session = (($event.target as HTMLSelectElement).value || undefined) as Item['session']">
+              <option value="">–</option>
+              <option v-for="(label, k) in SESSION_LABEL" :key="k" :value="k">{{ label }}</option>
+            </select>
+          </label>
+          <label class="p">
+            Người hỗ trợ
+            <input :value="item.supporter ?? ''" size="14" placeholder="vd. Đào tạo, QLKV" :disabled="ro" @change="item.supporter = ($event.target as HTMLInputElement).value.trim() || undefined" />
+          </label>
+          <label class="p">
+            Tài liệu
+            <input :value="item.link ?? ''" data-field="link" size="18" placeholder="https://…" :disabled="ro" @change="item.link = ($event.target as HTMLInputElement).value.trim() || undefined" />
+          </label>
+        </template>
         <label class="p">
           Hạn: ngày
           <input :value="item.dueOffset" data-field="dueOffset" type="number" min="0" style="width: 72px" :disabled="ro" @change="item.dueOffset = intOf($event)" />
           <span class="sm mut" :title="'Nếu NV bắt đầu Level hôm nay'">({{ exampleDate }})</span>
         </label>
-        <label class="p cb" data-field="gpp"><input :checked="item.gpp" type="checkbox" :disabled="ro" @change="setGpp(item, ($event.target as HTMLInputElement).checked)" /> GPP</label>
+        <label v-if="!cht" class="p cb" data-field="gpp"><input :checked="item.gpp" type="checkbox" :disabled="ro" @change="setGpp(item, ($event.target as HTMLInputElement).checked)" /> GPP</label>
         <label class="p cb"><input v-model="item.required" type="checkbox" :disabled="ro || item.gpp" /> Bắt buộc</label>
         <label class="p cb"><input v-model="item.allowNa" type="checkbox" :disabled="ro || item.gpp" /> Cho phép N/A</label>
         <!-- Nguồn (LMS/POS) và Bằng chứng đã ẩn: chưa có tích hợp và đính kèm, mọi mục xác nhận tay. Dữ liệu vẫn giữ trong phiên bản -->
         <label class="p">
           Phụ thuộc
-          <input :value="depsText" data-field="dependsOn" class="mono" size="12" placeholder="vd. L1-2-9" :disabled="ro" @change="setDeps(($event.target as HTMLInputElement).value)" />
+          <input :value="depsText" data-field="dependsOn" class="mono" size="12" :placeholder="cht ? `vd. ${(level as { code: string }).code}-1-2` : 'vd. L1-2-9'" :disabled="ro" @change="setDeps(($event.target as HTMLInputElement).value)" />
         </label>
         <label v-if="!ro && level.stages.length > 1" class="p">
           Chuyển tới

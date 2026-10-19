@@ -7,6 +7,8 @@ import { AlertsController } from './modules/alerts/alerts.controller';
 import { AlertsService } from './modules/alerts/alerts.service';
 import { AuditController } from './modules/audit/audit.controller';
 import { AuthModule } from './modules/auth/auth.module';
+import { ChtController } from './modules/cht/cht.controller';
+import { ChtService } from './modules/cht/cht.service';
 import { DemoController } from './modules/demo/demo.controller';
 import { HealthController } from './modules/health/health.controller';
 import { JobsService } from './modules/jobs/jobs.service';
@@ -54,6 +56,7 @@ import { VersionsController } from './modules/versions/versions.controller';
     AlertsController,
     AuditController,
     ReportsController,
+    ChtController,
   ],
   providers: [
     MeService,
@@ -68,6 +71,7 @@ import { VersionsController } from './modules/versions/versions.controller';
     UsersService,
     AlertsService,
     JobsService,
+    ChtService,
     { provide: APP_FILTER, useClass: ApiExceptionFilter },
     { provide: APP_INTERCEPTOR, useClass: AuditInterceptor },
   ],

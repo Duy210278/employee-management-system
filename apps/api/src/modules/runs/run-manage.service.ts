@@ -44,8 +44,10 @@ export class RunManageService {
 
   private async permissions(user: SessionUser, ctx: RunContext) {
     const record = AccessService.recordOf(ctx);
-    const update = await this.access.can(user, 'update', record);
-    const approve = await this.access.can(user, 'approve', record);
+    // Lượt onboarding CHT do BP ĐT, QLKV quản lý; CHT (kể cả chính người được đào tạo) không tự đổi phân công, tạm dừng
+    const cht = ctx.track !== 'nvbh' && (user.role === 'cht' || user.id === ctx.staff.userId);
+    const update = !cht && (await this.access.can(user, 'update', record));
+    const approve = !cht && (await this.access.can(user, 'approve', record));
     const open = isOpenRun(ctx.run.status) && ctx.staff.active;
     return { assign: update && open, requestPause: update && open, decidePause: approve && open, transfer: update && ctx.staff.active, stop: update && ctx.staff.active };
   }
@@ -114,18 +116,20 @@ export class RunManageService {
     return {
       today: await this.clock.today(),
       runId,
+      track: ctx.track,
       staffId: ctx.staff.id,
       levelKey: ctx.run.levelKey,
       runStatus: ctx.run.status,
       startDate: ctx.run.startDate,
       plannedEnd: ctx.run.plannedEnd,
       storeId: ctx.staff.storeId,
-      people: { buddyId: ctx.people.buddyId, chtId: ctx.people.chtId, qlkvId: ctx.people.qlkvId },
+      people: { buddyId: ctx.people.buddyId, chtId: ctx.people.chtId, qlkvId: ctx.people.qlkvId, trainerId: ctx.people.trainerId ?? null },
       options: {
         // NV không thể là Buddy của chính mình
         buddies: candidates.buddy.filter((c) => c.id !== ctx.staff.userId),
         chts: candidates.cht,
         qlkvs: candidates.qlkv,
+        trainers: candidates.trainer,
         stores: perm.transfer ? await this.storeOptions(user) : [],
       },
       pauses: await this.pauseViews(runId),
@@ -237,12 +241,19 @@ export class RunManageService {
   async assign(user: SessionUser, runId: number, body: { role: AssignmentRole; userId: number }): Promise<RunManageResponse> {
     const { ctx, perm } = await this.load(user, runId);
     if (!perm.assign) throw forbidden('CANNOT_ASSIGN', 'Chỉ CHT, QLKV phụ trách hoặc BP Đào tạo được đổi phân công của lượt đang mở');
-    const current = body.role === 'buddy' ? ctx.people.buddyId : body.role === 'cht' ? ctx.people.chtId : ctx.people.qlkvId;
+    const current = { buddy: ctx.people.buddyId, cht: ctx.people.chtId, qlkv: ctx.people.qlkvId, trainer: ctx.people.trainerId ?? null }[body.role];
     if (current === body.userId) return this.manage(user, runId);
     const [target] = await this.db.select().from(users).where(eq(users.id, body.userId));
     const label = ASSIGNMENT_LABEL[body.role];
     if (!target || !canHoldAssignment(body.role, target)) {
-      throw badRequest('INVALID_ASSIGNEE', body.role === 'buddy' ? 'Buddy phải là tài khoản đang hoạt động có quyền "Có thể làm Buddy" hoặc là CHT' : `${label} phải là tài khoản ${label} đang hoạt động`);
+      throw badRequest(
+        'INVALID_ASSIGNEE',
+        body.role === 'buddy'
+          ? 'Buddy phải là tài khoản đang hoạt động có quyền "Có thể làm Buddy" hoặc là CHT'
+          : body.role === 'trainer'
+            ? 'Người phụ trách Đào tạo phải là tài khoản BP Đào tạo đang hoạt động'
+            : `${label} phải là tài khoản ${label} đang hoạt động`,
+      );
     }
     if (body.role === 'buddy' && target.id === ctx.staff.userId) throw badRequest('INVALID_ASSIGNEE', 'Nhân viên không thể là Buddy của chính mình');
     const today = await this.clock.today();

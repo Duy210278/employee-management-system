@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { addDays, ASSIGNMENT_LABEL, PauseBody, type AssignmentRole, type PauseView } from '@lotrinh/shared';
+import { addDays, ASSIGNMENT_LABEL, PauseBody, runTitle, type AssignmentRole, type PauseView } from '@lotrinh/shared';
 import { computed, reactive, ref, toRef, watch } from 'vue';
 import { runApi, staffApi, useMutate, useRunManage } from '@/api/queries';
 import { useToast } from '@/composables/toast';
@@ -15,7 +15,7 @@ const mutate = useMutate();
 const toast = useToast();
 const busy = ref(false);
 
-const people = reactive<Record<AssignmentRole, number>>({ buddy: 0, cht: 0, qlkv: 0 });
+const people = reactive<Record<AssignmentRole, number>>({ buddy: 0, cht: 0, qlkv: 0, trainer: 0 });
 const pause = reactive({ from: '', to: '', reason: '' });
 const decideNote = ref('');
 const transfer = reactive({ storeId: 0, chtId: 0, qlkvId: 0 });
@@ -28,6 +28,7 @@ watch(
     people.buddy = v.people.buddyId ?? 0;
     people.cht = v.people.chtId ?? 0;
     people.qlkv = v.people.qlkvId ?? 0;
+    people.trainer = v.people.trainerId ?? 0;
     if (!pause.from) {
       pause.from = addDays(v.today, 1);
       pause.to = addDays(v.today, 7);
@@ -45,9 +46,16 @@ watch(
   },
 );
 
-const ROLES: AssignmentRole[] = ['buddy', 'cht', 'qlkv'];
-const optionsFor = (role: AssignmentRole) => (role === 'buddy' ? m.value?.options.buddies : role === 'cht' ? m.value?.options.chts : m.value?.options.qlkvs) ?? [];
-const current = (role: AssignmentRole) => (role === 'buddy' ? m.value?.people.buddyId : role === 'cht' ? m.value?.people.chtId : m.value?.people.qlkvId) ?? 0;
+// Lượt onboarding CHT: người phụ trách Đào tạo, QLKV, Buddy (CHT cũ / người QLKV chỉ định); lượt NVBH: Buddy, CHT, QLKV
+const ROLES = computed<AssignmentRole[]>(() => (m.value?.track === 'nvbh' ? ['buddy', 'cht', 'qlkv'] : ['trainer', 'qlkv', 'buddy']));
+const optionsFor = (role: AssignmentRole) => {
+  const o = m.value?.options;
+  return ({ buddy: o?.buddies, cht: o?.chts, qlkv: o?.qlkvs, trainer: o?.trainers }[role] ?? []);
+};
+const current = (role: AssignmentRole) => {
+  const p = m.value?.people;
+  return ({ buddy: p?.buddyId, cht: p?.chtId, qlkv: p?.qlkvId, trainer: p?.trainerId }[role] ?? 0) || 0;
+};
 /** NV không làm Buddy của chính mình */
 const buddiesFor = (staffUserId: number | null) => (m.value?.options.buddies ?? []).filter((b) => b.id !== staffUserId);
 const pending = computed(() => m.value?.pauses.find((p) => p.status === 'pending') ?? null);
@@ -104,7 +112,7 @@ async function doStop() {
     <div class="grid g2" style="align-items: start">
       <!-- Phân công -->
       <div class="card pad stack">
-        <div class="h2">Người phụ trách lượt Level {{ m.levelKey }}</div>
+        <div class="h2">Người phụ trách · {{ runTitle(m) }}</div>
         <div class="sm mut">Đổi người chỉ đổi người nhận các việc chưa xác nhận; lịch không đổi, xác nhận cũ giữ tên người đã xác nhận.</div>
         <div v-for="role in ROLES" :key="role" class="rowf">
           <label class="f grow">

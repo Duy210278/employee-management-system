@@ -53,6 +53,8 @@ const tabs = computed<Tab[]>(() => {
     { to: '/canh-bao', label: 'Cảnh báo', badge: redStaff.value },
     { to: '/khung-nang-luc', label: 'Khung năng lực' },
   ];
+  // CHT đang (hoặc đã) onboarding có hồ sơ nhân sự của chính mình: checklist tuần đầu nằm ở "Lộ trình của tôi"
+  if (m.staffId) t.splice(1, 0, { to: '/lo-trinh', label: 'Lộ trình của tôi' });
   if (m.user.role === 'bp') t.push({ to: '/thiet-ke', label: 'Thiết kế lộ trình' }, { to: '/quan-tri', label: 'Quản trị', badge: pendingUsers.value });
   else if (m.user.canApproveVersions) t.push({ to: '/thiet-ke', label: 'Duyệt phiên bản', badge: pendingVersions.value });
   return t;

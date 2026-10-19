@@ -18,7 +18,8 @@ export function isAssignee(actor: Actor, role: TaskRole, people: RunPeople): boo
     case 'qlkv':
       return actor.userId === people.qlkvId;
     case 'bp':
-      return actor.role === 'bp';
+      // Lượt có người phụ trách Đào tạo thì việc của BP ĐT về đúng người đó; mọi BP ĐT vẫn xác nhận được
+      return actor.role === 'bp' && (!people.trainerId || people.trainerId === actor.userId);
   }
 }
 

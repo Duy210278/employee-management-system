@@ -77,7 +77,8 @@ export class StaffService {
     return {
       today,
       alerts,
-      canManage: await this.access.can(user, 'update', AccessService.recordOf(ctx)),
+      // Lượt onboarding CHT: chỉ BP ĐT, QLKV quản lý (CHT không tự đổi phân công, tạm dừng)
+      canManage: !(ctx.track !== 'nvbh' && (user.role === 'cht' || user.id === ctx.staff.userId)) && (await this.access.can(user, 'update', AccessService.recordOf(ctx))),
       staff: {
         ...ctx.staff,
         hireDate: row.staff.hireDate,
@@ -89,10 +90,11 @@ export class StaffService {
       },
       run: summarizeRun(ctx, views, today),
       level: levelSummary(ctx),
-      people: { buddy: ctx.names.buddy, cht: ctx.names.cht, qlkv: ctx.names.qlkv },
+      people: { buddy: ctx.names.buddy, cht: ctx.names.cht, qlkv: ctx.names.qlkv, trainer: ctx.names.trainer },
       path: buildPath(ctx, allRuns),
       history: contexts.map((c) => ({
         runId: c.run.id,
+        track: c.track,
         levelKey: c.run.levelKey,
         levelName: c.level.name,
         versionCode: c.versionCode,

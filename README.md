@@ -71,6 +71,8 @@ Mở http://localhost:5173 (Vite, tự nạp lại khi sửa mã; `/api` đượ
 | nam@upharma.local | NV Level 2, ngày thứ 139 | Có doanh số 4 tháng, 4 ca Rubric (1 ca lỗi an toàn thuốc: cảnh báo đỏ) |
 | hanh@upharma.local | NV, chưa có hồ sơ | Dùng để demo "Thêm nhân viên" |
 | moi@upharma.local | Chờ duyệt | Tự đăng ký (Nhà thuốc A), chưa đăng nhập được: demo duyệt hoặc từ chối |
+| phuong@upharma.local | CHT Nhà thuốc C, mới tuyển | Đang onboarding tuần đầu (ngày D+2), Đào tạo là BP ĐT, QLKV Huy; tab "Lộ trình của tôi" |
+| minh@upharma.local | CHT Nhà thuốc D | Chưa gán checklist: demo "Gán checklist CHT" ở Quản trị |
 
 ## Kịch bản demo MVP (khoảng 7 phút)
 
@@ -113,6 +115,7 @@ Lưu ý có sẵn: CK-09 báo mục L1-6-5 nhắc "3 tháng" trong khi Level 1 d
 - **Sửa tài khoản:** vai trò, cửa hàng (CHT) hoặc khu vực (QLKV), quyền "Có thể làm Buddy", "Người duyệt phiên bản", trạng thái Hoạt động / Tạm khóa / Đã nghỉ. Đổi vai trò có hiệu lực ngay ở lần tải trang kế tiếp; mọi thay đổi ghi ở "Lịch sử thay đổi".
 - **Chuyển giao (R20):** khóa, cho nghỉ hoặc đổi vai trò người đang là Buddy/CHT/QLKV của lượt đang chạy thì khung "Chuyển giao" hiện ra, phải chọn người thay mới lưu được. Ví dụ: khóa Hùng (Buddy của Lan, Tuấn, Mai).
 - **Gán checklist:** tài khoản NV đang hoạt động mà chưa có hồ sơ có nút **Gán checklist** trong danh sách; trang chi tiết có khung "Lộ trình và checklist" (điền sẵn họ tên, mã NV, nhà thuốc lúc đăng ký): chọn Level, Buddy, CHT, QLKV rồi bấm **Gán checklist**. Hệ thống tạo hồ sơ, bắt đầu lượt Level và sinh checklist từ Bộ lộ trình đang hiệu lực. NV đã có hồ sơ thì khung này hiện Level, tiến độ và lối tắt tới checklist. (Cách cũ ở Nhân sự → Thêm nhân viên vẫn dùng được.)
+- **Gán checklist CHT:** tài khoản Cửa hàng trưởng có nút **Gán checklist CHT**; xem mục "Onboarding Cửa hàng trưởng" bên dưới.
 - **Luôn còn ít nhất 1 BP ĐT hoạt động (R19);** không tự khóa tài khoản của mình.
 - **Cửa hàng, khu vực:** thêm, sửa, ngừng; không ngừng cửa hàng còn nhân viên đang theo dõi.
 - **Nhập tài khoản:** tải mẫu CSV, xem trước (dòng lỗi được đánh dấu: trùng email/mã NV, cửa hàng không tồn tại…), chỉ nhập các dòng hợp lệ. Mật khẩu ban đầu `Upharma@123`.
@@ -125,6 +128,20 @@ Lưu ý có sẵn: CK-09 báo mục L1-6-5 nhắc "3 tháng" trong khi Level 1 d
 - **Tạm dừng:** Hồ sơ NV → tab **Phân công & tạm dừng**. CHT đề xuất → QLKV hoặc BP ĐT duyệt (đề xuất hiện ở "Chữ ký chờ bạn" của QLKV). Khi duyệt, mọi mốc chưa xong từ ngày dừng lùi đúng số ngày nghỉ, ngày kết thúc dự kiến lùi theo; "ngày thứ N" đứng yên trong lúc dừng. QLKV, BP ĐT tạm dừng thì có hiệu lực ngay.
 - **Đổi Buddy / CHT / QLKV, chuyển cửa hàng:** cùng tab; lịch không đổi, người mới nhận các việc chưa xác nhận và được thông báo.
 - **Ngừng theo dõi (nghỉ việc):** lượt chuyển Dừng, dữ liệu giữ nguyên; nếu NV đang là Buddy của người khác thì phải chọn Buddy thay.
+
+## Onboarding Cửa hàng trưởng (CHT)
+
+Checklist làm quen tuần đầu của CHT, trích từ `docs/nguon/Onboarding_CHT_MoiTuyen_[TenCHT].xlsx` và `Onboarding_CHT_TuNVBH_[TenCHT].xlsx` (`python3 seed/extract-cht.py` sinh lại `packages/shared/src/defaults/cht-tracks.ts`). Có 2 loại: **CHT mới tuyển** (5 ngày, 26 việc, mã `CM-…`) và **CHT thăng tiến từ NVBH** (5 ngày, 25 việc, mã `CT-…`). Mỗi ngày D+n là một giai đoạn, không ký cuối ngày.
+
+- **Quản lý checklist:** BP ĐT → Thiết kế lộ trình → bản nháp → tab **Checklist CHT**. Sửa thông tin (tên, mục tiêu, lưu ý, lựa chọn cảm xúc, tiêu chí đánh giá tuần đầu), từng ngày và đầu việc (người xác nhận Đào tạo / QLKV / Buddy, buổi, người hỗ trợ, link tài liệu). Bản chưa có checklist CHT có nút **Thêm … từ mẫu**. Đi qua cùng luồng gửi duyệt, ban hành với Khung năng lực.
+- **Gán checklist:** BP ĐT → Quản trị → tài khoản CHT → **Gán checklist CHT** (hoặc QLKV qua API): chọn loại, cửa hàng, Ngày D, hình thức training, **Người phụ trách Đào tạo** (tài khoản BP ĐT), QLKV, Buddy (không bắt buộc). Hệ thống gợi ý "thăng tiến" khi tài khoản đã có lượt NVBH; khi đó lượt Level đang mở đóng với trạng thái **Thăng chức CHT** và hồ sơ cũ được dùng lại (thâm niên, cửa hàng cũ).
+- **Phân vai trò:** việc của "Đào tạo" giao cho người phụ trách Đào tạo của lượt (không phải mọi BP ĐT), việc của QLKV giao cho QLKV. Đổi người ở tab **Phân công & tạm dừng**. CHT tự báo xong việc của mình ở **Lộ trình của tôi**.
+- **Nhật ký theo dõi:** Đào tạo ghi cảm xúc, khó khăn, hành động hỗ trợ sau mỗi lần check-in; QLKV (hoặc BP ĐT) ghi chú quản lý.
+- **Đánh giá tuần đầu:** Đào tạo chấm sao từng tiêu chí, đánh giá nguy cơ nghỉ việc (cao → báo QLKV và cảnh báo đỏ; trung bình → vàng), đề xuất hỗ trợ tuần 2. QLKV xác nhận khi checklist đã xong mọi việc bắt buộc và đánh giá đủ: lượt chuyển **Hoàn thành**, nhật ký và đánh giá khóa lại.
+
+Kịch bản thử: **BP ĐT** → Quản trị → Phan Đức Minh → Gán checklist CHT. Mở hồ sơ **Phương** → tab Nhật ký theo dõi, Đánh giá tuần đầu. Đăng nhập **Phương** → Lộ trình của tôi → báo xong một việc ngày D+2.
+
+Bản đang chạy trên Render + Neon có phiên bản v2.1 ban hành trước khi có tính năng này nên chưa có checklist CHT: hoặc **Khôi phục dữ liệu mẫu**, hoặc tạo bản nháp → tab Checklist CHT → "Thêm … từ mẫu" → gửi duyệt, ban hành.
 
 ## Cảnh báo, thông báo, xuất CSV
 
@@ -149,8 +166,8 @@ apps/api/src      NestJS (mục 14.4–14.5 đặc tả)
                     health, me (Hôm nay, Việc cần xử lý), runs (checklist, ký giai đoạn, tạm dừng, phân công), staff,
                     tasks, versions (vòng đời phiên bản), sales, observations, reviews (phiếu đánh giá, lên Level),
                     users (tài khoản, chuyển giao, nhập CSV), org (cửa hàng, khu vực), alerts, notifications,
-                    jobs (bản tin, leo thang, nhắc lượt, kích hoạt phiên bản), reports (CSV)
-  db/migrations/    SQL; 0002 là trigger chặn sửa, xóa bản đã ban hành (R03); 0004 bảng của giai đoạn 2
+                    jobs (bản tin, leo thang, nhắc lượt, kích hoạt phiên bản), reports (CSV), cht (onboarding CHT)
+  db/migrations/    SQL; 0002 là trigger chặn sửa, xóa bản đã ban hành (R03); 0004 bảng của giai đoạn 2; 0005 onboarding CHT
 apps/web/src      Vue 3: api, components (ItemRow, StageChecklist, design/ trình soạn checklist…), designer/ (thao tác soạn),
                   pages, styles (bảng màu N3)
 packages/shared   Lõi nghiệp vụ dùng chung API ↔ giao diện: schema phiên bản, tính lịch, trạng thái đầu việc,

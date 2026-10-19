@@ -56,6 +56,7 @@ export function buildTaskViews(ctx: RunContext, data: RunTaskData, today: IsoDat
     views.push({
       id: task.id,
       runId: ctx.run.id,
+      track: ctx.track,
       staffId: ctx.staff.id,
       staffName: ctx.staff.fullName,
       itemKey: item.key,
@@ -65,6 +66,9 @@ export function buildTaskViews(ctx: RunContext, data: RunTaskData, today: IsoDat
       content: item.content,
       guidance: item.guidance,
       gpp: item.gpp,
+      session: item.session ?? null,
+      supporter: item.supporter || null,
+      link: item.link || null,
       openDate: task.openDate,
       dueDate: task.dueDate,
       doneDate: task.doneDate,
@@ -113,9 +117,11 @@ export function currentRunOf<T extends { status: string }>(runsNewestFirst: T[])
 }
 
 /** Thanh "Lộ trình 4 Level" (mục 9.2) */
-export function buildPath(ctx: RunContext, allRuns: { levelKey: number; startDate: IsoDate; plannedEnd: IsoDate }[]): PathStep[] {
+export function buildPath(ctx: RunContext, allRuns: { levelKey: number; track: string; startDate: IsoDate; plannedEnd: IsoDate }[]): PathStep[] {
+  // Lượt onboarding CHT không có thanh 4 Level
+  if (ctx.track !== 'nvbh') return [];
   return ctx.content.levels.map((l) => {
-    const run = allRuns.find((r) => r.levelKey === l.key);
+    const run = allRuns.find((r) => r.track === 'nvbh' && r.levelKey === l.key);
     return {
       levelKey: l.key,
       name: l.name,
@@ -213,6 +219,7 @@ export function summarizeRun(ctx: RunContext, views: TaskView[], today: IsoDate)
   const stage = stageIdx >= 0 ? ctx.level.stages[stageIdx] : null;
   return {
     id: ctx.run.id,
+    track: ctx.track,
     levelKey: ctx.run.levelKey,
     versionCode: ctx.versionCode,
     startDate: ctx.run.startDate,

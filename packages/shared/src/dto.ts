@@ -9,7 +9,7 @@ import type { ChangeKind } from './change-kind/classify';
 import type { KpiEvaluation } from './evaluation/kpi';
 import type { CriterionResult, ReviewResult } from './evaluation/review';
 import type { RubricEvaluation } from './evaluation/rubric';
-import type { LevelOverview, ReviewForm, Rubric, VersionContent } from './schemas/version';
+import type { ChtTrackKey, LevelOverview, ReviewForm, Rubric, Track, VersionContent } from './schemas/version';
 
 /** Hợp đồng dữ liệu API ↔ giao diện. */
 
@@ -73,6 +73,8 @@ export interface LevelSummary {
 
 export interface RunSummary {
   id: number;
+  /** NVBH 4 Level hoặc một loại checklist CHT */
+  track: Track;
   levelKey: number;
   versionCode: string;
   startDate: IsoDate;
@@ -104,6 +106,7 @@ export interface ConfirmationView {
 export interface TaskView {
   id: number;
   runId: number;
+  track: Track;
   staffId: number;
   staffName: string;
   itemKey: string;
@@ -113,6 +116,10 @@ export interface TaskView {
   content: string;
   guidance: string;
   gpp: boolean;
+  /** Checklist CHT: buổi, người hỗ trợ, link hướng dẫn */
+  session: 'sang' | 'chieu' | 'cuoi_ngay' | null;
+  supporter: string | null;
+  link: string | null;
   openDate: IsoDate;
   dueDate: IsoDate;
   doneDate: IsoDate | null;
@@ -256,6 +263,7 @@ export interface StaffListResponse {
 
 /** Trang Cảnh báo (mục 11.6): mỗi dòng một cảnh báo, đỏ trước vàng sau */
 export interface AlertRow extends Alert {
+  track: Track;
   staffId: number;
   staffName: string;
   employeeCode: string | null;
@@ -286,10 +294,10 @@ export interface StaffProfileResponse {
   /** Lượt Level đang mở (hoặc gần nhất) */
   run: RunSummary | null;
   level: LevelSummary | null;
-  people: { buddy: string | null; cht: string | null; qlkv: string | null };
+  people: { buddy: string | null; cht: string | null; qlkv: string | null; trainer: string | null };
   path: PathStep[];
   /** Mọi lượt Level của NV, mới nhất trước */
-  history: { runId: number; levelKey: number; levelName: string; versionCode: string; startDate: IsoDate; plannedEnd: IsoDate; status: string }[];
+  history: { runId: number; track: Track; levelKey: number; levelName: string; versionCode: string; startDate: IsoDate; plannedEnd: IsoDate; status: string }[];
   isSelf: boolean;
 }
 
@@ -609,17 +617,19 @@ export interface PauseView {
 export interface RunManageResponse {
   today: IsoDate;
   runId: number;
+  track: Track;
   staffId: number;
   levelKey: number;
   runStatus: string;
   startDate: IsoDate;
   plannedEnd: IsoDate;
   storeId: number;
-  people: { buddyId: number | null; chtId: number | null; qlkvId: number | null };
+  people: { buddyId: number | null; chtId: number | null; qlkvId: number | null; trainerId: number | null };
   options: {
     buddies: PersonOption[];
     chts: PersonOption[];
     qlkvs: PersonOption[];
+    trainers: PersonOption[];
     stores: { id: number; name: string; areaName: string; defaultChtId: number | null; defaultQlkvId: number | null }[];
   };
   pauses: PauseView[];
@@ -682,6 +692,77 @@ export interface JobResult {
 export interface RegisterOptions {
   areas: { id: number; name: string }[];
   stores: { id: number; name: string; areaId: number; areaName: string }[];
+}
+
+// ---------- Onboarding Cửa hàng trưởng ----------
+
+export type AttritionRisk = 'low' | 'medium' | 'high';
+
+export interface ChtJournalRow {
+  /** 0 là Ngày D */
+  day: number;
+  label: string;
+  date: IsoDate;
+  mood: string | null;
+  difficulties: string;
+  actions: string;
+  managerNote: string;
+  updatedByName: string | null;
+  updatedAt: string | null;
+  managerByName: string | null;
+  managerAt: string | null;
+}
+
+export interface ChtEvaluationView {
+  ratings: Record<string, number>;
+  risk: AttritionRisk | null;
+  suggestion: string;
+  savedByName: string | null;
+  savedAt: string | null;
+  confirmedByName: string | null;
+  confirmedAt: string | null;
+  confirmNote: string | null;
+}
+
+/** Hồ sơ onboarding CHT: thông tin, nhật ký theo dõi hằng ngày, đánh giá tổng kết tuần đầu */
+export interface ChtOnboardingResponse {
+  today: IsoDate;
+  runId: number;
+  staffId: number;
+  track: ChtTrackKey;
+  trackName: string;
+  title: string;
+  goal: string;
+  tip: string;
+  notes: string[];
+  moods: string[];
+  ratings: { key: string; label: string }[];
+  startDate: IsoDate;
+  plannedEnd: IsoDate;
+  runStatus: string;
+  meta: { trainingMode: 'online' | 'offline' | null; previousStoreName: string | null; seniorityMonths: number | null; managerNote: string };
+  people: { learner: string; trainer: string | null; qlkv: string | null; buddy: string | null };
+  journal: ChtJournalRow[];
+  evaluation: ChtEvaluationView;
+  permissions: { journal: boolean; managerNote: boolean; evaluate: boolean; confirm: boolean };
+  /** Còn thiếu gì trước khi quản lý xác nhận tổng kết */
+  problems: string[];
+}
+
+/** Lựa chọn cho form "Gán checklist CHT" */
+export interface ChtFormOptions {
+  today: IsoDate;
+  user: { id: number; fullName: string; employeeCode: string | null; role: AccountRole; status: UserStatus; storeIds: number[] };
+  /** Hồ sơ đào tạo sẵn có (CHT thăng tiến từ NVBH) */
+  staff: { id: number; storeName: string; hireDate: IsoDate; seniorityMonths: number; currentRun: { runId: number; track: Track; levelKey: number; status: string } | null } | null;
+  /** Lượt CHT đang mở (nếu có thì không gán thêm) */
+  openChtRun: { runId: number; staffId: number; track: ChtTrackKey } | null;
+  tracks: { key: ChtTrackKey; name: string; title: string; days: number; items: number }[];
+  suggestedTrack: ChtTrackKey;
+  stores: { id: number; name: string; areaName: string; defaultQlkvId: number | null }[];
+  trainers: PersonOption[];
+  qlkvs: PersonOption[];
+  buddies: PersonOption[];
 }
 
 export type { AlertSeverity };

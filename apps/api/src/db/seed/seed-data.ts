@@ -8,6 +8,8 @@ export const SEED_AREAS = [{ code: 'HN1', name: 'Hà Nội 1' }];
 export const SEED_STORES = [
   { code: 'NTA', name: 'Nhà thuốc A', address: '12 Cầu Giấy, Hà Nội', area: 'HN1' },
   { code: 'NTB', name: 'Nhà thuốc B', address: '45 Kim Mã, Ba Đình, Hà Nội', area: 'HN1' },
+  { code: 'NTC', name: 'Nhà thuốc C', address: '8 Láng Hạ, Đống Đa, Hà Nội', area: 'HN1' },
+  { code: 'NTD', name: 'Nhà thuốc D', address: '102 Trần Duy Hưng, Cầu Giấy, Hà Nội', area: 'HN1' },
 ];
 
 export interface SeedUser {
@@ -30,6 +32,8 @@ export const SEED_USERS: SeedUser[] = [
   { key: 'huy', email: 'huy@upharma.local', fullName: 'Ngô Quang Huy', employeeCode: 'QL001', role: 'qlkv', status: 'active', canApproveVersions: true, areas: ['HN1'], note: 'QLKV Hà Nội 1, người duyệt phiên bản, nhận cảnh báo leo thang' },
   { key: 'ha', email: 'ha@upharma.local', fullName: 'Phạm Thu Hà', employeeCode: 'CH001', role: 'cht', status: 'active', stores: ['NTA'], note: 'CHT Nhà thuốc A' },
   { key: 'binh', email: 'binh@upharma.local', fullName: 'Lê Văn Bình', employeeCode: 'CH002', role: 'cht', status: 'active', stores: ['NTB'], note: 'CHT Nhà thuốc B' },
+  { key: 'phuong', email: 'phuong@upharma.local', fullName: 'Trịnh Thu Phương', employeeCode: 'CH003', role: 'cht', status: 'active', stores: ['NTC'], note: 'CHT mới tuyển Nhà thuốc C, đang onboarding tuần đầu (ngày D+2)' },
+  { key: 'minh', email: 'minh@upharma.local', fullName: 'Phan Đức Minh', employeeCode: 'CH004', role: 'cht', status: 'active', stores: ['NTD'], note: 'CHT mới Nhà thuốc D, chưa gán checklist: demo "Gán checklist CHT"' },
   { key: 'hung', email: 'hung@upharma.local', fullName: 'Trần Văn Hùng', employeeCode: 'NV101', role: 'nv', status: 'active', canBuddy: true, note: 'NV Level 3, đồng thời là Buddy của Lan, Tuấn, Mai' },
   { key: 'thao', email: 'thao@upharma.local', fullName: 'Đỗ Thị Thảo', employeeCode: 'NV102', role: 'nv', status: 'active', canBuddy: true, note: 'NV Level 3, Buddy của Linh (Nhà thuốc B)' },
   { key: 'lan', email: 'lan@upharma.local', fullName: 'Nguyễn Thị Lan', employeeCode: 'NV201', role: 'nv', status: 'active', note: 'NV Level 1 ngày thứ 27: có mục quá hạn, có mục bị yêu cầu làm lại' },
@@ -43,6 +47,21 @@ export const SEED_USERS: SeedUser[] = [
 
 /** Lần vào cuối cách hôm nay bao nhiêu ngày (mặc định 1); null là chưa đăng nhập lần nào */
 export const LAST_SEEN_DAYS_AGO: Record<string, number | null> = { tuan: 7, hanh: null };
+
+/** Onboarding CHT đang chạy: Phương, CHT mới tuyển Nhà thuốc C, bắt đầu 2 ngày trước; Đào tạo đã check-in 2 ngày đầu */
+export const SEED_CHT = {
+  user: 'phuong',
+  store: 'NTC',
+  track: 'cht_moi_tuyen' as const,
+  startOffset: -2,
+  trainer: 'admin',
+  qlkv: 'huy',
+  trainingMode: 'offline' as const,
+  journal: [
+    { day: 0, mood: '🤔 Còn nhiều thứ chưa quen', difficulties: 'Chưa nhớ hết tên NV và ca làm; còn lúng túng khi tìm hàng trong kho', actions: 'Gửi sơ đồ quầy kệ, danh sách đội nhóm kèm ca làm việc', managerNote: '' },
+    { day: 1, mood: '😐 Bình thường', difficulties: 'Thao tác POS còn chậm khi khách đông', actions: 'Hẹn NV kỳ cựu kèm thêm 30 phút POS đầu ca sáng mai', managerNote: 'Theo dõi thêm phần POS, cuối tuần báo lại' },
+  ],
+};
 
 /** Đề xuất tạm dừng đang chờ duyệt: CHT Bình đề xuất cho Nam, QLKV Huy duyệt */
 export const SEED_PAUSE = { user: 'nam', by: 'binh', fromOffset: 5, toOffset: 14, reason: 'Nghỉ phép năm 10 ngày' };

@@ -1,5 +1,10 @@
 import type {
   AlertsResponse,
+  ChtEvaluationBodyT,
+  ChtFormOptions,
+  ChtJournalBodyT,
+  ChtOnboardingResponse,
+  CreateChtRunBodyT,
   ApproveUserBodyT,
   AreaBodyT,
   AssignmentRole,
@@ -131,6 +136,19 @@ export const useRunManage = (runId: Ref<number | null>) =>
     queryFn: () => api.get<RunManageResponse>(`/runs/${runId.value}/manage`),
     enabled: computed(() => runId.value !== null),
   });
+export const useChtOnboarding = (runId: Ref<number | null>) =>
+  useQuery({
+    queryKey: computed(() => ['cht', runId.value]),
+    queryFn: () => api.get<ChtOnboardingResponse>(`/runs/${runId.value}/cht`),
+    enabled: computed(() => runId.value !== null),
+  });
+export const useChtFormOptions = (userId: Ref<number | null>) =>
+  useQuery({
+    queryKey: computed(() => ['cht-form', userId.value]),
+    queryFn: () => api.get<ChtFormOptions>(`/cht/form-options/${userId.value}`),
+    enabled: computed(() => userId.value !== null),
+    staleTime: 0,
+  });
 const runQuery = <T>(name: string, runId: Ref<number | null>, path: string) =>
   useQuery({
     queryKey: computed(() => [name, runId.value]),
@@ -235,6 +253,15 @@ export const orgApi = {
   updateArea: (id: number, body: AreaBodyT) => api.put<OrgResponse>(`/org/areas/${id}`, body),
   createStore: (body: StoreBodyT) => api.post<OrgResponse>('/org/stores', body),
   updateStore: (id: number, body: StoreBodyT) => api.put<OrgResponse>(`/org/stores/${id}`, body),
+};
+
+/** Onboarding Cửa hàng trưởng */
+export const chtApi = {
+  create: (body: CreateChtRunBodyT) => api.post<{ staffId: number; runId: number }>('/cht/runs', body),
+  journal: (runId: number, day: number, body: ChtJournalBodyT) => api.put<ChtOnboardingResponse>(`/runs/${runId}/cht/journal/${day}`, body),
+  evaluation: (runId: number, body: ChtEvaluationBodyT) => api.put<ChtOnboardingResponse>(`/runs/${runId}/cht/evaluation`, body),
+  confirm: (runId: number, note: string) => api.post<ChtOnboardingResponse>(`/runs/${runId}/cht/evaluation/confirm`, { note }),
+  meta: (runId: number, managerNote: string) => api.put<ChtOnboardingResponse>(`/runs/${runId}/cht/meta`, { managerNote }),
 };
 
 export const notificationApi = {

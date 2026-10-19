@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ALERT_RULES } from '@lotrinh/shared';
+import { ALERT_RULES, runTitle } from '@lotrinh/shared';
 import { computed, ref } from 'vue';
 import { useAlerts, useMe } from '@/api/queries';
 
@@ -56,7 +56,7 @@ const items = computed(() =>
               <b>{{ a.staffName }}</b>
               <div v-if="a.employeeCode" class="sm mut">{{ a.employeeCode }}</div>
             </td>
-            <td data-l="Level"><span class="pill info">L{{ a.levelKey }}</span></td>
+            <td data-l="Level"><span class="pill info" :title="runTitle(a)">{{ a.track === 'nvbh' ? `L${a.levelKey}` : 'CHT' }}</span></td>
             <td data-l="Cửa hàng">{{ a.storeName }}</td>
             <td data-l="Nội dung">{{ a.message }}</td>
             <td><RouterLink class="btn sm" :to="`/nhan-su/${a.staffId}`">Mở hồ sơ</RouterLink></td>

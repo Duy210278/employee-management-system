@@ -3,6 +3,7 @@ import {
   ASSIGNMENT_LABEL,
   canHoldAssignment,
   ROLE_LABEL,
+  runTitle,
   UpdateUserBody,
   USER_STATUS_LABEL,
   type AccountRole,
@@ -14,6 +15,7 @@ import { computed, reactive, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { ApiError } from '@/api/client';
 import { userApi, useStaffProfile, useUser } from '@/api/queries';
+import ChtRunForm from '@/components/cht/ChtRunForm.vue';
 import StaffRunForm from '@/components/StaffRunForm.vue';
 import { useToast } from '@/composables/toast';
 import { fmtDateTime } from '@/format';
@@ -58,14 +60,19 @@ const isReviewed = computed(() => !!d.value && !['pending', 'rejected'].includes
 
 // Lộ trình và checklist của tài khoản NV (mục 9.1): chưa có hồ sơ thì gán checklist ngay tại đây
 const isActiveNv = computed(() => d.value?.user.role === 'nv' && d.value.user.status === 'active');
-const staffId = computed(() => (isActiveNv.value ? (d.value?.user.staffId ?? null) : null));
+// Tài khoản CHT: gán checklist onboarding (mới tuyển, hoặc thăng tiến từ NVBH thì dùng lại hồ sơ đào tạo cũ)
+const isActiveCht = computed(() => d.value?.user.role === 'cht' && d.value.user.status === 'active');
+const staffId = computed(() => (isActiveNv.value || isActiveCht.value ? (d.value?.user.staffId ?? null) : null));
 const { data: profile } = useStaffProfile(staffId);
+const chtRun = computed(() => (isActiveCht.value && profile.value?.run && profile.value.run.track !== 'nvbh' ? profile.value.run : null));
+const showChtForm = computed(() => isActiveCht.value && (!d.value?.user.staffId || (!!profile.value && !chtRun.value)));
 const runText = computed(() => {
   const r = profile.value?.run;
   const l = profile.value?.level;
   if (!r || !l) return '';
   const day = r.dayIndex < 0 ? `bắt đầu sau ${-r.dayIndex} ngày` : `ngày ${r.dayIndex + 1}/${l.totalDays}`;
-  return `Level ${r.levelKey} · ${l.name} (${l.checklistName} v${r.versionCode}) · ${day} · ${r.progress.done}/${r.progress.total} mục (${Math.round(r.progress.pct * 100)}%)`;
+  const name = r.track === 'nvbh' ? `Level ${r.levelKey} · ${l.name} (${l.checklistName} v${r.versionCode})` : `${runTitle(r)} (v${r.versionCode})`;
+  return `${name} · ${day} · ${r.progress.done}/${r.progress.total} mục (${Math.round(r.progress.pct * 100)}%)`;
 });
 const accountForForm = computed(() =>
   d.value ? { id: d.value.user.id, fullName: d.value.user.fullName, employeeCode: d.value.user.employeeCode, storeId: d.value.user.requested?.storeId ?? null } : undefined,
@@ -170,6 +177,32 @@ function reject() {
           <div class="sm mut">Tài khoản chưa có hồ sơ nhân viên nên chưa có checklist. Chọn Level, nhà thuốc và người phụ trách để gán checklist.</div>
           <StaffRunForm v-if="accountForForm" :key="d.user.id" :account="accountForForm" submit-label="Gán checklist" />
         </template>
+      </div>
+
+      <!-- Checklist onboarding (tài khoản CHT đang hoạt động) -->
+      <div v-if="isActiveCht" class="card pad stack" :style="showChtForm ? 'border-color: var(--accent)' : ''">
+        <div class="h2">Checklist onboarding CHT</div>
+        <template v-if="chtRun">
+          <div class="rowf sp">
+            <div>
+              <template v-if="chtRun.status === 'passed'">Đã hoàn thành <b>{{ runTitle(chtRun) }}</b> (QLKV đã xác nhận tổng kết tuần đầu).</template>
+              <template v-else>Đang theo <b>{{ runText }}</b></template>
+            </div>
+            <div class="rowf">
+              <RouterLink class="btn sm" :to="{ path: `/nhan-su/${d.user.staffId}`, query: { tab: 'check' } }">Mở checklist</RouterLink>
+              <RouterLink class="btn sm" :to="{ path: `/nhan-su/${d.user.staffId}`, query: { tab: 'cht-journal' } }">Nhật ký theo dõi</RouterLink>
+              <RouterLink class="btn sm" :to="{ path: `/nhan-su/${d.user.staffId}`, query: { tab: 'manage' } }">Phân công</RouterLink>
+            </div>
+          </div>
+        </template>
+        <template v-else-if="showChtForm">
+          <div class="sm mut">
+            Chọn loại checklist (CHT mới tuyển hoặc thăng tiến từ NVBH), cửa hàng, Ngày D và người phụ trách Đào tạo. Đào tạo ghi nhật ký check-in hằng ngày và
+            đánh giá tuần đầu; QLKV xác nhận tổng kết.
+          </div>
+          <ChtRunForm :key="d.user.id" :user-id="d.user.id" />
+        </template>
+        <div v-else class="sm mut">Đang tải…</div>
       </div>
 
       <!-- Sửa tài khoản (mục 5.3) -->

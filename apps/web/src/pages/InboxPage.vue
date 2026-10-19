@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ROLE_SHORT, type SignatureTodo, type TaskRole } from '@lotrinh/shared';
+import { ROLE_SHORT, runTitle, type SignatureTodo, type TaskRole } from '@lotrinh/shared';
 import { computed, ref } from 'vue';
 import { useInbox } from '@/api/queries';
 import ItemRow from '@/components/ItemRow.vue';
@@ -71,7 +71,7 @@ const ACTION_LABEL: Record<SignatureTodo['kind'], string> = { review: 'Mở phi�
       <div class="rowf sp">
         <div class="rowf" style="gap: 8px">
           <b>{{ g.staff.fullName }}</b>
-          <span class="pill info">Level {{ g.run.levelKey }} · ngày {{ g.run.dayIndex + 1 }}/{{ g.level.totalDays }}</span>
+          <span class="pill info">{{ runTitle(g.run) }} · ngày {{ g.run.dayIndex + 1 }}/{{ g.level.totalDays }}</span>
           <span class="sm mut">{{ g.staff.storeName }}</span>
         </div>
         <div class="rowf" style="gap: 8px">
@@ -85,10 +85,10 @@ const ACTION_LABEL: Record<SignatureTodo['kind'], string> = { review: 'Mở phi�
     </div>
 
     <template v-if="data.upcoming.length">
-      <div class="sec">Lượt Level sắp bắt đầu</div>
+      <div class="sec">Lượt sắp bắt đầu</div>
       <details v-for="g in data.upcoming" :key="g.run.id" class="card pad">
         <summary>
-          {{ g.staff.fullName }} · Level {{ g.run.levelKey }} bắt đầu {{ fmtDate(g.run.startDate, refYear) }} (còn {{ -g.run.dayIndex }} ngày) ·
+          {{ g.staff.fullName }} · {{ runTitle(g.run) }} bắt đầu {{ fmtDate(g.run.startDate, refYear) }} (còn {{ -g.run.dayIndex }} ngày) ·
           {{ g.items.length }} việc giai đoạn đầu
         </summary>
         <div class="card clip" style="margin-top: 10px">

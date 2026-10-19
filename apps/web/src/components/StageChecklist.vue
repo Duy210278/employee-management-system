@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { StageSignStepView } from '@lotrinh/shared';
+import { diffDays, type StageSignStepView } from '@lotrinh/shared';
 import { computed, reactive, ref, toRef, watch } from 'vue';
 import { runApi, useMutate, useRunTasks } from '@/api/queries';
 import { fmtDate, fmtDateTime } from '@/format';
@@ -62,7 +62,9 @@ async function sign(stageKey: string, step: StageSignStepView) {
         <div style="min-width: 0; flex: 1">
           <b>{{ s.label }}: {{ s.name }}</b>
           <span v-if="s.isCurrent" class="pill info" style="margin-left: 6px">Đang diễn ra</span>
-          <div class="sm mut">{{ fmtDate(s.from, refYear) }} → {{ fmtDate(s.to, refYear) }}<template v-if="s.goal"> · {{ s.goal }}</template></div>
+          <div class="sm mut">
+            {{ fmtDate(s.from, refYear) }}<template v-if="diffDays(s.to, s.from) > 1"> → {{ fmtDate(s.to, refYear) }}</template><template v-if="s.goal"> · {{ s.goal }}</template>
+          </div>
         </div>
         <div class="rowf">
           <span v-if="s.overdue" class="pill bad">{{ s.overdue }} trễ</span>

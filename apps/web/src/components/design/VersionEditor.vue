@@ -9,6 +9,7 @@ import { useToast } from '@/composables/toast';
 import { createDesigner, type DesignerTab } from '@/designer/editor';
 import { fmtDate, fmtDateTime } from '@/format';
 import ChecklistEditor from './ChecklistEditor.vue';
+import ChtEditor from './ChtEditor.vue';
 import FrameworkEditor from './FrameworkEditor.vue';
 import ScheduleParamsEditor from './ScheduleParamsEditor.vue';
 
@@ -34,6 +35,7 @@ const tab = d.tab;
 const TABS: [DesignerTab, string][] = [
   ['framework', 'Khung năng lực'],
   ['checklist', 'Checklist theo giai đoạn'],
+  ['cht', 'Checklist CHT'],
   ['settings', 'Thiết lập chung'],
 ];
 const v = computed(() => props.detail.version);
@@ -303,6 +305,7 @@ onBeforeUnmount(() => {
 
     <FrameworkEditor v-if="tab === 'framework'" />
     <ChecklistEditor v-else-if="tab === 'checklist'" />
+    <ChtEditor v-else-if="tab === 'cht'" />
     <ScheduleParamsEditor v-else />
 
     <div v-if="dirty" class="savebar">

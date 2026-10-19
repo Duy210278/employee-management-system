@@ -1,7 +1,7 @@
-import { findLevel, planRunTasks, plannedEnd, VersionContentSchema, type IsoDate, type VersionContent } from '@lotrinh/shared';
+import { levelForTrack, planRunTasks, plannedEnd, VersionContentSchema, type IsoDate, type Track, type VersionContent } from '@lotrinh/shared';
 import { and, desc, eq, inArray, lte } from 'drizzle-orm';
 import type { DbLike } from '../../db/client';
-import { levelRuns, runAssignments, runTasks, versions } from '../../db/schema';
+import { levelRuns, runAssignments, runTasks, versions, type RunMeta } from '../../db/schema';
 
 /** Bản đã ban hành (đang, sắp hoặc hết hiệu lực) */
 export const PUBLISHED = inArray(versions.status, ['active', 'expired']);
@@ -31,9 +31,12 @@ export async function findVersionForDate(db: DbLike, date: IsoDate) {
 export interface CreateRunInput {
   staffId: number;
   levelKey: number;
+  /** Mặc định lộ trình NVBH; lượt CHT dùng checklist CHT của phiên bản */
+  track?: Track;
+  meta?: RunMeta;
   startDate: IsoDate;
   version: { id: number; criteriaLine: string; content: VersionContent };
-  people: { buddy?: number | null; cht?: number | null; qlkv?: number | null };
+  people: { buddy?: number | null; cht?: number | null; qlkv?: number | null; trainer?: number | null };
   createdBy: number | null;
 }
 
@@ -42,12 +45,15 @@ export interface CreateRunInput {
  * Gọi trong transaction để lượt, phân công và đầu việc cùng thành công hoặc cùng hủy.
  */
 export async function createRun(tx: DbLike, input: CreateRunInput) {
-  const level = findLevel(input.version.content, input.levelKey);
+  const track = input.track ?? 'nvbh';
+  const level = levelForTrack(input.version.content, track, input.levelKey);
   const [run] = await tx
     .insert(levelRuns)
     .values({
       staffId: input.staffId,
       levelKey: input.levelKey,
+      track,
+      meta: input.meta ?? {},
       versionId: input.version.id,
       criteriaLine: input.version.criteriaLine,
       startDate: input.startDate,
@@ -57,7 +63,7 @@ export async function createRun(tx: DbLike, input: CreateRunInput) {
     })
     .returning();
 
-  const assignments = (['buddy', 'cht', 'qlkv'] as const)
+  const assignments = (['buddy', 'cht', 'qlkv', 'trainer'] as const)
     .filter((role) => input.people[role])
     .map((role) => ({ runId: run.id, role, userId: input.people[role]!, fromDate: input.startDate }));
   if (assignments.length) await tx.insert(runAssignments).values(assignments);

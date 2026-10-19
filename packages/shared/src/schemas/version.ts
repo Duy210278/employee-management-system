@@ -32,7 +32,19 @@ export const ItemSchema = z.object({
   evidence: z.enum(['none', 'score', 'note', 'file']).default('none'),
   dependsOn: z.array(z.string()).default([]),
   sourceRef: z.string().optional(),
+  /** Checklist CHT: buổi trong ngày */
+  session: z.enum(['sang', 'chieu', 'cuoi_ngay']).optional(),
+  /** Checklist CHT: người hỗ trợ tại chỗ (chữ tự do: HR, NV kỳ cựu, QLKV…); người xác nhận vẫn là verifiers */
+  supporter: z.string().optional(),
+  /** Link tài liệu hướng dẫn */
+  link: z.string().optional(),
 });
+
+export const SESSION_LABEL: Record<NonNullable<z.infer<typeof ItemSchema>['session']>, string> = {
+  sang: 'Sáng',
+  chieu: 'Chiều',
+  cuoi_ngay: 'Cuối ngày',
+};
 
 export const StageSchema = z.object({
   key: z.string(),
@@ -132,6 +144,31 @@ export const ScheduleParamsSchema = z.object({
   shiftsPerWeek: z.number().int().min(1).default(6),
 });
 
+/**
+ * Checklist onboarding Cửa hàng trưởng: hai loại "mới tuyển" và "thăng tiến từ NVBH" (docs/nguon/Onboarding_CHT_*.xlsx).
+ * Mỗi giai đoạn là một ngày (Ngày D … D+4); kèm nhật ký check-in hằng ngày và đánh giá tổng kết tuần đầu.
+ */
+export const CHT_TRACKS = ['cht_moi_tuyen', 'cht_thang_tien'] as const;
+export type ChtTrackKey = (typeof CHT_TRACKS)[number];
+
+export const ChtTrackSchema = z.object({
+  key: z.enum(CHT_TRACKS),
+  /** Tiền tố mã đầu việc, ví dụ CM-1-3 */
+  code: z.string().regex(/^[A-Z]{2,4}$/, 'Tiền tố mã gồm 2–4 chữ in hoa'),
+  name: z.string(),
+  title: z.string().default(''),
+  goal: z.string().default(''),
+  tip: z.string().default(''),
+  /** Lưu ý sử dụng / điểm khác biệt, hiện ở trang tổng quan */
+  notes: z.array(z.string()).default([]),
+  totalDays: z.number().int().positive(),
+  /** Lựa chọn "Cảm xúc CHT" trong nhật ký theo dõi */
+  moods: z.array(z.string()).default([]),
+  /** Tiêu chí chấm sao (1–5) khi đánh giá tổng kết tuần đầu */
+  ratings: z.array(z.object({ key: z.string(), label: z.string() })).default([]),
+  stages: z.array(StageSchema),
+});
+
 /** Phần giới thiệu chung của Khung năng lực (màn "Khung năng lực" chỉ xem) */
 export const FrameworkSchema = z.object({
   intro: z.array(z.string()),
@@ -146,6 +183,7 @@ export const VersionContentSchema = z
     scheduleParams: ScheduleParamsSchema,
     rubric: RubricSchema.optional(),
     framework: FrameworkSchema.optional(),
+    chtTracks: z.array(ChtTrackSchema).optional(),
   })
   .superRefine((content, ctx) => {
     content.levels.forEach((level, li) => {
@@ -153,6 +191,8 @@ export const VersionContentSchema = z
         ctx.addIssue({ code: 'custom', path: ['levels', li, 'key'], message: `Level thứ ${li + 1} phải có key ${li + 1}` });
       }
     });
+    const keys = (content.chtTracks ?? []).map((t) => t.key);
+    if (new Set(keys).size !== keys.length) ctx.addIssue({ code: 'custom', path: ['chtTracks'], message: 'Mỗi loại checklist CHT chỉ có một' });
   });
 
 export type Item = z.infer<typeof ItemSchema>;
@@ -165,6 +205,12 @@ export type Kpi = z.infer<typeof KpiSchema>;
 export type ReviewForm = z.infer<typeof ReviewFormSchema>;
 export type Rubric = z.infer<typeof RubricSchema>;
 export type VersionContent = z.infer<typeof VersionContentSchema>;
+export type ChtTrack = z.infer<typeof ChtTrackSchema>;
+
+/** Loại lộ trình của một lượt: NVBH 4 Level hoặc một loại checklist CHT */
+export type Track = 'nvbh' | ChtTrackKey;
+export const isChtTrack = (track: string): track is ChtTrackKey => (CHT_TRACKS as readonly string[]).includes(track);
+export const TRACK_LABEL: Record<Track, string> = { nvbh: 'NVBH', cht_moi_tuyen: 'CHT mới tuyển', cht_thang_tien: 'CHT thăng tiến từ NVBH' };
 
 export interface ItemWithStage {
   item: Item;
@@ -176,6 +222,35 @@ export function findLevel(content: VersionContent, levelKey: number): Level {
   const level = content.levels.find((l) => l.key === levelKey);
   if (!level) throw new Error(`Phiên bản không có Level ${levelKey}`);
   return level;
+}
+
+export function findChtTrack(content: Pick<VersionContent, 'chtTracks'>, key: ChtTrackKey): ChtTrack | null {
+  return content.chtTracks?.find((t) => t.key === key) ?? null;
+}
+
+/**
+ * Checklist mà một lượt chạy theo, ở dạng Level để bộ tính lịch, quy tắc xác nhận, hàng đợi, cảnh báo dùng chung.
+ * Lượt CHT: Level 1 giả lập từ checklist CHT (không có doanh số, phiếu đánh giá Level).
+ */
+export function levelForTrack(content: VersionContent, track: Track, levelKey: number): Level {
+  if (!isChtTrack(track)) return findLevel(content, levelKey);
+  const t = findChtTrack(content, track);
+  if (!t) throw new Error(`Phiên bản không có checklist ${TRACK_LABEL[track]}`);
+  return {
+    key: 1,
+    name: t.name,
+    phase: 'Onboarding CHT',
+    motto: t.goal,
+    durationLabel: `${t.totalDays} ngày`,
+    rangeLabel: `Ngày D → D+${t.totalDays - 1}`,
+    months: 1,
+    totalDays: t.totalDays,
+    checklistName: t.title || t.name,
+    kpi: { total: 0, coef1: 0, ratio: 0 },
+    overview: { goals: [], kpiTable: [], responsibilities: [], lms: [], counter: [], note: t.tip || undefined },
+    reviewCriteria: [],
+    stages: t.stages,
+  };
 }
 
 /** Mọi đầu việc của Level theo thứ tự giai đoạn rồi thứ tự trong giai đoạn. */

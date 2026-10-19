@@ -8,7 +8,7 @@ import type { Db } from '../../db/client';
 import { DB } from '../../db/db.provider';
 import { salesMonthly, users } from '../../db/schema';
 import { AccessService } from '../access/access.service';
-import { RunContextService, type RunContext } from '../runs/run-context.service';
+import { assertNvbh, RunContextService, type RunContext } from '../runs/run-context.service';
 
 /** Doanh số tháng của lượt Level (mục 11.5 tab Doanh số, R15). Nhập tay, POS ghi vào cùng bảng khi tích hợp */
 @Injectable()
@@ -27,6 +27,7 @@ export class SalesService {
 
   async get(user: SessionUser, runId: number): Promise<SalesResponse> {
     const ctx = await this.runs.load(runId);
+    assertNvbh(ctx, 'doanh số theo Level');
     await this.access.assertCanViewRun(user, ctx);
     const today = await this.clock.today();
     const rows = await this.db
@@ -62,6 +63,7 @@ export class SalesService {
 
   async put(user: SessionUser, runId: number, month: number, body: SalesBodyT): Promise<SalesResponse> {
     const ctx = await this.runs.load(runId);
+    assertNvbh(ctx, 'doanh số theo Level');
     await this.access.assertCanViewRun(user, ctx);
     if (!(await this.canEdit(user, ctx))) throw forbidden('CANNOT_EDIT_SALES', 'Chỉ CHT, QLKV phụ trách hoặc BP Đào tạo nhập doanh số cho lượt đang chạy');
     if (month < 1 || month > ctx.level.months) throw badRequest('INVALID_MONTH', `Level ${ctx.level.key} có ${ctx.level.months} tháng`);

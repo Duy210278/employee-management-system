@@ -56,7 +56,7 @@ export class NotificationsService {
     }
   }
 
-  /** Người nhận việc của một vai trò trên lượt (mục 10.5): NV chưa có tài khoản thì Buddy, rồi CHT; BP ĐT là mọi BP ĐT */
+  /** Người nhận việc của một vai trò trên lượt (mục 10.5): NV chưa có tài khoản thì Buddy, rồi CHT; BP ĐT là người phụ trách Đào tạo, không có thì mọi BP ĐT */
   async recipientsOf(roles: readonly TaskRole[], people: RunPeople): Promise<number[]> {
     const out: (number | null)[] = [];
     for (const role of roles) {
@@ -64,6 +64,7 @@ export class NotificationsService {
       else if (role === 'buddy') out.push(people.buddyId ?? people.chtId);
       else if (role === 'cht') out.push(people.chtId);
       else if (role === 'qlkv') out.push(people.qlkvId);
+      else if (people.trainerId) out.push(people.trainerId);
       else out.push(...(await this.activeIds({ role: 'bp' })));
     }
     return [...new Set(out.filter((id): id is number => id !== null))];

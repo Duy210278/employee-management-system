@@ -1,4 +1,4 @@
-import type { AccountRole, AssignmentRole, CriterionResult, ReviewResult, TaskRole, TaskStatus, UserStatus, VersionContent } from '@lotrinh/shared';
+import type { AccountRole, AssignmentRole, AttritionRisk, CriterionResult, ReviewResult, TaskRole, TaskStatus, Track, UserStatus, VersionContent } from '@lotrinh/shared';
 import { sql } from 'drizzle-orm';
 import {
   bigserial,
@@ -202,7 +202,16 @@ export const staff = pgTable('staff', {
   createdAt: ts('created_at').notNull().defaultNow(),
 });
 
-export type RunStatus = 'active' | 'paused' | 'review' | 'passed' | 'extended' | 'failed' | 'stopped';
+/** promoted: NVBH thăng chức Cửa hàng trưởng, lượt NVBH đóng và chuyển sang lượt CHT */
+export type RunStatus = 'active' | 'paused' | 'review' | 'passed' | 'extended' | 'failed' | 'stopped' | 'promoted';
+
+/** Thông tin riêng của lượt onboarding CHT (tab "Thông tin CHT" trong file Excel) */
+export interface RunMeta {
+  trainingMode?: 'online' | 'offline';
+  previousStoreName?: string | null;
+  seniorityMonths?: number | null;
+  managerNote?: string;
+}
 
 export const levelRuns = pgTable(
   'level_runs',
@@ -212,6 +221,9 @@ export const levelRuns = pgTable(
       .notNull()
       .references(() => staff.id),
     levelKey: integer('level_key').notNull(),
+    /** nvbh: lộ trình 4 Level · cht_moi_tuyen, cht_thang_tien: checklist onboarding Cửa hàng trưởng */
+    track: text('track').$type<Track>().notNull().default('nvbh'),
+    meta: jsonb('meta').$type<RunMeta>().notNull().default({}),
     versionId: integer('version_id')
       .notNull()
       .references(() => versions.id),
@@ -376,6 +388,45 @@ export const taskDateChanges = pgTable(
   },
   (t) => [index('task_date_changes_task_idx').on(t.taskId)],
 );
+
+/** Nhật ký theo dõi hằng ngày của onboarding CHT: Đào tạo ghi sau mỗi lần check-in, quản lý ghi chú */
+export const runJournal = pgTable(
+  'run_journal',
+  {
+    id: serial('id').primaryKey(),
+    runId: integer('run_id')
+      .notNull()
+      .references(() => levelRuns.id),
+    /** 0 là Ngày D */
+    day: integer('day').notNull(),
+    mood: text('mood'),
+    difficulties: text('difficulties').notNull().default(''),
+    actions: text('actions').notNull().default(''),
+    managerNote: text('manager_note').notNull().default(''),
+    updatedBy: integer('updated_by').references(() => users.id),
+    updatedAt: ts('updated_at'),
+    managerBy: integer('manager_by').references(() => users.id),
+    managerAt: ts('manager_at'),
+  },
+  (t) => [uniqueIndex('run_journal_run_day_uq').on(t.runId, t.day)],
+);
+
+/** Đánh giá tổng kết tuần đầu của onboarding CHT; quản lý cấp trên xác nhận thì lượt hoàn thành */
+export const runEvaluations = pgTable('run_evaluations', {
+  id: serial('id').primaryKey(),
+  runId: integer('run_id')
+    .notNull()
+    .unique()
+    .references(() => levelRuns.id),
+  ratings: jsonb('ratings').$type<Record<string, number>>().notNull().default({}),
+  risk: text('risk').$type<AttritionRisk>(),
+  suggestion: text('suggestion').notNull().default(''),
+  savedBy: integer('saved_by').references(() => users.id),
+  savedAt: ts('saved_at'),
+  confirmedBy: integer('confirmed_by').references(() => users.id),
+  confirmedAt: ts('confirmed_at'),
+  confirmNote: text('confirm_note'),
+});
 
 // ---------- Đánh giá (mục 11.5) ----------
 

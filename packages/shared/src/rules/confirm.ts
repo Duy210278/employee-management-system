@@ -18,6 +18,8 @@ export interface RunPeople {
   buddyId: number | null;
   chtId: number | null;
   qlkvId: number | null;
+  /** Người phụ trách Đào tạo của lượt (lượt CHT); null thì mọi BP ĐT cùng nhận việc của BP ĐT */
+  trainerId?: number | null;
   /** NV (hoặc người thay) đã xác nhận đọc Tổng quan Level (mục 9.4) */
   acknowledged: boolean;
 }

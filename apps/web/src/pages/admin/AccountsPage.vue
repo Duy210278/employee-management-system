@@ -165,6 +165,7 @@ async function create() {
             <td data-l="Hồ sơ NV">
               <RouterLink v-if="u.staffId" :to="`/nhan-su/${u.staffId}`" class="sm">Mở hồ sơ</RouterLink>
               <RouterLink v-else-if="u.role === 'nv' && u.status === 'active'" :to="`/quan-tri/tai-khoan/${u.id}`" class="btn sm pri">Gán checklist</RouterLink>
+              <RouterLink v-else-if="u.role === 'cht' && u.status === 'active'" :to="`/quan-tri/tai-khoan/${u.id}`" class="btn sm pri">Gán checklist CHT</RouterLink>
             </td>
             <td data-l="Trạng thái"><span class="pill" :class="STATUS_TONE[u.status]">{{ USER_STATUS_LABEL[u.status] }}</span></td>
             <td data-l="Lần vào cuối" class="sm mut">{{ fmtDateTime(u.lastSeenAt) || 'Chưa đăng nhập' }}</td>

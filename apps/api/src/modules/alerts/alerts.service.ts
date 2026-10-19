@@ -17,7 +17,7 @@ import { env } from '../../config';
 import { toActor, type SessionUser } from '../../common/session';
 import type { Db } from '../../db/client';
 import { DB } from '../../db/db.provider';
-import { levelRuns, observations, salesMonthly, staff, stores, users } from '../../db/schema';
+import { levelRuns, observations, runEvaluations, salesMonthly, staff, stores, users } from '../../db/schema';
 import { AccessService } from '../access/access.service';
 import { RunContextService, type RunContext } from '../runs/run-context.service';
 import { TaskQueryService } from '../runs/task-query.service';
@@ -42,11 +42,12 @@ export class AlertsService {
     const runIds = contexts.map((c) => c.run.id);
     if (!runIds.length) return out;
     const userIds = contexts.map((c) => c.staff.userId).filter((id): id is number => id !== null);
-    const [sales, obs, seen, signoffs] = await Promise.all([
+    const [sales, obs, seen, signoffs, evaluations] = await Promise.all([
       this.db.select().from(salesMonthly).where(inArray(salesMonthly.runId, runIds)),
       this.db.select({ runId: observations.runId, scores: observations.scores }).from(observations).where(inArray(observations.runId, runIds)),
       userIds.length ? this.db.select({ id: users.id, at: users.lastSeenAt }).from(users).where(inArray(users.id, userIds)) : [],
       this.taskQuery.loadSignoffs(runIds),
+      this.db.select({ runId: runEvaluations.runId, risk: runEvaluations.risk }).from(runEvaluations).where(inArray(runEvaluations.runId, runIds)),
     ]);
     const lastSeen = new Map(seen.map((u) => [u.id, u.at ? todayIn(env().TZ, u.at) : null]));
 
@@ -80,6 +81,8 @@ export class AlertsService {
           hasAccount: ctx.staff.userId !== null,
           lastSeen: ctx.staff.userId ? (lastSeen.get(ctx.staff.userId) ?? null) : null,
           lateStageSigns: [...signs.values()].filter((s) => s.overdue).length,
+          track: ctx.track,
+          attritionRisk: evaluations.find((e) => e.runId === ctx.run.id)?.risk ?? null,
         }),
       );
     }
@@ -110,6 +113,7 @@ export class AlertsService {
     const items: AlertRow[] = contexts.flatMap((c) =>
       (alerts.get(c.run.id) ?? []).map((a) => ({
         ...a,
+        track: c.track,
         staffId: c.staff.id,
         staffName: c.staff.fullName,
         employeeCode: c.staff.employeeCode,

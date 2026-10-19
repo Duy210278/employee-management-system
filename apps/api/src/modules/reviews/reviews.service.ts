@@ -29,7 +29,7 @@ import { levelReviews, levelRuns, observations, reviewSignatures, salesMonthly, 
 import { AccessService } from '../access/access.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { createRun, findVersionForDate } from '../runs/run-factory';
-import { RunContextService, type RunContext } from '../runs/run-context.service';
+import { assertNvbh, RunContextService, type RunContext } from '../runs/run-context.service';
 import { TaskQueryService } from '../runs/task-query.service';
 import { buildTaskViews, levelSummary, summarizeRun } from '../runs/task-views';
 
@@ -93,6 +93,7 @@ export class ReviewsService {
 
   async get(user: SessionUser, runId: number): Promise<ReviewResponse> {
     const ctx = await this.runs.load(runId);
+    assertNvbh(ctx, 'phiếu chuyển Level');
     await this.access.assertCanViewRun(user, ctx);
     const today = await this.clock.today();
     const actor = toActor(user);
@@ -194,6 +195,7 @@ export class ReviewsService {
 
   async save(user: SessionUser, runId: number, body: SaveReviewBodyT): Promise<ReviewResponse> {
     const ctx = await this.runs.load(runId);
+    assertNvbh(ctx, 'phiếu chuyển Level');
     await this.access.assertCanViewRun(user, ctx);
     const today = await this.clock.today();
     if (ctx.run.status !== 'active') throw conflict('RUN_CLOSED', 'Lượt Level đã đóng, không sửa được phiếu');
@@ -229,6 +231,7 @@ export class ReviewsService {
 
   async sign(user: SessionUser, runId: number, step: number): Promise<ReviewResponse> {
     const ctx = await this.runs.load(runId);
+    assertNvbh(ctx, 'phiếu chuyển Level');
     await this.access.assertCanViewRun(user, ctx);
     const actor = toActor(user);
     const form = reviewFormOf(ctx.level);
@@ -316,6 +319,7 @@ export class ReviewsService {
     const { reviews, signatures } = await this.reviewsOf(contexts.map((c) => c.run.id));
     const out: SignatureTodo[] = [];
     for (const ctx of contexts) {
+      if (ctx.track !== 'nvbh') continue;
       const form = reviewFormOf(ctx.level);
       const { round, row } = currentRound(reviews.filter((r) => r.runId === ctx.run.id));
       if (round === 0 && today < this.opensOn(ctx)) continue;
@@ -353,6 +357,7 @@ export class ReviewsService {
     const contexts = await this.runs.loadMany(runRows.map((r) => r.id));
     const { reviews, signatures } = await this.reviewsOf(contexts.map((c) => c.run.id));
     for (const ctx of contexts) {
+      if (ctx.track !== 'nvbh') continue;
       const form = reviewFormOf(ctx.level);
       for (const r of reviews.filter((x) => x.runId === ctx.run.id && x.status === 'signing')) {
         const next = nextSignStep(

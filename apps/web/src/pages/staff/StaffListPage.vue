@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { countAlerts, type StaffListItem } from '@lotrinh/shared';
+import { countAlerts, runTitle, type StaffListItem } from '@lotrinh/shared';
 import { computed, ref } from 'vue';
 import { staffApi, useStaffList } from '@/api/queries';
 
@@ -10,11 +10,13 @@ const store = ref('');
 const level = ref('');
 
 const items = computed(() => data.value?.items ?? []);
+/** Lượt đang theo dõi: Level 1–4 của NVBH hoặc onboarding CHT */
+const levelOf = (i: StaffListItem) => (!i.run ? '' : i.run.track === 'nvbh' ? String(i.run.levelKey) : 'cht');
 const stores = computed(() => [...new Set(items.value.map((i) => i.staff.storeName))].sort());
 const filtered = computed(() =>
   items.value.filter((i) => {
     const text = `${i.staff.fullName} ${i.staff.employeeCode ?? ''}`.toLowerCase();
-    return (!q.value || text.includes(q.value.trim().toLowerCase())) && (!store.value || i.staff.storeName === store.value) && (!level.value || String(i.run?.levelKey) === level.value);
+    return (!q.value || text.includes(q.value.trim().toLowerCase())) && (!store.value || i.staff.storeName === store.value) && (!level.value || levelOf(i) === level.value);
   }),
 );
 
@@ -25,11 +27,13 @@ const lateRed = (i: StaffListItem) => i.alerts.some((a) => a.key === 'overdue_es
 const alertText = (i: StaffListItem) => i.alerts.map((a) => a.message).join('\n');
 const stats = computed(() => {
   const all = items.value;
-  const byLevel = [1, 2, 3, 4].map((l) => all.filter((i) => i.run?.levelKey === l).length);
+  const byLevel = ['1', '2', '3', '4'].map((l) => all.filter((i) => levelOf(i) === l).length);
+  const cht = all.filter((i) => levelOf(i) === 'cht').length;
   const avg = all.length ? Math.round((all.reduce((a, i) => a + (i.run?.progress.pct ?? 0), 0) / all.length) * 100) : 0;
   return {
     total: all.length,
     byLevel,
+    cht,
     avg,
     overdue: all.reduce((a, i) => a + (i.run?.counts.overdue ?? 0), 0),
     red: all.filter((i) => reds(i) > 0).length,
@@ -45,7 +49,7 @@ const pct = (i: StaffListItem) => Math.round((i.run?.progress.pct ?? 0) * 100);
     <div class="grid g4">
       <div class="card stat">
         <b>{{ stats.total }}</b>
-        <span>Nhân sự (L1 {{ stats.byLevel[0] }} · L2 {{ stats.byLevel[1] }} · L3 {{ stats.byLevel[2] }} · L4 {{ stats.byLevel[3] }})</span>
+        <span>Nhân sự (L1 {{ stats.byLevel[0] }} · L2 {{ stats.byLevel[1] }} · L3 {{ stats.byLevel[2] }} · L4 {{ stats.byLevel[3] }}<template v-if="stats.cht"> · CHT {{ stats.cht }}</template>)</span>
       </div>
       <div class="card stat"><b>{{ stats.avg }}%</b><span>Hoàn thành checklist trung bình</span></div>
       <div class="card stat"><b>{{ stats.overdue }}</b><span>Mục đang trễ hạn</span></div>
@@ -64,6 +68,7 @@ const pct = (i: StaffListItem) => Math.round((i.run?.progress.pct ?? 0) * 100);
         <select v-model="level" aria-label="Level">
           <option value="">Mọi Level</option>
           <option v-for="l in 4" :key="l" :value="String(l)">Level {{ l }}</option>
+          <option value="cht">Onboarding CHT</option>
         </select>
       </div>
       <div class="rowf">
@@ -96,7 +101,7 @@ const pct = (i: StaffListItem) => Math.round((i.run?.progress.pct ?? 0) * 100);
             </td>
             <td data-l="Cửa hàng">{{ i.staff.storeName }}</td>
             <td data-l="Level">
-              <span v-if="i.run" class="pill info">L{{ i.run.levelKey }}</span>
+              <span v-if="i.run" class="pill info" :title="runTitle(i.run)">{{ i.run.track === 'nvbh' ? `L${i.run.levelKey}` : 'CHT' }}</span>
               <span v-if="i.run && i.level" class="sm mut">
                 {{ i.run.dayIndex < 0 ? `bắt đầu sau ${-i.run.dayIndex} ngày` : `ngày ${i.run.dayIndex + 1}/${i.level.totalDays}` }}
               </span>

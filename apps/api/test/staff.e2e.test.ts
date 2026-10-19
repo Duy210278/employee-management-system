@@ -25,8 +25,9 @@ describe('danh sách nhân sự theo phạm vi (mục 11.4, R22)', () => {
     const [ha, binh, huy, admin] = await Promise.all([as('ha'), as('binh'), as('huy'), as('admin')]);
     expect(names(await listOf(ha))).toEqual(['Nguyễn Thị Lan', 'Phạm Minh Tuấn', 'Trần Văn Hùng', 'Vũ Thị Mai']);
     expect(names(await listOf(binh))).toEqual(['Hoàng Thùy Linh', 'Đặng Văn Nam', 'Đỗ Thị Thảo'].sort());
-    expect((await listOf(huy)).items).toHaveLength(7);
-    expect((await listOf(admin)).items).toHaveLength(7);
+    // 7 NV và 1 CHT mới tuyển đang onboarding (Phương, Nhà thuốc C)
+    expect((await listOf(huy)).items).toHaveLength(8);
+    expect((await listOf(admin)).items).toHaveLength(8);
   });
 
   it('Buddy (NV) chỉ thấy hồ sơ của mình và NV mình kèm; không được thêm nhân viên', async () => {
@@ -55,7 +56,7 @@ describe('hồ sơ nhân viên', () => {
     const ha = await as('ha');
     const lan = (await listOf(ha)).items.find((i) => i.staff.fullName === 'Nguyễn Thị Lan')!;
     const profile = (await ha.get(`${API}/staff/${lan.staff.id}`).expect(200)).body as StaffProfileResponse;
-    expect(profile.people).toEqual({ buddy: 'Trần Văn Hùng', cht: 'Phạm Thu Hà', qlkv: 'Ngô Quang Huy' });
+    expect(profile.people).toEqual({ buddy: 'Trần Văn Hùng', cht: 'Phạm Thu Hà', qlkv: 'Ngô Quang Huy', trainer: null });
     expect(profile.path.map((p) => p.state)).toEqual(['current', 'future', 'future', 'future']);
     expect(profile.history).toHaveLength(1);
     expect(profile.isSelf).toBe(false);
@@ -148,8 +149,8 @@ describe('công cụ demo', () => {
     const ha = await as('ha');
     await ha.post(`${API}/demo/reset`).expect(403);
     const admin = await as('admin');
-    expect((await listOf(admin)).items).toHaveLength(8);
+    expect((await listOf(admin)).items).toHaveLength(9);
     await admin.post(`${API}/demo/reset`).expect(200);
-    expect((await listOf(await as('admin'))).items).toHaveLength(7);
+    expect((await listOf(await as('admin'))).items).toHaveLength(8);
   });
 });

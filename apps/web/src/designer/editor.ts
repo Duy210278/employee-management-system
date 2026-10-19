@@ -3,13 +3,14 @@ import {
   countIssues,
   proposeVersionCode,
   validateVersion,
+  type ChtTrackKey,
   type ValidationIssue,
   type VersionContent,
   type VersionDetailResponse,
 } from '@lotrinh/shared';
 import { computed, inject, nextTick, provide, reactive, ref, type ComputedRef, type InjectionKey, type Ref } from 'vue';
 
-export type DesignerTab = 'framework' | 'checklist' | 'settings';
+export type DesignerTab = 'framework' | 'checklist' | 'cht' | 'settings';
 
 /** Trạng thái chung của trình soạn bản lộ trình, chia sẻ cho các thẻ giai đoạn và dòng đầu việc */
 export interface DesignerContext {
@@ -19,6 +20,8 @@ export interface DesignerContext {
   today: ComputedRef<string>;
   editable: ComputedRef<boolean>;
   levelKey: Ref<number>;
+  /** Checklist CHT đang mở ở tab "Checklist CHT" */
+  chtKey: Ref<ChtTrackKey>;
   collapsed: Set<string>;
   issues: ComputedRef<ValidationIssue[]>;
   issuesFor: (where: { itemKey?: string; stageKey?: string }) => ValidationIssue[];
@@ -35,6 +38,7 @@ const KEY: InjectionKey<DesignerContext> = Symbol('designer');
 
 export function createDesigner(detail: Ref<VersionDetailResponse>, content: Ref<VersionContent>): DesignerContext {
   const levelKey = ref(1);
+  const chtKey = ref<ChtTrackKey>('cht_moi_tuyen');
   const tab = ref<DesignerTab>('checklist');
   const collapsed = reactive(new Set<string>());
   const flashKey = ref<string | null>(null);
@@ -55,15 +59,27 @@ export function createDesigner(detail: Ref<VersionDetailResponse>, content: Ref<
     if (detail.value.version.code) return detail.value.version.code;
     return s?.kind && line ? proposeVersionCode(line, s.kind, detail.value.existingCodes) : null;
   });
-  const categories = computed(() => [...new Set(content.value.levels.flatMap((l) => l.stages.flatMap((s) => s.items.map((i) => i.category))))].filter(Boolean).sort());
+  const categories = computed(() =>
+    [...new Set([...content.value.levels, ...(content.value.chtTracks ?? [])].flatMap((l) => l.stages.flatMap((s) => s.items.map((i) => i.category))))].filter(Boolean).sort(),
+  );
 
   function focus(at: ValidationIssue['at']) {
     if (at.levelKey) levelKey.value = at.levelKey;
+    if (at.trackKey) chtKey.value = at.trackKey as ChtTrackKey;
     if (at.stageKey) collapsed.delete(at.stageKey);
-    // Lỗi Khung năng lực có section; lỗi tham số lịch chỉ có field; còn lại là lỗi checklist
-    tab.value = at.section ? 'framework' : at.stageKey || at.itemKey ? 'checklist' : 'settings';
-    const id = at.section ? `knl-${at.levelKey ?? 'all'}-${at.section}` : at.itemKey ? `it-${at.itemKey}` : at.stageKey ? `st-${at.stageKey}` : 'settings';
-    const key = at.section ? id : (at.itemKey ?? at.stageKey ?? null);
+    // Lỗi checklist CHT có trackKey; lỗi Khung năng lực có section; lỗi tham số lịch chỉ có field; còn lại là lỗi checklist
+    tab.value = at.trackKey ? 'cht' : at.section ? 'framework' : at.stageKey || at.itemKey ? 'checklist' : 'settings';
+    const id =
+      at.trackKey && !at.itemKey && !at.stageKey
+        ? `cht-${at.trackKey}-info`
+        : at.section
+          ? `knl-${at.levelKey ?? 'all'}-${at.section}`
+          : at.itemKey
+            ? `it-${at.itemKey}`
+            : at.stageKey
+              ? `st-${at.stageKey}`
+              : 'settings';
+    const key = at.section || (at.trackKey && !at.itemKey && !at.stageKey) ? id : (at.itemKey ?? at.stageKey ?? null);
     void nextTick(() => {
       const el = document.getElementById(id);
       if (!el) return;
@@ -81,6 +97,7 @@ export function createDesigner(detail: Ref<VersionDetailResponse>, content: Ref<
     today: computed(() => detail.value.today),
     editable,
     levelKey,
+    chtKey,
     collapsed,
     issues,
     issuesFor: (w) => byItem.value.get(w.itemKey ?? `stage:${w.stageKey}`) ?? [],

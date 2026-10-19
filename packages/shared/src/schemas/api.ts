@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { isIsoDate } from '../dates';
 import { ACCOUNT_ROLES, ASSIGNMENT_ROLES, TASK_ROLES } from '../roles';
-import { VersionContentSchema } from './version';
+import { CHT_TRACKS, VersionContentSchema } from './version';
 
 /** Dữ liệu vào của API, dùng chung cho form giao diện và kiểm tra ở server. */
 
@@ -211,6 +211,40 @@ export const StopStaffBody = z.object({
 });
 
 export const MarkReadBody = z.object({ ids: z.array(id).optional(), all: z.boolean().optional() });
+
+// ---------- Onboarding Cửa hàng trưởng ----------
+
+/** Gán checklist CHT cho một tài khoản CHT (BP ĐT hoặc QLKV trong khu vực) */
+export const CreateChtRunBody = z.object({
+  userId: id,
+  track: z.enum(CHT_TRACKS, { errorMap: () => ({ message: 'Chọn loại checklist CHT' }) }),
+  storeId: z.number({ required_error: 'Chọn cửa hàng', invalid_type_error: 'Chọn cửa hàng' }).int().positive('Chọn cửa hàng'),
+  startDate: isoDate,
+  trainingMode: z.enum(['online', 'offline'], { errorMap: () => ({ message: 'Chọn hình thức training tuần đầu' }) }),
+  trainerId: z.number({ required_error: 'Chọn người phụ trách Đào tạo', invalid_type_error: 'Chọn người phụ trách Đào tạo' }).int().positive('Chọn người phụ trách Đào tạo'),
+  qlkvId: z.number({ required_error: 'Chọn QLKV', invalid_type_error: 'Chọn QLKV' }).int().positive('Chọn QLKV'),
+  buddyId: id.nullable().optional(),
+  /** Thâm niên NVBH (tháng) khi CHT thăng tiến chưa có hồ sơ NVBH trong hệ thống */
+  seniorityMonths: z.number().int().min(0).max(600).nullable().optional(),
+});
+export const ChtJournalBody = z.object({
+  mood: z.string().trim().max(100).nullable().optional(),
+  difficulties: z.string().max(2000).optional(),
+  actions: z.string().max(2000).optional(),
+  managerNote: z.string().max(2000).optional(),
+});
+export const ATTRITION_RISKS = ['low', 'medium', 'high'] as const;
+export const ChtEvaluationBody = z.object({
+  ratings: z.record(z.string(), z.number().int().min(1).max(5)),
+  risk: z.enum(ATTRITION_RISKS).nullable(),
+  suggestion: z.string().max(2000).default(''),
+});
+export const ChtConfirmBody = z.object({ note: z.string().trim().max(1000).default('') });
+export const ChtMetaBody = z.object({ managerNote: z.string().max(2000) });
+
+export type CreateChtRunBodyT = z.infer<typeof CreateChtRunBody>;
+export type ChtJournalBodyT = z.infer<typeof ChtJournalBody>;
+export type ChtEvaluationBodyT = z.infer<typeof ChtEvaluationBody>;
 
 export type RegisterBodyT = z.infer<typeof RegisterBody>;
 export type ApproveUserBodyT = z.infer<typeof ApproveUserBody>;

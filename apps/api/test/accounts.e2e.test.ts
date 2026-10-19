@@ -185,9 +185,9 @@ describe('danh mục cửa hàng, khu vực (mục 5.5)', () => {
     const admin = await as('admin');
     let org = (await admin.post(`${API}/org/areas`).send({ code: 'HN2', name: 'Hà Nội 2' }).expect(201)).body as OrgResponse;
     const hn2 = org.areas.find((a) => a.code === 'HN2')!;
-    org = (await admin.post(`${API}/org/stores`).send({ code: 'NTC', name: 'Nhà thuốc C', address: '8 Láng Hạ', areaId: hn2.id }).expect(201)).body as OrgResponse;
-    expect(org.stores.find((s) => s.code === 'NTC')).toMatchObject({ areaName: 'Hà Nội 2', staffCount: 0, active: true });
-    await admin.post(`${API}/org/stores`).send({ code: 'NTC', name: 'Trùng', areaId: hn2.id }).expect(409);
+    org = (await admin.post(`${API}/org/stores`).send({ code: 'NTE', name: 'Nhà thuốc E', address: '20 Nguyễn Trãi', areaId: hn2.id }).expect(201)).body as OrgResponse;
+    expect(org.stores.find((s) => s.code === 'NTE')).toMatchObject({ areaName: 'Hà Nội 2', staffCount: 0, active: true });
+    await admin.post(`${API}/org/stores`).send({ code: 'NTE', name: 'Trùng', areaId: hn2.id }).expect(409);
 
     const nta = org.stores.find((s) => s.code === 'NTA')!;
     expect(nta.chtNames).toEqual(['Phạm Thu Hà']);
