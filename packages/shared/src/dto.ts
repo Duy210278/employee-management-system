@@ -367,7 +367,19 @@ export interface VersionDetailResponse {
   parentContent: VersionContent | null;
   parentLine: string | null;
   existingCodes: string[];
-  permissions: { edit: boolean; submit: boolean; withdraw: boolean; approve: boolean; reject: boolean; remove: boolean; createDraft: boolean };
+  /** Bản đã duyệt mà chưa tới ngày hiệu lực: khoảng ngày được chọn lại (max = null khi không có bản nào sau) */
+  effectiveRange: { min: IsoDate; max: IsoDate | null } | null;
+  permissions: {
+    edit: boolean;
+    submit: boolean;
+    withdraw: boolean;
+    approve: boolean;
+    reject: boolean;
+    remove: boolean;
+    createDraft: boolean;
+    /** Đổi ngày hiệu lực của bản "Sắp hiệu lực" */
+    reschedule: boolean;
+  };
 }
 
 // ---------- Đánh giá: doanh số, Rubric, phiếu đánh giá (mục 11.5) ----------

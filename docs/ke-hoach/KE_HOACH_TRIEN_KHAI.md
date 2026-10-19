@@ -146,6 +146,8 @@ Làm theo **lát cắt dọc**: mỗi lát gồm cả API lẫn giao diện, xon
 > - 162 test đạt (78 lõi nghiệp vụ, 84 API, gồm T-U01..T-U04, T-U06, T-X09, T-L05, T-L07, T-L08). Kịch bản giai đoạn 2 chạy trọn trên trình duyệt, không lỗi console/5xx; điện thoại 390 px không tràn ngang.
 > - Lệch so với đặc tả: quy tắc cảnh báo cố định trong mã (chưa cấu hình theo phiên bản ở "Thiết lập chung"); danh sách tài khoản chỉ BP ĐT xem (ma trận cho CHT/QLKV xem trong phạm vi); chưa có OTP, Mailpit, đổi mật khẩu.
 > - Còn lại: Buddy Score (cả cảnh báo kèm theo), chuyển phiên bản cho NV đang dở Level (8.4), xem trước điện thoại (7.6), giai đoạn 5.
+>
+> **Bổ sung (19/10/2026):** đổi ngày hiệu lực của bản đã duyệt mà chưa tới ngày (`PUT /versions/:id/effective`, quyền như người duyệt): giữ thứ tự phiên bản, đổi ngày kết thúc của bản bị thay thế, chặn khi có lượt Level bắt đầu trong khoảng ngày bị đổi; 4 test API. Triển khai bản demo lên Render + Neon (`render.yaml`).
 
 | Ngày | Việc | Kết quả kiểm tra được |
 |---|---|---|

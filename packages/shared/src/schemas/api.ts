@@ -79,6 +79,8 @@ export const SaveDraftBody = z.object({
 });
 export const SubmitBody = z.object({ changeNote: z.string().trim().max(2000).optional() });
 export const ApproveBody = z.object({ effectiveFrom: isoDate });
+/** Đổi ngày hiệu lực của bản đã duyệt nhưng chưa tới ngày */
+export const RescheduleBody = ApproveBody;
 export const ReturnBody = z.object({ note: z.string().trim().min(1, 'Nhập lý do trả về để BP Đào tạo biết cần sửa gì').max(2000) });
 
 /**

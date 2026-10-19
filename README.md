@@ -103,6 +103,7 @@ Khung năng lực và Checklist được phát hành chung một số phiên b�
 3. **Dải tác động** cho biết đây là *sửa diễn đạt* (số 2.1.1, NV đang chạy thấy câu mới ngay) hay *thay đổi tiêu chí* (số 2.2, chỉ áp dụng cho lượt Level bắt đầu từ ngày hiệu lực).
 4. Nhập ghi chú thay đổi → **Gửi duyệt**.
 5. **QLKV Huy** (quyền "Người duyệt phiên bản") → tab "Duyệt phiên bản" → chọn ngày hiệu lực → **Duyệt và ban hành**, hoặc **Trả về nháp** kèm lý do. BP ĐT không tự duyệt được bản mình soạn, trừ khi bật công tắc V20 ở Quản trị.
+6. **Đổi ngày hiệu lực:** bản đã duyệt mà chưa tới ngày ("Sắp hiệu lực") có khung **Ngày hiệu lực** để người duyệt chọn lại ngày. Ngày mới phải sau bản trước, trước bản ban hành sau nó và không ở quá khứ; bản đang hiệu lực tự kết thúc theo ngày mới. Bị chặn nếu đã có lượt Level bắt đầu trong khoảng giữa ngày cũ và ngày mới (phiên bản gắn với lượt đó sẽ sai). Bản đã có hiệu lực thì không đổi được, muốn thay đổi phải ban hành bản mới.
 
 Lưu ý có sẵn: CK-09 báo mục L1-6-5 nhắc "3 tháng" trong khi Level 1 dài 2 tháng (vấn đề V1) — có thể sửa bằng một bản sửa diễn đạt.
 

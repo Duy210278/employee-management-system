@@ -108,6 +108,19 @@ const approve = () => {
   if (!confirm(`Duyệt và ban hành, hiệu lực từ ${fmtDate(effectiveFrom.value)}?`)) return;
   void act(() => versionApi.approve(v.value.id, effectiveFrom.value), 'Đã duyệt và ban hành');
 };
+// Đổi ngày hiệu lực của bản đã duyệt nhưng chưa tới ngày ("Sắp hiệu lực")
+const newEffective = ref(props.detail.version.effectiveFrom ?? '');
+watch(
+  () => props.detail.version.effectiveFrom,
+  (date) => (newEffective.value = date ?? ''),
+);
+const range = computed(() => props.detail.effectiveRange);
+const reschedule = () => {
+  const from = v.value.effectiveFrom;
+  if (!newEffective.value || newEffective.value === from) return;
+  if (!confirm(`Đổi ngày hiệu lực v${v.value.code} từ ${fmtDate(from)} sang ${fmtDate(newEffective.value)}?`)) return;
+  void act(() => versionApi.reschedule(v.value.id, newEffective.value), `Đã đổi ngày hiệu lực sang ${fmtDate(newEffective.value)}`);
+};
 const reject = () => {
   if (!rejectNote.value.trim()) {
     toast.show('Nhập lý do trả về để BP Đào tạo biết cần sửa gì');
@@ -254,6 +267,28 @@ onBeforeUnmount(() => {
           <div class="h2">Trả về nháp</div>
           <textarea v-model="rejectNote" rows="3" placeholder="Lý do trả về (bắt buộc)" aria-label="Lý do trả về"></textarea>
           <div><button class="btn bad" type="button" :disabled="busy" @click="reject">Trả về nháp</button></div>
+        </div>
+      </div>
+
+      <!-- Bản đã duyệt mà chưa tới ngày: còn đổi được ngày hiệu lực -->
+      <div v-if="v.state === 'scheduled'" class="card pad stack" style="border-color: var(--info)">
+        <div class="h2">Ngày hiệu lực</div>
+        <template v-if="perm.reschedule && range">
+          <div class="rowf" style="align-items: end">
+            <label class="f" style="max-width: 220px">
+              Ngày hiệu lực mới
+              <input v-model="newEffective" type="date" :min="range.min" :max="range.max ?? undefined" />
+            </label>
+            <button class="btn" type="button" :disabled="busy || !newEffective || newEffective === v.effectiveFrom" @click="reschedule">Đổi ngày hiệu lực</button>
+          </div>
+          <div class="sm mut">
+            Đang đặt hiệu lực từ <b>{{ fmtDate(v.effectiveFrom) }}</b>; chọn được từ {{ fmtDate(range.min) }}<template v-if="range.max"> đến {{ fmtDate(range.max) }}</template>.
+            Bản đang hiệu lực sẽ kết thúc ngày {{ fmtDate(addDays(newEffective || v.effectiveFrom!, -1)) }}. Không đổi được nếu đã có lượt Level bắt đầu trong
+            khoảng giữa ngày cũ và ngày mới, vì phiên bản gắn với lượt đó sẽ sai.
+          </div>
+        </template>
+        <div v-else class="sm mut">
+          Hiệu lực từ <b>{{ fmtDate(v.effectiveFrom) }}</b>. Trước ngày này, người duyệt phiên bản còn đổi được ngày hiệu lực.
         </div>
       </div>
     </div>

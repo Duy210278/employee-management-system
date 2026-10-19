@@ -39,6 +39,7 @@ const LABELS: [RegExp, string][] = [
   [/^POST \/versions\/:id\/withdraw$/, 'Rút phiên bản về nháp'],
   [/^POST \/versions\/:id\/approve$/, 'Duyệt và ban hành phiên bản'],
   [/^POST \/versions\/:id\/reject$/, 'Trả phiên bản về nháp'],
+  [/^PUT \/versions\/:id\/effective$/, 'Đổi ngày hiệu lực phiên bản'],
   [/^DELETE \/versions\/:id$/, 'Xóa bản nháp'],
   [/^PUT \/settings\/publishing$/, 'Đổi cấu hình ban hành (V20)'],
   [/^POST \/users$/, 'Tạo tài khoản'],

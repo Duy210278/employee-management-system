@@ -3,6 +3,7 @@ import {
   addDays,
   classifyChanges,
   countIssues,
+  fmtDate,
   proposeVersionCode,
   validateVersion,
   VersionContentSchema,
@@ -14,14 +15,14 @@ import {
   type VersionListResponse,
   type VersionState,
 } from '@lotrinh/shared';
-import { and, eq, inArray, isNull, lt, ne, sql } from 'drizzle-orm';
+import { and, eq, gte, inArray, isNull, lt, ne, sql } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
 import { ClockService } from '../../adapters/clock/clock.service';
 import { badRequest, conflict, notFound, staleData } from '../../common/errors';
 import type { SessionUser } from '../../common/session';
 import type { Db } from '../../db/client';
 import { DB } from '../../db/db.provider';
-import { levelRuns, users, versions } from '../../db/schema';
+import { levelRuns, staff, users, versions } from '../../db/schema';
 import { AccessService } from '../access/access.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { findVersionForDate, PUBLISHED } from '../runs/run-factory';
@@ -132,8 +133,11 @@ export class VersionLifecycleService {
     const [canEdit, canApprove] = await Promise.all([this.access.can(user, 'update', 'Version'), this.access.can(user, 'approve', 'Version')]);
     const hasOpen = all.some((i) => i.state === 'draft' || i.state === 'pending');
     const published = row.status === 'active' || row.status === 'expired';
+    const today = await this.clock.today();
+    const effectiveRange = await this.effectiveRange(row, today);
     return {
-      today: await this.clock.today(),
+      today,
+      effectiveRange,
       version: { ...item, rowVersion: row.rowVersion },
       content: VersionContentSchema.parse(row.content),
       parentContent: parent ? VersionContentSchema.parse(parent.content) : null,
@@ -147,6 +151,7 @@ export class VersionLifecycleService {
         reject: canApprove && row.status === 'pending',
         remove: canEdit && row.status === 'draft',
         createDraft: canEdit && published && !hasOpen,
+        reschedule: canApprove && effectiveRange !== null,
       },
     };
   }
@@ -278,6 +283,90 @@ export class VersionLifecycleService {
           ),
         );
     });
+    return this.detail(user, id);
+  }
+
+  /**
+   * Khoảng ngày hiệu lực được phép chọn lại cho bản đã duyệt nhưng chưa tới ngày ("Sắp hiệu lực"):
+   * sau mọi bản đứng trước nó (bản cùng dòng nếu là sửa diễn đạt) và trước mọi bản ban hành sau nó, không sớm hơn hôm nay.
+   */
+  private async effectiveRange(row: VersionRow, today: string): Promise<{ min: string; max: string | null } | null> {
+    if (row.status !== 'active' || !row.effectiveFrom || row.effectiveFrom <= today) return null;
+    const others = (await this.db.select().from(versions).where(and(PUBLISHED, ne(versions.id, row.id)))).filter((v) => v.effectiveFrom);
+    const isHead = row.code === row.criteriaLine;
+    const before = others.filter((v) => v.effectiveFrom! < row.effectiveFrom! && (isHead || v.criteriaLine === row.criteriaLine)).map((v) => v.effectiveFrom!);
+    const after = others.filter((v) => v.effectiveFrom! > row.effectiveFrom!).map((v) => v.effectiveFrom!);
+    const lower = before.length ? addDays(before.sort().at(-1)!, 1) : today;
+    return { min: lower > today ? lower : today, max: after.length ? addDays(after.sort()[0], -1) : null };
+  }
+
+  /**
+   * Đổi ngày hiệu lực của bản đã duyệt nhưng chưa tới ngày. Bản bị thay thế đổi ngày kết thúc theo.
+   * Thay đổi tiêu chí: chặn nếu có lượt Level bắt đầu trong khoảng giữa ngày cũ và ngày mới, vì phiên bản gắn với lượt (R01) sẽ không còn đúng.
+   */
+  async reschedule(user: SessionUser, id: number, effectiveFrom: string): Promise<VersionDetailResponse> {
+    await this.assert(user, 'approve', 'Chỉ người duyệt phiên bản được đổi ngày hiệu lực');
+    const today = await this.clock.today();
+    const row = await this.get(id);
+    const old = row.effectiveFrom;
+    const range = await this.effectiveRange(row, today);
+    if (!range || !old) {
+      throw conflict(
+        'NOT_SCHEDULED',
+        row.status === 'active' || row.status === 'expired'
+          ? `v${row.code} đã có hiệu lực từ ${fmtDate(old)}, không đổi ngày được. Muốn thay đổi thì ban hành bản mới`
+          : 'Chỉ đổi ngày hiệu lực được cho bản đã duyệt mà chưa tới ngày hiệu lực',
+      );
+    }
+    if (effectiveFrom === old) return this.detail(user, id);
+    if (effectiveFrom < range.min) {
+      throw badRequest('EFFECTIVE_TOO_EARLY', range.min === today ? 'Ngày hiệu lực không được trước hôm nay' : `Ngày hiệu lực phải từ ${fmtDate(range.min)} (sau bản trước đó)`);
+    }
+    if (range.max && effectiveFrom > range.max) {
+      throw badRequest('EFFECTIVE_TOO_LATE', `Ngày hiệu lực phải trước ${fmtDate(addDays(range.max, 1))}, ngày bản ban hành sau có hiệu lực`);
+    }
+
+    const isHead = row.code === row.criteriaLine;
+    const [from, to] = effectiveFrom < old ? [effectiveFrom, old] : [old, effectiveFrom];
+    if (isHead) {
+      const affected = await this.db
+        .select({ name: staff.fullName, startDate: levelRuns.startDate })
+        .from(levelRuns)
+        .innerJoin(staff, eq(staff.id, levelRuns.staffId))
+        .where(and(gte(levelRuns.startDate, from), lt(levelRuns.startDate, to)));
+      if (affected.length) {
+        const names = affected.map((a) => `${a.name} (${fmtDate(a.startDate)})`);
+        throw conflict(
+          'RUNS_AFFECTED',
+          `Có ${affected.length} lượt Level bắt đầu từ ${fmtDate(from)} đến trước ${fmtDate(to)} đã gắn phiên bản theo ngày cũ: ${names.slice(0, 3).join(', ')}${names.length > 3 ? '…' : ''}. Chọn ngày khác`,
+        );
+      }
+    }
+
+    await this.db.transaction(async (tx) => {
+      const [locked] = await tx.select().from(versions).where(eq(versions.id, id)).for('update');
+      if (locked.effectiveFrom !== old) throw staleData();
+      await tx.update(versions).set({ effectiveFrom, updatedAt: new Date() }).where(eq(versions.id, id));
+      // Bản bị bản này thay thế (đã được đặt kết thúc = ngày cũ − 1 khi duyệt) kết thúc theo ngày mới
+      await tx
+        .update(versions)
+        .set({ effectiveTo: addDays(effectiveFrom, -1) })
+        .where(
+          and(
+            PUBLISHED,
+            ne(versions.id, id),
+            eq(versions.effectiveTo, addDays(old, -1)),
+            isHead ? ne(versions.criteriaLine, row.criteriaLine!) : eq(versions.criteriaLine, row.criteriaLine!),
+          ),
+        );
+    });
+
+    const recipients = [...(await this.notifications.activeIds({ role: 'bp' })), ...(await this.notifications.activeIds({ canApproveVersions: true }))];
+    await this.notifications.notify(
+      recipients,
+      { type: 'version_rescheduled', title: `Bộ lộ trình v${row.code} đổi ngày hiệu lực: ${fmtDate(old)} → ${fmtDate(effectiveFrom)}`, link: `/thiet-ke/${id}` },
+      user.id,
+    );
     return this.detail(user, id);
   }
 

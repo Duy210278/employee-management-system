@@ -191,6 +191,7 @@ export const versionApi = {
   withdraw: (id: number) => api.post<VersionDetailResponse>(`/versions/${id}/withdraw`),
   reject: (id: number, note: string) => api.post<VersionDetailResponse>(`/versions/${id}/reject`, { note }),
   approve: (id: number, effectiveFrom: string) => api.post<VersionDetailResponse>(`/versions/${id}/approve`, { effectiveFrom }),
+  reschedule: (id: number, effectiveFrom: string) => api.put<VersionDetailResponse>(`/versions/${id}/effective`, { effectiveFrom }),
   remove: (id: number) => api.del<{ ok: true }>(`/versions/${id}`),
   exportUrl: (id: number) => `/api/v1/versions/${id}/export`,
   setPublishing: (body: PublishingSettings) => api.put<PublishingSettings>('/settings/publishing', body),

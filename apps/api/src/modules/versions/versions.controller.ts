@@ -2,6 +2,7 @@ import { Body, Controller, Delete, Get, HttpCode, Param, ParseIntPipe, Post, Put
 import {
   ApproveBody,
   CreateDraftBody,
+  RescheduleBody,
   ReturnBody,
   SaveDraftBody,
   SubmitBody,
@@ -61,6 +62,11 @@ export class VersionsController {
   @HttpCode(200)
   approve(@Param('id', ParseIntPipe) id: number, @Body(new ZodPipe(ApproveBody)) body: ApproveBodyT, @CurrentUser() user: SessionUser) {
     return this.versions.approve(user, id, body);
+  }
+
+  @Put(':id/effective')
+  reschedule(@Param('id', ParseIntPipe) id: number, @Body(new ZodPipe(RescheduleBody)) body: ApproveBodyT, @CurrentUser() user: SessionUser) {
+    return this.versions.reschedule(user, id, body.effectiveFrom);
   }
 
   @Delete(':id')
