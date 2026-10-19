@@ -8,6 +8,7 @@ import SalesTab from '@/components/assessment/SalesTab.vue';
 import LevelOverview from '@/components/LevelOverview.vue';
 import PathBar from '@/components/PathBar.vue';
 import RoleChip from '@/components/RoleChip.vue';
+import RunManagePanel from '@/components/RunManagePanel.vue';
 import StageChecklist from '@/components/StageChecklist.vue';
 import { fmtDate, yearOf } from '@/format';
 
@@ -22,16 +23,19 @@ const { data: p, isLoading, error } = useStaffProfile(staffId);
 const refYear = computed(() => (p.value ? yearOf(p.value.today) : new Date().getFullYear()));
 const run = computed(() => p.value?.run ?? null);
 const pct = computed(() => Math.round((run.value?.progress.pct ?? 0) * 100));
+const hasRed = computed(() => !!p.value?.alerts.some((a) => a.severity === 'red'));
 
-type Tab = 'over' | 'check' | 'sales' | 'rubric' | 'review' | 'history';
-const tabs: { key: Tab; label: string }[] = [
+type Tab = 'over' | 'check' | 'sales' | 'rubric' | 'review' | 'history' | 'manage';
+const tabs = computed<{ key: Tab; label: string }[]>(() => [
   { key: 'over', label: 'Tổng quan' },
   { key: 'check', label: 'Checklist' },
   { key: 'sales', label: 'Doanh số' },
   { key: 'rubric', label: 'Quan sát Rubric' },
   { key: 'review', label: 'Chuyển Level' },
   { key: 'history', label: 'Lịch sử lượt' },
-];
+  // Đổi phân công, tạm dừng, chuyển cửa hàng, ngừng theo dõi (mục 9.3): CHT, QLKV trong phạm vi, BP ĐT
+  ...(p.value?.canManage ? [{ key: 'manage' as const, label: 'Phân công & tạm dừng' }] : []),
+]);
 
 /** Bộ chọn Level để xem lại các Level đã qua (mục 11.5); mặc định lượt hiện tại. Lưu trên URL để mở thẳng từ "Chữ ký chờ bạn" */
 const selectedRunId = computed(() => {
@@ -45,7 +49,7 @@ const gated = computed(() => !!p.value?.isSelf && viewingCurrent.value && !!run.
 const tab = computed<Tab>(() => {
   if (gated.value) return 'over';
   const q = route.query.tab as Tab;
-  return tabs.some((t) => t.key === q) ? q : 'check';
+  return tabs.value.some((t) => t.key === q) ? q : 'check';
 });
 function go(query: { tab?: Tab; run?: number }) {
   void router.replace({ query: { ...route.query, ...query } });
@@ -110,9 +114,18 @@ const STATUS_LABEL: Record<string, string> = {
           <div class="bar grow"><i :style="{ width: pct + '%' }"></i></div>
           <span class="sm mut">Level {{ run.levelKey }}: {{ run.progress.done }}/{{ run.progress.total }} mục · {{ pct }}%</span>
         </div>
-        <div v-if="run.levelKey <= 2 && !p.people.buddy" class="alert bad"><div>Chưa phân công Buddy cho nhân viên Level {{ run.levelKey }}.</div></div>
-        <div v-if="run.counts.overdue" class="alert"><div>{{ run.counts.overdue }} mục checklist đã quá hạn.</div></div>
-        <div v-if="run.counts.rework" class="alert bad"><div>{{ run.counts.rework }} mục đang bị yêu cầu làm lại.</div></div>
+        <div v-if="!p.staff.active" class="alert">
+          <div><b>Đã ngừng theo dõi</b><template v-if="p.staff.stopReason">: {{ p.staff.stopReason }}</template>. Dữ liệu được giữ nguyên để tra cứu.</div>
+        </div>
+        <div v-if="run.pause" class="alert info">
+          <div>Đang <b>tạm dừng</b> {{ fmtDate(run.pause.from, refYear) }} → {{ fmtDate(run.pause.to, refYear) }}. Các mốc chưa xong đã lùi tương ứng.</div>
+        </div>
+        <div v-if="p.alerts.length && !p.isSelf" class="alert" :class="{ bad: hasRed }">
+          <ul class="ul" style="margin: 0">
+            <li v-for="a in p.alerts" :key="a.key"><span class="pill" :class="a.severity === 'red' ? 'bad' : 'warn'">{{ a.severity === 'red' ? 'Đỏ' : 'Vàng' }}</span> {{ a.message }}</li>
+          </ul>
+        </div>
+        <div v-if="p.isSelf && run.counts.rework" class="alert bad"><div>{{ run.counts.rework }} mục đang bị yêu cầu làm lại.</div></div>
       </div>
 
       <div v-if="gated" class="alert">
@@ -155,6 +168,7 @@ const STATUS_LABEL: Record<string, string> = {
         <SalesTab v-else-if="tab === 'sales'" :key="`s${selectedRunId}`" :run-id="selectedRunId" />
         <RubricTab v-else-if="tab === 'rubric'" :key="`r${selectedRunId}`" :run-id="selectedRunId" />
         <ReviewTab v-else-if="tab === 'review'" :key="`v${selectedRunId}`" :run-id="selectedRunId" />
+        <RunManagePanel v-else-if="tab === 'manage' && run" :key="`m${run.id}`" :run-id="run.id" :staff-id="p.staff.id" :staff-name="p.staff.fullName" />
       </template>
       <div v-if="tab === 'history'" class="card">
         <table class="rt">

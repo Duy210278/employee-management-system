@@ -7,13 +7,14 @@ import {
   Inject,
   Injectable,
   NotFoundException,
+  Param,
   Post,
   Put,
   Req,
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { addDays, ClockBody, LoginAsBody, type ClockBodyT, type ClockView, type DemoAccount } from '@lotrinh/shared';
+import { addDays, ClockBody, LoginAsBody, type ClockBodyT, type ClockView, type DemoAccount, type JobName, type JobResult } from '@lotrinh/shared';
 import type { Request, Response } from 'express';
 import { env } from '../../config';
 import { CurrentUser, Public, type SessionUser } from '../../common/session';
@@ -27,7 +28,9 @@ import { resetDatabase } from '../../db/seed';
 import { SEED_USERS } from '../../db/seed/seed-data';
 import { AccessService } from '../access/access.service';
 import { AuthService } from '../auth/auth.service';
+import { JOB_NAMES, JobsService } from '../jobs/jobs.service';
 import { VersionsService } from '../versions/versions.service';
+import { badRequest } from '../../common/errors';
 
 /** Công cụ demo chỉ tồn tại khi DEMO_MODE=true, tắt ở cả API lẫn giao diện (mục 14.7) */
 @Injectable()
@@ -50,6 +53,7 @@ export class DemoController {
     private readonly audit: AuditService,
     private readonly access: AccessService,
     private readonly versions: VersionsService,
+    private readonly jobs: JobsService,
   ) {}
 
   @Public()
@@ -80,10 +84,20 @@ export class DemoController {
   @Put('clock')
   async setClock(@Body(new ZodPipe(ClockBody)) body: ClockBodyT, @CurrentUser() user: SessionUser): Promise<ClockView> {
     await this.access.assertCan(user, 'manage', 'Clock', 'Chỉ BP Đào tạo được đặt ngày giả lập');
-    if (body.shiftDays !== undefined) {
-      return this.clock.setFakeToday(addDays(await this.clock.today(), body.shiftDays), user.id);
-    }
-    return this.clock.setFakeToday(body.date ?? null, user.id);
+    const date = body.shiftDays !== undefined ? addDays(await this.clock.today(), body.shiftDays) : (body.date ?? null);
+    const view = await this.clock.setFakeToday(date, user.id);
+    // Mục 14.7: đổi ngày giả lập thì tự chạy kích hoạt phiên bản, bản tin, cảnh báo của ngày mới
+    await this.jobs.runAll(view.today);
+    return view;
+  }
+
+  /** Nút "Chạy ngay" của từng job (mục 14.11) */
+  @Post('jobs/:name/run')
+  @HttpCode(200)
+  async runJob(@Param('name') name: string, @CurrentUser() user: SessionUser): Promise<JobResult> {
+    await this.access.assertCan(user, 'manage', 'Clock', 'Chỉ BP Đào tạo được chạy job');
+    if (!JOB_NAMES.includes(name as JobName)) throw badRequest('UNKNOWN_JOB', `Không có job ${name}`);
+    return this.jobs.run(name as JobName);
   }
 
   /** Xóa sạch, nạp lại bộ mẫu, đặt lại ngày thật (mục 14.7) */
@@ -94,6 +108,8 @@ export class DemoController {
     const today = this.clock.realToday();
     await resetDatabase(this.db, today);
     this.versions.clearCache();
+    // Có sẵn bản tin, nhắc việc của ngày hôm nay sau khi khôi phục
+    await this.jobs.runAll(today);
     await this.audit.log({ userId: null, action: 'demo.reset', payload: { by: user.email, today } });
     return { ok: true, today };
   }

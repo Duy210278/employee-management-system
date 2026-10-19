@@ -6,9 +6,10 @@ import { onBeforeRouteLeave, onBeforeRouteUpdate, useRouter } from 'vue-router';
 import { ApiError } from '@/api/client';
 import { versionApi } from '@/api/queries';
 import { useToast } from '@/composables/toast';
-import { createDesigner } from '@/designer/editor';
+import { createDesigner, type DesignerTab } from '@/designer/editor';
 import { fmtDate, fmtDateTime } from '@/format';
 import ChecklistEditor from './ChecklistEditor.vue';
+import FrameworkEditor from './FrameworkEditor.vue';
 import ScheduleParamsEditor from './ScheduleParamsEditor.vue';
 
 /** Soạn, gửi duyệt, duyệt một phiên bản Bộ lộ trình (mục 7.3, 8.2) */
@@ -23,13 +24,18 @@ const changeNote = ref(props.detail.version.changeNote ?? '');
 const baseline = ref(JSON.stringify(props.detail.content));
 const baselineNote = ref(props.detail.version.changeNote ?? '');
 const busy = ref(false);
-const tab = ref<'checklist' | 'settings'>('checklist');
 const showChanges = ref(false);
 const showIssues = ref(true);
 const effectiveFrom = ref(addDays(props.detail.today, 1));
 const rejectNote = ref('');
 
 const d = createDesigner(toRef(props, 'detail'), content);
+const tab = d.tab;
+const TABS: [DesignerTab, string][] = [
+  ['framework', 'Khung năng lực'],
+  ['checklist', 'Checklist theo giai đoạn'],
+  ['settings', 'Thiết lập chung'],
+];
 const v = computed(() => props.detail.version);
 const perm = computed(() => props.detail.permissions);
 const dirty = computed(() => perm.value.edit && (JSON.stringify(content.value) !== baseline.value || changeNote.value !== baselineNote.value));
@@ -253,15 +259,15 @@ onBeforeUnmount(() => {
     </div>
 
     <div class="sub" role="tablist">
-      <button type="button" role="tab" :aria-current="tab === 'checklist'" :aria-selected="tab === 'checklist'" @click="tab = 'checklist'">Checklist theo giai đoạn</button>
-      <button type="button" role="tab" :aria-current="tab === 'settings'" :aria-selected="tab === 'settings'" @click="tab = 'settings'">Thiết lập chung</button>
+      <button v-for="[k, label] in TABS" :key="k" type="button" role="tab" :aria-current="tab === k" :aria-selected="tab === k" @click="tab = k">{{ label }}</button>
     </div>
     <div v-if="!perm.edit && (v.state === 'draft' || v.state === 'pending')" class="sm mut">
       {{ v.state === 'pending' ? 'Bản đang chờ duyệt: chỉ xem. BP Đào tạo rút về nháp nếu cần sửa.' : 'Chỉ BP Đào tạo sửa được bản nháp.' }}
     </div>
     <div v-else-if="!perm.edit" class="sm mut">Bản đã ban hành không sửa được (R03). Muốn thay đổi, bấm "Tạo bản nháp từ bản này".</div>
 
-    <ChecklistEditor v-if="tab === 'checklist'" />
+    <FrameworkEditor v-if="tab === 'framework'" />
+    <ChecklistEditor v-else-if="tab === 'checklist'" />
     <ScheduleParamsEditor v-else />
 
     <div v-if="dirty" class="savebar">

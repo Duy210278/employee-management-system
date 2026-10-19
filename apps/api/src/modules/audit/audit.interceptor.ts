@@ -12,7 +12,8 @@ export class AuditInterceptor implements NestInterceptor {
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     const req = context.switchToHttp().getRequest<Request>();
-    if (['GET', 'HEAD', 'OPTIONS'].includes(req.method)) return next.handle();
+    // Đánh dấu đã đọc thông báo không phải thay đổi dữ liệu nghiệp vụ
+    if (['GET', 'HEAD', 'OPTIONS'].includes(req.method) || req.path.endsWith('/me/notifications/read')) return next.handle();
     return next.handle().pipe(
       tap(() => {
         if (!req.user) return;

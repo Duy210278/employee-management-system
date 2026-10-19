@@ -1,5 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import {
+  countAlerts,
   ROLE_LABEL,
   type CreateStaffBodyT,
   type PersonOption,
@@ -16,6 +17,7 @@ import type { Db } from '../../db/client';
 import { DB } from '../../db/db.provider';
 import { areas, levelRuns, staff, stores, userAreaScopes, users, userStoreScopes } from '../../db/schema';
 import { AccessService } from '../access/access.service';
+import { AlertsService } from '../alerts/alerts.service';
 import { createRun, findVersionForDate } from '../runs/run-factory';
 import { RunContextService } from '../runs/run-context.service';
 import { TaskQueryService } from '../runs/task-query.service';
@@ -29,47 +31,29 @@ export class StaffService {
     private readonly access: AccessService,
     private readonly runs: RunContextService,
     private readonly taskQuery: TaskQueryService,
+    private readonly alerts: AlertsService,
   ) {}
 
   /** Bảng Nhân sự (mục 11.4): chỉ NV trong phạm vi, mặc định nhiều cảnh báo đỏ trước */
   async list(user: SessionUser): Promise<StaffListResponse> {
     const today = await this.clock.today();
-    const scope = await this.access.staffScope(user);
-    const rows = await this.db
-      .select({ id: staff.id })
-      .from(staff)
-      .innerJoin(stores, eq(stores.id, staff.storeId))
-      .where(scope ? and(eq(staff.active, true), scope) : eq(staff.active, true));
-    const staffIds = rows.map((r) => r.id);
-
-    const runRows = staffIds.length
-      ? await this.db.select().from(levelRuns).where(inArray(levelRuns.staffId, staffIds)).orderBy(desc(levelRuns.startDate))
-      : [];
-    const currentIds = staffIds
-      .map((id) => currentRunOf(runRows.filter((r) => r.staffId === id))?.id)
-      .filter((id): id is number => id !== undefined);
-    const contexts = await this.runs.loadMany(currentIds);
-    const data = await this.taskQuery.loadForRuns(currentIds);
+    const contexts = await this.alerts.currentRunsInScope(user);
+    const data = await this.taskQuery.loadForRuns(contexts.map((c) => c.run.id));
     const actor = toActor(user);
+    const views = new Map(contexts.map((ctx) => [ctx.run.id, buildTaskViews(ctx, data.get(ctx.run.id)!, today, actor)]));
+    const alerts = await this.alerts.forRuns(contexts, views, today);
 
-    const items: StaffListItem[] = contexts.map((ctx) => {
-      const views = buildTaskViews(ctx, data.get(ctx.run.id)!, today, actor);
-      return {
-        staff: ctx.staff,
-        run: summarizeRun(ctx, views, today),
-        level: levelSummary(ctx),
-        flags: {
-          overdue7: views.filter((v) => v.state.overdueDays > ctx.content.scheduleParams.escalateDays).length,
-          noBuddy: ctx.run.levelKey <= 2 && ctx.people.buddyId === null,
-          noCht: ctx.people.chtId === null,
-        },
-      };
-    });
-    const red = (i: StaffListItem) => (i.flags.overdue7 > 0 ? 1 : 0) + (i.flags.noBuddy ? 1 : 0);
+    const items: StaffListItem[] = contexts.map((ctx) => ({
+      staff: ctx.staff,
+      run: summarizeRun(ctx, views.get(ctx.run.id)!, today),
+      level: levelSummary(ctx),
+      alerts: alerts.get(ctx.run.id) ?? [],
+    }));
+    const red = (i: StaffListItem) => countAlerts(i.alerts).red;
     items.sort(
       (a, b) => red(b) - red(a) || (b.run?.counts.overdue ?? 0) - (a.run?.counts.overdue ?? 0) || a.staff.fullName.localeCompare(b.staff.fullName, 'vi'),
     );
-    return { today, items, canCreate: await this.access.can(user, 'create', 'Staff') };
+    return { today, items, canCreate: await this.access.can(user, 'create', 'Staff'), canExport: await this.access.can(user, 'read', 'Report') };
   }
 
   async profile(user: SessionUser, staffId: number): Promise<StaffProfileResponse> {
@@ -89,9 +73,20 @@ export class StaffService {
     await this.access.assertCanViewRun(user, ctx);
 
     const views = buildTaskViews(ctx, (await this.taskQuery.loadForRuns([ctx.run.id])).get(ctx.run.id)!, today, toActor(user));
+    const alerts = (await this.alerts.forRuns([ctx], new Map([[ctx.run.id, views]]), today)).get(ctx.run.id) ?? [];
     return {
       today,
-      staff: { ...ctx.staff, hireDate: row.staff.hireDate, currentLevel: row.staff.currentLevel, accountEmail: row.accountEmail },
+      alerts,
+      canManage: await this.access.can(user, 'update', AccessService.recordOf(ctx)),
+      staff: {
+        ...ctx.staff,
+        hireDate: row.staff.hireDate,
+        currentLevel: row.staff.currentLevel,
+        accountEmail: row.accountEmail,
+        active: row.staff.active,
+        stopReason: row.staff.stopReason,
+        stoppedAt: row.staff.stoppedAt?.toISOString() ?? null,
+      },
       run: summarizeRun(ctx, views, today),
       level: levelSummary(ctx),
       people: { buddy: ctx.names.buddy, cht: ctx.names.cht, qlkv: ctx.names.qlkv },

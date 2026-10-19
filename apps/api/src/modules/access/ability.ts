@@ -6,7 +6,14 @@ import type { SessionUser } from '../../common/session';
  * Bước 2 của mục 14.8; bước 3 (lọc phạm vi ở truy vấn) là AccessService.staffScope, phải khớp các quy tắc dưới đây.
  */
 export type Action = 'read' | 'create' | 'update' | 'approve' | 'manage';
-export type SubjectName = 'Staff' | 'StaffList' | 'Clock' | 'DemoData' | 'Version' | 'all';
+/** User: tài khoản · Org: danh mục cửa hàng, khu vực · AuditLog: nhật ký hệ thống · Report: xuất CSV */
+export type SubjectName = 'Staff' | 'StaffList' | 'Clock' | 'DemoData' | 'Version' | 'Settings' | 'User' | 'Org' | 'AuditLog' | 'Report' | 'all';
+
+/** Cấu hình hệ thống ảnh hưởng tới quyền */
+export interface AbilityFlags {
+  /** V20: BP Đào tạo tự duyệt và ban hành phiên bản */
+  bpSelfPublish: boolean;
+}
 
 /** Bản ghi dùng để xét quyền trên một hồ sơ NV / lượt Level */
 export interface StaffRecord {
@@ -25,22 +32,23 @@ export interface UserScopes {
   areaIds: number[];
 }
 
-export function defineAbilityFor(user: SessionUser, scopes: UserScopes): AppAbility {
+export function defineAbilityFor(user: SessionUser, scopes: UserScopes, flags: AbilityFlags = { bpSelfPublish: false }): AppAbility {
   const { can, cannot, build } = new AbilityBuilder<AppAbility>(createMongoAbility);
 
   switch (user.role) {
     case 'bp':
-      // BP Đào tạo là quản trị viên: toàn chuỗi; soạn, gửi duyệt, rút về phiên bản
+      // BP Đào tạo là quản trị viên: toàn chuỗi; chỉ BP ĐT soạn, sửa Khung năng lực và Checklist, gửi duyệt, rút về
       can('manage', 'all');
-      // Duyệt và ban hành tách khỏi người soạn (V20): chỉ "Người duyệt phiên bản"
-      if (!user.canApproveVersions) cannot('approve', 'Version');
+      // Duyệt và ban hành mặc định tách khỏi người soạn; bật "BP ĐT tự ban hành" (V20) thì BP ĐT tự duyệt được
+      if (!user.canApproveVersions && !flags.bpSelfPublish) cannot('approve', 'Version');
       break;
     case 'qlkv':
-      can('read', 'StaffList');
-      can(['read', 'create', 'update'], 'Staff', { areaId: { $in: scopes.areaIds } });
+      can(['read'], ['StaffList', 'Report']);
+      // QLKV duyệt đề xuất tạm dừng của CHT trong khu vực (mục 9.3)
+      can(['read', 'create', 'update', 'approve'], 'Staff', { areaId: { $in: scopes.areaIds } });
       break;
     case 'cht':
-      can('read', 'StaffList');
+      can(['read'], ['StaffList', 'Report']);
       can(['read', 'create', 'update'], 'Staff', { storeId: { $in: scopes.storeIds } });
       break;
     case 'nv':

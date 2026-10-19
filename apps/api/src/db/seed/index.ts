@@ -19,8 +19,10 @@ import {
   credentials,
   levelRuns,
   observations,
+  runPauses,
   runTasks,
   salesMonthly,
+  stageSignoffs,
   staff,
   stores,
   taskConfirmations,
@@ -33,6 +35,8 @@ import {
 import {
   HELP_NOTE,
   HIRE_BEFORE_LEVEL_START,
+  LAST_SEEN_DAYS_AGO,
+  SEED_PAUSE,
   REWORK_NOTE,
   SEED_AREAS,
   SEED_OBSERVATIONS,
@@ -78,6 +82,9 @@ export async function seedDatabase(db: Db, today: IsoDate): Promise<void> {
           status: u.status,
           canBuddy: !!u.canBuddy,
           canApproveVersions: !!u.canApproveVersions,
+          requestedRole: u.status === 'pending' ? u.role : null,
+          // Lần vào cuối: mặc định hôm qua; một số người để trống hoặc lâu ngày để có cảnh báo "không đăng nhập" (mục 11.6)
+          lastSeenAt: u.status === 'active' && LAST_SEEN_DAYS_AGO[u.key] !== null ? at(addDays(today, -(LAST_SEEN_DAYS_AGO[u.key] ?? 1)), '20:00') : null,
         })),
       )
       .returning();
@@ -89,7 +96,9 @@ export async function seedDatabase(db: Db, today: IsoDate): Promise<void> {
       return row;
     };
     await tx.insert(credentials).values(userRows.map((u) => ({ userId: u.id, passwordHash })));
-    const storeScopes = SEED_USERS.flatMap((u) => (u.stores ?? []).map((s) => ({ userId: user(u.key).id, storeId: storeId.get(s)! })));
+    const pendingStore = SEED_USERS.filter((u) => u.status === 'pending' && u.stores?.length);
+    for (const u of pendingStore) await tx.update(users).set({ requestedStoreId: storeId.get(u.stores![0])! }).where(eq(users.id, user(u.key).id));
+    const storeScopes = SEED_USERS.filter((u) => u.status === 'active').flatMap((u) => (u.stores ?? []).map((s) => ({ userId: user(u.key).id, storeId: storeId.get(s)! })));
     const areaScopes = SEED_USERS.flatMap((u) => (u.areas ?? []).map((a) => ({ userId: user(u.key).id, areaId: areaId.get(a)! })));
     if (storeScopes.length) await tx.insert(userStoreScopes).values(storeScopes);
     if (areaScopes.length) await tx.insert(userAreaScopes).values(areaScopes);
@@ -136,8 +145,20 @@ export async function seedDatabase(db: Db, today: IsoDate): Promise<void> {
       runOf.set(s.user, { id: run.id, start, observer: s.level === 1 && people.buddy ? people.buddy : people.cht });
       const day = -s.startOffset;
       if (day >= 0) await tx.update(levelRuns).set({ ackBy: u.id, ackAt: at(start, '08:30') }).where(eq(levelRuns.id, run.id));
-      await seedProgress(tx, { level, start, today, day, tasks, plan: s.plan, staffUserId: u.id, people, adminId });
+      await seedProgress(tx, { level, start, today, day, tasks, plan: s.plan, staffUserId: u.id, people, adminId, runId: run.id, signOff: content.scheduleParams.signDueAfter });
     }
+
+    // Một đề xuất tạm dừng đang chờ QLKV duyệt (mục 9.3)
+    const pauseRun = runOf.get(SEED_PAUSE.user)!;
+    await tx.insert(runPauses).values({
+      runId: pauseRun.id,
+      fromDate: addDays(today, SEED_PAUSE.fromOffset),
+      toDate: addDays(today, SEED_PAUSE.toOffset),
+      reason: SEED_PAUSE.reason,
+      status: 'pending',
+      requestedBy: user(SEED_PAUSE.by).id,
+      requestedAt: at(addDays(today, -1), '16:30'),
+    });
 
     // Doanh số tháng và ca quan sát Rubric đã qua (mục 11.5)
     const sales = Object.entries(SEED_SALES).flatMap(([key, months]) =>
@@ -179,6 +200,9 @@ interface ProgressInput {
   staffUserId: number | null;
   people: { buddy: number | null; cht: number; qlkv: number };
   adminId: number;
+  runId: number;
+  /** signDueAfter: giai đoạn đã quá hạn ký mà đủ mục bắt buộc thì coi như đã ký */
+  signOff: number;
 }
 
 /** Tạo sẵn tiến độ: mục đã qua hạn phần lớn đã xong, chừa lại vài mục quá hạn, làm lại, chờ xác nhận, cần hỗ trợ */
@@ -263,6 +287,18 @@ async function seedProgress(tx: Tx, p: ProgressInput): Promise<void> {
 
   if (confirmations.length) await tx.insert(taskConfirmations).values(confirmations);
   if (events.length) await tx.insert(taskEvents).values(events);
+
+  // Ký cuối giai đoạn (mục 10.2) cho giai đoạn đã qua hạn ký và đủ mục bắt buộc; giai đoạn vừa kết thúc để trống cho CHT ký thử
+  const signoffs: (typeof stageSignoffs.$inferInsert)[] = [];
+  for (const stage of p.level.stages) {
+    if (stage.offsetEnd + p.signOff >= p.day) continue;
+    const complete = stage.items.filter((i) => i.required).every((i) => i.dueOffset < p.day && !leaveKeys.has(i.key));
+    if (!complete) continue;
+    stage.signers.forEach((role, step) => {
+      signoffs.push({ runId: p.runId, stageKey: stage.key, step, role, userId: filler(role).userId, at: at(addDays(p.start, stage.offsetEnd), '17:00') });
+    });
+  }
+  if (signoffs.length) await tx.insert(stageSignoffs).values(signoffs);
 }
 
 /** Xóa sạch, chạy migration, nạp lại dữ liệu mẫu */

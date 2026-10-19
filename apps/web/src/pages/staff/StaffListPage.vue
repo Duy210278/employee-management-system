@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import type { StaffListItem } from '@lotrinh/shared';
+import { countAlerts, type StaffListItem } from '@lotrinh/shared';
 import { computed, ref } from 'vue';
-import { useStaffList } from '@/api/queries';
+import { staffApi, useStaffList } from '@/api/queries';
 
 /** Nhân sự (mục 11.4): danh sách trong phạm vi, nhiều cảnh báo đỏ xếp trước */
 const { data, isLoading, error } = useStaffList();
@@ -19,8 +19,10 @@ const filtered = computed(() =>
 );
 
 /** Số quy tắc cảnh báo bị chạm (mục 11.6), không phải số mục trễ */
-const reds = (i: StaffListItem) => (i.flags.overdue7 > 0 ? 1 : 0) + (i.flags.noBuddy ? 1 : 0);
-const yellows = (i: StaffListItem) => ((i.run?.counts.overdue ?? 0) > i.flags.overdue7 ? 1 : 0) + (i.flags.noCht ? 1 : 0);
+const reds = (i: StaffListItem) => countAlerts(i.alerts).red;
+const yellows = (i: StaffListItem) => countAlerts(i.alerts).yellow;
+const lateRed = (i: StaffListItem) => i.alerts.some((a) => a.key === 'overdue_escalate');
+const alertText = (i: StaffListItem) => i.alerts.map((a) => a.message).join('\n');
 const stats = computed(() => {
   const all = items.value;
   const byLevel = [1, 2, 3, 4].map((l) => all.filter((i) => i.run?.levelKey === l).length);
@@ -64,7 +66,10 @@ const pct = (i: StaffListItem) => Math.round((i.run?.progress.pct ?? 0) * 100);
           <option v-for="l in 4" :key="l" :value="String(l)">Level {{ l }}</option>
         </select>
       </div>
-      <RouterLink v-if="data.canCreate" class="btn pri" to="/nhan-su/them">+ Thêm nhân viên</RouterLink>
+      <div class="rowf">
+        <a v-if="data.canExport" class="btn" :href="staffApi.exportUrl" download>Xuất CSV</a>
+        <RouterLink v-if="data.canCreate" class="btn pri" to="/nhan-su/them">+ Thêm nhân viên</RouterLink>
+      </div>
     </div>
 
     <div class="card">
@@ -103,11 +108,12 @@ const pct = (i: StaffListItem) => Math.round((i.run?.progress.pct ?? 0) * 100);
               </div>
             </td>
             <td data-l="Trễ hạn">
-              <span v-if="i.run?.counts.overdue" class="pill" :class="i.flags.overdue7 ? 'bad' : 'warn'">{{ i.run.counts.overdue }}</span>
+              <span v-if="i.run?.counts.overdue" class="pill" :class="lateRed(i) ? 'bad' : 'warn'">{{ i.run.counts.overdue }}</span>
               <span v-else>0</span>
             </td>
             <td data-l="Cảnh báo">
-              <div class="rowf" style="gap: 4px">
+              <div class="rowf" style="gap: 4px" :title="alertText(i)">
+                <span v-if="i.run?.pause" class="pill info">Tạm dừng</span>
                 <span v-if="reds(i)" class="pill bad">{{ reds(i) }} đỏ</span>
                 <span v-if="yellows(i)" class="pill warn">{{ yellows(i) }} vàng</span>
                 <span v-if="!reds(i) && !yellows(i)" class="pill ok">Ổn</span>
@@ -125,6 +131,6 @@ const pct = (i: StaffListItem) => Math.round((i.run?.progress.pct ?? 0) * 100);
         </div>
       </div>
     </div>
-    <div class="sm mut">Cảnh báo đỏ: có mục trễ hơn 7 ngày, NV Level 1–2 chưa có Buddy. Vàng: có mục trễ, chưa gắn CHT. Trang Cảnh báo đầy đủ có ở giai đoạn 2.</div>
+    <div class="sm mut">Di chuột vào cột Cảnh báo để xem nội dung. Danh sách đầy đủ và quy tắc ở trang <RouterLink to="/canh-bao">Cảnh báo</RouterLink>.</div>
   </div>
 </template>

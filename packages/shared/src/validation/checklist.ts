@@ -12,8 +12,8 @@ export interface ValidationIssue {
   code: string;
   level: IssueLevel;
   message: string;
-  /** Vị trí để giao diện cuộn tới đúng chỗ */
-  at: { levelKey?: number; stageKey?: string; itemKey?: string; field?: string };
+  /** Vị trí để giao diện cuộn tới đúng chỗ; section là phần của Khung năng lực (info, kpi, review, rubric…) */
+  at: { levelKey?: number; stageKey?: string; itemKey?: string; section?: string; field?: string };
 }
 
 const ITEM_KEY_RE = /^L([1-4])-\d+-\d+$/;

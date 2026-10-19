@@ -21,7 +21,7 @@ const fields: { key: keyof ScheduleParams; label: string; help: string }[] = [
 </script>
 
 <template>
-  <div class="card pad stack">
+  <div id="settings" class="card pad stack">
     <div class="h2">Tham số lịch</div>
     <div class="sm mut">Đổi tham số là thay đổi tiêu chí: chỉ áp dụng cho lượt Level bắt đầu từ ngày hiệu lực của phiên bản mới.</div>
     <div class="form">

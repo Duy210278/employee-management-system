@@ -54,9 +54,56 @@ export const users = pgTable('users', {
   status: text('status').$type<UserStatus>().notNull().default('pending'),
   canBuddy: boolean('can_buddy').notNull().default(false),
   canApproveVersions: boolean('can_approve_versions').notNull().default(false),
+  /** Thông tin người đăng ký đề nghị (mục 5.1); BP ĐT chốt vai trò, phạm vi khi duyệt */
+  requestedRole: text('requested_role').$type<AccountRole>(),
+  requestedStoreId: integer('requested_store_id').references(() => stores.id),
+  requestedAreaId: integer('requested_area_id').references(() => areas.id),
+  /** Lý do từ chối đăng ký (mục 5.4 điều 5) */
+  reviewNote: text('review_note'),
+  reviewedBy: integer('reviewed_by'),
+  reviewedAt: ts('reviewed_at'),
+  rowVersion: integer('row_version').notNull().default(0),
   lastSeenAt: ts('last_seen_at'),
   createdAt: ts('created_at').notNull().defaultNow(),
 });
+
+/** Lịch sử thay đổi tài khoản (mục 5.3): ai đổi, lúc nào, giá trị cũ và mới */
+export const userChanges = pgTable(
+  'user_changes',
+  {
+    id: serial('id').primaryKey(),
+    userId: integer('user_id')
+      .notNull()
+      .references(() => users.id),
+    changedBy: integer('changed_by').references(() => users.id),
+    field: text('field').notNull(),
+    oldValue: text('old_value'),
+    newValue: text('new_value'),
+    at: ts('at').notNull(),
+  },
+  (t) => [index('user_changes_user_idx').on(t.userId)],
+);
+
+/** Thông báo trong ứng dụng (mục 10.6); dedupe_key chống trùng khi job chạy lại (mục 14.9) */
+export const notifications = pgTable(
+  'notifications',
+  {
+    id: serial('id').primaryKey(),
+    userId: integer('user_id')
+      .notNull()
+      .references(() => users.id),
+    type: text('type').notNull(),
+    title: text('title').notNull(),
+    body: text('body'),
+    link: text('link'),
+    dedupeKey: text('dedupe_key').unique(),
+    /** Ngày nghiệp vụ lúc tạo (theo ngày giả lập) */
+    businessDate: day('business_date').notNull(),
+    createdAt: ts('created_at').notNull(),
+    readAt: ts('read_at'),
+  },
+  (t) => [index('notifications_user_idx').on(t.userId, t.readAt)],
+);
 
 export const userStoreScopes = pgTable(
   'user_store_scopes',
@@ -148,6 +195,10 @@ export const staff = pgTable('staff', {
   hireDate: day('hire_date').notNull(),
   currentLevel: integer('current_level').notNull().default(1),
   active: boolean('active').notNull().default(true),
+  /** "Ngừng theo dõi" khi nghỉ việc (mục 9.3): dữ liệu giữ nguyên */
+  stopReason: text('stop_reason'),
+  stoppedAt: ts('stopped_at'),
+  stoppedBy: integer('stopped_by').references(() => users.id),
   createdAt: ts('created_at').notNull().defaultNow(),
 });
 
@@ -260,6 +311,70 @@ export const taskEvents = pgTable(
     at: ts('at').notNull(),
   },
   (t) => [index('task_events_task_idx').on(t.taskId)],
+);
+
+/** Ký cuối giai đoạn theo chuỗi ký của giai đoạn (mục 10.2, R11, R12) */
+export const stageSignoffs = pgTable(
+  'stage_signoffs',
+  {
+    id: serial('id').primaryKey(),
+    runId: integer('run_id')
+      .notNull()
+      .references(() => levelRuns.id),
+    stageKey: text('stage_key').notNull(),
+    step: integer('step').notNull(),
+    role: text('role').$type<TaskRole>().notNull(),
+    userId: integer('user_id')
+      .notNull()
+      .references(() => users.id),
+    at: ts('at').notNull(),
+  },
+  (t) => [uniqueIndex('stage_signoffs_step_uq').on(t.runId, t.stageKey, t.step)],
+);
+
+export type PauseStatus = 'pending' | 'approved' | 'rejected';
+
+/** Tạm dừng lượt Level (mục 9.3): CHT đề xuất, QLKV hoặc BP ĐT duyệt */
+export const runPauses = pgTable(
+  'run_pauses',
+  {
+    id: serial('id').primaryKey(),
+    runId: integer('run_id')
+      .notNull()
+      .references(() => levelRuns.id),
+    fromDate: day('from_date').notNull(),
+    toDate: day('to_date').notNull(),
+    reason: text('reason').notNull(),
+    status: text('status').$type<PauseStatus>().notNull().default('pending'),
+    requestedBy: integer('requested_by')
+      .notNull()
+      .references(() => users.id),
+    requestedAt: ts('requested_at').notNull(),
+    decidedBy: integer('decided_by').references(() => users.id),
+    decidedAt: ts('decided_at'),
+    decisionNote: text('decision_note'),
+  },
+  (t) => [index('run_pauses_run_idx').on(t.runId)],
+);
+
+/** Mỗi lần tính lại ngày của đầu việc đều ghi log: ngày cũ, ngày mới, lý do (mục 10.2, R18) */
+export const taskDateChanges = pgTable(
+  'task_date_changes',
+  {
+    id: serial('id').primaryKey(),
+    taskId: integer('task_id')
+      .notNull()
+      .references(() => runTasks.id),
+    oldOpen: day('old_open').notNull(),
+    oldDue: day('old_due').notNull(),
+    newOpen: day('new_open').notNull(),
+    newDue: day('new_due').notNull(),
+    reason: text('reason').$type<'pause' | 'extend' | 'migrate'>().notNull(),
+    refId: integer('ref_id'),
+    at: ts('at').notNull(),
+    by: integer('by').references(() => users.id),
+  },
+  (t) => [index('task_date_changes_task_idx').on(t.taskId)],
 );
 
 // ---------- Đánh giá (mục 11.5) ----------

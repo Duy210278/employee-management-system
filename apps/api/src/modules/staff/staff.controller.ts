@@ -1,12 +1,27 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Post } from '@nestjs/common';
-import { CreateStaffBody, type CreateStaffBodyT, type StaffFormOptions, type StaffListResponse, type StaffProfileResponse } from '@lotrinh/shared';
+import { Body, Controller, Get, HttpCode, Param, ParseIntPipe, Post } from '@nestjs/common';
+import {
+  CreateStaffBody,
+  StopStaffBody,
+  TransferBody,
+  type CreateStaffBodyT,
+  type RunManageResponse,
+  type StaffFormOptions,
+  type StaffListResponse,
+  type StaffProfileResponse,
+  type StopStaffBodyT,
+  type TransferBodyT,
+} from '@lotrinh/shared';
 import { CurrentUser, type SessionUser } from '../../common/session';
 import { ZodPipe } from '../../common/zod.pipe';
+import { RunManageService } from '../runs/run-manage.service';
 import { StaffService } from './staff.service';
 
 @Controller('staff')
 export class StaffController {
-  constructor(private readonly staff: StaffService) {}
+  constructor(
+    private readonly staff: StaffService,
+    private readonly manage: RunManageService,
+  ) {}
 
   @Get()
   list(@CurrentUser() user: SessionUser): Promise<StaffListResponse> {
@@ -26,5 +41,17 @@ export class StaffController {
   @Get(':id')
   profile(@Param('id', ParseIntPipe) id: number, @CurrentUser() user: SessionUser): Promise<StaffProfileResponse> {
     return this.staff.profile(user, id);
+  }
+
+  @Post(':id/transfer')
+  @HttpCode(200)
+  transfer(@Param('id', ParseIntPipe) id: number, @Body(new ZodPipe(TransferBody)) body: TransferBodyT, @CurrentUser() user: SessionUser): Promise<RunManageResponse> {
+    return this.manage.transfer(user, id, body);
+  }
+
+  @Post(':id/stop')
+  @HttpCode(200)
+  stop(@Param('id', ParseIntPipe) id: number, @Body(new ZodPipe(StopStaffBody)) body: StopStaffBodyT, @CurrentUser() user: SessionUser): Promise<RunManageResponse> {
+    return this.manage.stop(user, id, body);
   }
 }

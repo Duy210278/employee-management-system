@@ -128,6 +128,24 @@ Làm theo **lát cắt dọc**: mỗi lát gồm cả API lẫn giao diện, xon
 > - Cấu hình KPI, Rubric (Phụ lục C N1), phiếu đánh giá nằm trong nội dung phiên bản; đổi cấu hình là thay đổi tiêu chí.
 > - 113 test đạt (61 lõi nghiệp vụ, 52 API); luồng nhập doanh số → Rubric → phiếu → lên Level chạy trọn trên trình duyệt.
 > - Chưa làm: Buddy Score (mục 11.5), quy tắc cảnh báo doanh số/Rubric (giai đoạn 2), miễn chỉ tiêu tháng đầu khi vào từ ngày 15 (V8), trả phiếu về để sửa sau khi đã ký.
+>
+> **Tiến độ (19/10/2026): Khung năng lực do BP Đào tạo quản lý (theo quyết định của người dùng: giữ Khung năng lực, chỉ BP ĐT sửa; giữ toàn bộ phần đánh giá).**
+> - Trình soạn: tab "Khung năng lực" trong Thiết kế lộ trình (thông tin Level, mục tiêu, phân công, KPI và cách xét, LMS/tại quầy, phiếu đánh giá 7.4, Rubric, giới thiệu chung). Kiểm tra KNL-00/03/04/05/06/10, CK-12/13 chạy cùng CK-xx; bấm lỗi nhảy đúng tab và mục.
+> - Trang "Khung năng lực" chỉ xem (`GET /framework`) cho CHT, QLKV, BP ĐT. Chỉ BP ĐT sửa được nội dung (CASL + test 403).
+> - V20: công tắc "BP Đào tạo tự duyệt và ban hành" (`system_settings.bp_self_publish`, mặc định tắt) ở Quản trị.
+> - 122 test đạt (65 lõi nghiệp vụ, 57 API). Luồng trên trình duyệt: sửa KPI → KNL-04 chặn gửi duyệt → sửa → lưu; CHT/QLKV chỉ xem; điện thoại 390 px không tràn ngang.
+> - Chưa làm của mục 6.1: Buddy Score, quy tắc chuyển Level, cảnh báo, SKU/GPP/Career Path; xem trước điện thoại (7.6); chuyển phiên bản 8.4.
+>
+> **Tiến độ (19/10/2026): xong giai đoạn 2 (mục 6).**
+> - Quản trị người dùng: đăng ký → chờ duyệt → duyệt (chốt vai trò, phạm vi) / từ chối có lý do; danh sách tài khoản có bộ lọc; trang chi tiết sửa vai trò, phạm vi, quyền bổ sung, trạng thái, lịch sử `user_changes`; chuyển giao bắt buộc khi khóa/cho nghỉ/đổi vai trò người đang được phân công (R20); chặn hạ BP ĐT cuối cùng (R19); tạo tài khoản; nhập CSV có xem trước; danh mục cửa hàng, khu vực.
+> - Ký cuối giai đoạn (R11, R12) ở chân thẻ giai đoạn và trong "Chữ ký chờ bạn".
+> - Cảnh báo theo mục 11.6 (trừ Buddy Score): trang Cảnh báo, cột ở Nhân sự, đầu Hồ sơ NV, huy hiệu tab; khối "Cảnh báo trong khu vực" cho QLKV (T-L08). Tính trực tiếp khi đọc, không lưu bảng.
+> - Thông báo trong ứng dụng (chuông, trang Thông báo) cho các sự kiện mục 10.6; job bản tin sáng, leo thang, nhắc lượt sắp bắt đầu, kích hoạt phiên bản, có khóa chống trùng; chạy khi khởi động, sang ngày, đổi ngày giả lập, khôi phục dữ liệu mẫu, "Chạy ngay". Không dùng `@nestjs/schedule` (bộ đếm 15 phút trong tiến trình).
+> - Tạm dừng lượt (CHT đề xuất, QLKV/BP ĐT duyệt, lùi mốc, `task_date_changes`, T-L05); đổi Buddy/CHT/QLKV; chuyển cửa hàng; ngừng theo dõi có chuyển giao Buddy.
+> - Nhật ký hệ thống (lọc người, thao tác, ngày); xuất CSV tiến độ theo phạm vi.
+> - 162 test đạt (78 lõi nghiệp vụ, 84 API, gồm T-U01..T-U04, T-U06, T-X09, T-L05, T-L07, T-L08). Kịch bản giai đoạn 2 chạy trọn trên trình duyệt, không lỗi console/5xx; điện thoại 390 px không tràn ngang.
+> - Lệch so với đặc tả: quy tắc cảnh báo cố định trong mã (chưa cấu hình theo phiên bản ở "Thiết lập chung"); danh sách tài khoản chỉ BP ĐT xem (ma trận cho CHT/QLKV xem trong phạm vi); chưa có OTP, Mailpit, đổi mật khẩu.
+> - Còn lại: Buddy Score (cả cảnh báo kèm theo), chuyển phiên bản cho NV đang dở Level (8.4), xem trước điện thoại (7.6), giai đoạn 5.
 
 | Ngày | Việc | Kết quả kiểm tra được |
 |---|---|---|

@@ -594,13 +594,23 @@ details summary {
   margin: 6vh auto;
   padding: 0 16px;
 }
-.acct {
-  text-align: left;
+.btn.wide {
   width: 100%;
-  justify-content: flex-start;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 2px;
+  justify-content: center;
+}
+/* Đường kẻ "hoặc" giữa đăng nhập thường và đăng nhập nhanh */
+.or {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--mut);
+  font-size: 12px;
+}
+.or::before,
+.or::after {
+  content: '';
+  flex: 1;
+  border-top: 1px solid var(--line);
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -641,6 +651,125 @@ label.f select {
 .sub button[disabled] {
   opacity: 0.45;
   cursor: not-allowed;
+}
+/* Mục con dạng liên kết (Quản trị) dùng cùng kiểu nút tròn */
+.sub a.subl {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  padding: 6px 12px;
+  border-radius: 99px;
+  font-weight: 600;
+  color: var(--mut);
+  text-decoration: none;
+}
+.sub a.subl[aria-current='page'] {
+  background: var(--ink);
+  color: var(--bg);
+  border-color: var(--ink);
+}
+.sub a.subl .n,
+.bell .n {
+  display: inline-block;
+  min-width: 18px;
+  padding: 0 5px;
+  margin-left: 5px;
+  border-radius: 9px;
+  background: var(--bad);
+  color: #fff;
+  font-size: 11px;
+  line-height: 18px;
+  text-align: center;
+}
+
+/* Chuông thông báo */
+.bell {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding: 6px;
+  border-radius: 8px;
+  color: var(--mut);
+}
+.bell:hover,
+.bell.on {
+  background: var(--surface2);
+  color: var(--ink);
+}
+.bell {
+  margin-right: 8px;
+}
+.bell .n {
+  position: absolute;
+  top: -3px;
+  right: -10px;
+  margin: 0;
+}
+/* Nhãn mức cảnh báo nằm trong khung cảnh báo cùng màu */
+.alert.bad .pill.bad {
+  background: var(--surface);
+}
+.note {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  width: 100%;
+  text-align: left;
+  border: 0;
+  border-top: 1px solid var(--line);
+  background: none;
+  padding: 11px 14px;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+.note:first-child {
+  border-top: 0;
+}
+.note:hover {
+  background: var(--surface2);
+}
+.note .dot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  margin-top: 7px;
+  border-radius: 50%;
+  background: transparent;
+}
+.note.unread {
+  background: var(--soft);
+}
+.note.unread .dot {
+  background: var(--accent);
+}
+.nowrap {
+  white-space: nowrap;
+}
+.bad-text {
+  color: var(--bad);
+}
+
+/* Ký cuối giai đoạn ở chân thẻ giai đoạn */
+.signbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  align-items: center;
+  padding: 10px 14px;
+  border-top: 1px solid var(--line);
+  background: var(--surface2);
+}
+.payload {
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-width: 420px;
+  margin: 6px 0 0;
+  padding: 8px;
+  border-radius: 6px;
+  background: var(--surface2);
+}
+label.btn {
+  cursor: pointer;
 }
 details > summary.stg {
   list-style: none;
@@ -1016,9 +1145,72 @@ select[disabled] {
   z-index: 30;
   box-shadow: 0 6px 20px rgb(0 0 0 / 0.2);
 }
+/* Trình soạn Khung năng lực */
+.knl {
+  scroll-margin-top: 80px;
+}
+.tle {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.tle-row,
+.goal {
+  display: flex;
+  gap: 6px;
+  align-items: flex-start;
+}
+.tle-row textarea,
+.goal textarea {
+  flex: 1;
+  min-height: 36px;
+}
+/* Ô chữ cao theo nội dung để đọc được trọn câu khi soạn (trình duyệt cũ giữ chiều cao cố định, kéo giãn tay) */
+.tle-row textarea,
+.goal textarea,
+table.te textarea {
+  field-sizing: content;
+  max-height: 240px;
+}
+.goal input:not([type='number']) {
+  flex: 0 1 260px;
+}
+.tle-no {
+  flex: none;
+  width: 22px;
+  padding-top: 8px;
+  text-align: right;
+  font-size: 12px;
+  color: var(--mut);
+}
+table.te {
+  min-width: 100%;
+}
+table.te th,
+table.te td {
+  padding: 4px;
+  vertical-align: top;
+}
+table.te th input {
+  width: 100%;
+  font-weight: 600;
+  font-size: 12px;
+}
+table.te textarea {
+  min-height: 36px;
+  min-width: 140px;
+}
+table.te td:has(> button),
+table.te td:has(> input[type='checkbox']) {
+  width: 1%;
+  text-align: center;
+}
 @media (max-width: 960px) {
   .designer {
     grid-template-columns: 1fr;
+  }
+  .goal {
+    flex-wrap: wrap;
   }
   .dz-list {
     position: static;

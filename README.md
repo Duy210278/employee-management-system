@@ -28,8 +28,12 @@ pnpm start
 
 Mở http://localhost:3000. Lần chạy đầu, API tự tạo bảng và nạp dữ liệu mẫu nếu cơ sở dữ liệu còn trống. Giữ cửa sổ terminal mở trong buổi demo; `Ctrl+C` để dừng.
 
-Màn đăng nhập có **đăng nhập nhanh** các tài khoản mẫu (mật khẩu chung `Demo@123`); sau khi vào có thể đổi tài khoản ở thanh trên cùng.
+Màn đăng nhập có ô **đăng nhập nhanh** (bản demo): chọn tài khoản mẫu trong danh sách thả xuống, theo nhóm vai trò, rồi bấm "Vào". Mật khẩu chung `Demo@123`; sau khi vào có thể đổi tài khoản ở thanh trên cùng.
 Đăng nhập BP Đào tạo (Ngô Quốc Bảo) để tua ngày giả lập (dải dưới thanh tab) và khôi phục dữ liệu mẫu (tab Quản trị).
+
+## Đưa lên mạng miễn phí (Render + Neon)
+
+Ứng dụng chạy trên Render (gói Free, vùng Singapore), cơ sở dữ liệu ở Neon; cấu hình sẵn trong [render.yaml](render.yaml). Hướng dẫn từng bước: [docs/ke-hoach/TRIEN_KHAI_RENDER_NEON.md](docs/ke-hoach/TRIEN_KHAI_RENDER_NEON.md).
 
 ## Chạy khi phát triển
 
@@ -55,18 +59,18 @@ Mở http://localhost:5173 (Vite, tự nạp lại khi sửa mã; `/api` đượ
 | Tài khoản | Vai trò | Tình huống |
 |---|---|---|
 | admin@upharma.local | BP Đào tạo | Quản trị, ngày giả lập, khôi phục dữ liệu mẫu |
-| huy@upharma.local | QLKV Hà Nội 1 | Thấy mọi cửa hàng trong khu vực; người duyệt phiên bản |
+| huy@upharma.local | QLKV Hà Nội 1 | Thấy mọi cửa hàng trong khu vực; người duyệt phiên bản; có đề xuất tạm dừng của Nam chờ duyệt |
 | ha@upharma.local | CHT Nhà thuốc A | |
 | binh@upharma.local | CHT Nhà thuốc B | Đồng thời là Buddy của Nam |
 | hung@upharma.local | NV Level 3 | Buddy của Lan, Tuấn, Mai: tab "Việc kèm cặp" |
 | thao@upharma.local | NV Level 3 | Buddy của Linh |
 | lan@upharma.local | NV Level 1, ngày thứ 27 | Có mục quá hạn, mục bị yêu cầu làm lại |
-| tuan@upharma.local | NV Level 1, ngày thứ 10 | Có mục cần hỗ trợ |
+| tuan@upharma.local | NV Level 1, ngày thứ 10 | Có mục cần hỗ trợ; 7 ngày chưa đăng nhập (cảnh báo vàng) |
 | mai@upharma.local | NV Level 1, bắt đầu sau 2 ngày | Việc ở trạng thái "Sắp mở" |
-| linh@upharma.local | NV Level 1, ngày thứ 62 | Đã xong checklist, đủ doanh số và Rubric: demo phiếu đánh giá, lên Level 2 |
-| nam@upharma.local | NV Level 2, ngày thứ 139 | Có doanh số 4 tháng, 4 ca Rubric (1 ca trượt) |
+| linh@upharma.local | NV Level 1, ngày thứ 62 | Đã xong checklist, đủ doanh số và Rubric: demo phiếu đánh giá, lên Level 2; giai đoạn cuối chờ CHT Bình ký |
+| nam@upharma.local | NV Level 2, ngày thứ 139 | Có doanh số 4 tháng, 4 ca Rubric (1 ca lỗi an toàn thuốc: cảnh báo đỏ) |
 | hanh@upharma.local | NV, chưa có hồ sơ | Dùng để demo "Thêm nhân viên" |
-| moi@upharma.local | Chờ duyệt | Chưa đăng nhập được |
+| moi@upharma.local | Chờ duyệt | Tự đăng ký (Nhà thuốc A), chưa đăng nhập được: demo duyệt hoặc từ chối |
 
 ## Kịch bản demo MVP (khoảng 7 phút)
 
@@ -98,9 +102,39 @@ Khung năng lực và Checklist được phát hành chung một số phiên b�
 2. Khung **"Kiểm tra trước khi gửi duyệt"** chạy ngay khi gõ (CK-01..CK-11); bấm vào lỗi để nhảy tới đúng dòng. Còn lỗi thì không gửi duyệt được.
 3. **Dải tác động** cho biết đây là *sửa diễn đạt* (số 2.1.1, NV đang chạy thấy câu mới ngay) hay *thay đổi tiêu chí* (số 2.2, chỉ áp dụng cho lượt Level bắt đầu từ ngày hiệu lực).
 4. Nhập ghi chú thay đổi → **Gửi duyệt**.
-5. **QLKV Huy** (quyền "Người duyệt phiên bản") → tab "Duyệt phiên bản" → chọn ngày hiệu lực → **Duyệt và ban hành**, hoặc **Trả về nháp** kèm lý do. BP ĐT không tự duyệt được bản mình soạn.
+5. **QLKV Huy** (quyền "Người duyệt phiên bản") → tab "Duyệt phiên bản" → chọn ngày hiệu lực → **Duyệt và ban hành**, hoặc **Trả về nháp** kèm lý do. BP ĐT không tự duyệt được bản mình soạn, trừ khi bật công tắc V20 ở Quản trị.
 
 Lưu ý có sẵn: CK-09 báo mục L1-6-5 nhắc "3 tháng" trong khi Level 1 dài 2 tháng (vấn đề V1) — có thể sửa bằng một bản sửa diễn đạt.
+
+## Quản trị người dùng (BP Đào tạo → Quản trị)
+
+- **Đăng ký → duyệt:** người mới bấm "Chưa có tài khoản? Đăng ký" ở trang đăng nhập, chọn vai trò đề nghị và nhà thuốc/khu vực, rồi thấy màn **Đang chờ duyệt**. BP ĐT nhận thông báo (chuông), vào **Tài khoản và vai trò**: thẻ "N tài khoản đang chờ duyệt" có nút Duyệt (theo đề nghị) và Từ chối (bắt buộc lý do). Muốn chỉnh vai trò, phạm vi trước khi duyệt thì mở Chi tiết.
+- **Sửa tài khoản:** vai trò, cửa hàng (CHT) hoặc khu vực (QLKV), quyền "Có thể làm Buddy", "Người duyệt phiên bản", trạng thái Hoạt động / Tạm khóa / Đã nghỉ. Đổi vai trò có hiệu lực ngay ở lần tải trang kế tiếp; mọi thay đổi ghi ở "Lịch sử thay đổi".
+- **Chuyển giao (R20):** khóa, cho nghỉ hoặc đổi vai trò người đang là Buddy/CHT/QLKV của lượt đang chạy thì khung "Chuyển giao" hiện ra, phải chọn người thay mới lưu được. Ví dụ: khóa Hùng (Buddy của Lan, Tuấn, Mai).
+- **Luôn còn ít nhất 1 BP ĐT hoạt động (R19);** không tự khóa tài khoản của mình.
+- **Cửa hàng, khu vực:** thêm, sửa, ngừng; không ngừng cửa hàng còn nhân viên đang theo dõi.
+- **Nhập tài khoản:** tải mẫu CSV, xem trước (dòng lỗi được đánh dấu: trùng email/mã NV, cửa hàng không tồn tại…), chỉ nhập các dòng hợp lệ. Mật khẩu ban đầu `Upharma@123`.
+- **Nhật ký hệ thống:** mọi thao tác ghi dữ liệu, lọc theo người, loại thao tác, khoảng ngày.
+- **Cấu hình, công cụ demo:** V20, ngày giả lập, "Chạy job ngay", khôi phục dữ liệu mẫu.
+
+## Vận hành lượt Level
+
+- **Ký cuối giai đoạn:** chân mỗi thẻ giai đoạn (Hồ sơ NV → Checklist) có chuỗi ký. Mở từ 3 ngày trước khi giai đoạn kết thúc, hạn 3 ngày sau; chỉ ký được khi mọi mục bắt buộc đã xong hoặc N/A (R11). Giai đoạn sẵn sàng ký hiện ở "Chữ ký chờ bạn". Thử: **CHT Bình** → ký giai đoạn cuối của Linh.
+- **Tạm dừng:** Hồ sơ NV → tab **Phân công & tạm dừng**. CHT đề xuất → QLKV hoặc BP ĐT duyệt (đề xuất hiện ở "Chữ ký chờ bạn" của QLKV). Khi duyệt, mọi mốc chưa xong từ ngày dừng lùi đúng số ngày nghỉ, ngày kết thúc dự kiến lùi theo; "ngày thứ N" đứng yên trong lúc dừng. QLKV, BP ĐT tạm dừng thì có hiệu lực ngay.
+- **Đổi Buddy / CHT / QLKV, chuyển cửa hàng:** cùng tab; lịch không đổi, người mới nhận các việc chưa xác nhận và được thông báo.
+- **Ngừng theo dõi (nghỉ việc):** lượt chuyển Dừng, dữ liệu giữ nguyên; nếu NV đang là Buddy của người khác thì phải chọn Buddy thay.
+
+## Cảnh báo, thông báo, xuất CSV
+
+- **Cảnh báo** (tab Cảnh báo, cột Cảnh báo ở Nhân sự, đầu Hồ sơ NV): đỏ khi mục GPP quá hạn, Level 1–2 chưa có Buddy sau 48 giờ, có mục trễ hơn 7 ngày, có ca Rubric lỗi an toàn thuốc; vàng khi có mục trễ, chưa gắn CHT, DS tổng dưới 80% hai tháng liền, Rubric dưới mục tiêu, NV Level 1 không đăng nhập quá 5 ngày, quá thời gian Level 14 ngày, trễ ký giai đoạn. Tính trực tiếp nên luôn khớp ngày giả lập. QLKV có thêm khối "Cảnh báo trong khu vực" ở Việc cần xử lý.
+- **Thông báo** (chuông trên thanh trên cùng): NV báo xong / cần hỗ trợ → người xác nhận kế tiếp; yêu cầu làm lại → NV; chữ ký giai đoạn, phiếu → người ký kế tiếp; đề xuất tạm dừng → QLKV; bản nháp chờ duyệt → người duyệt; đăng ký mới → BP ĐT. Mỗi sáng có **bản tin** (việc quá hạn, sắp đến hạn, mới mở), QLKV nhận báo việc quá hạn lâu, lượt sắp bắt đầu được nhắc trước 1 ngày. Job chạy khi khởi động, sang ngày mới, đổi ngày giả lập, khôi phục dữ liệu mẫu, hoặc bấm "Chạy ngay"; chạy lại không tạo trùng.
+- **Xuất CSV tiến độ:** Nhân sự → "Xuất CSV" (CHT, QLKV trong phạm vi, BP ĐT toàn chuỗi), mở được bằng Excel.
+
+## Khung năng lực (chỉ BP Đào tạo sửa)
+
+- **Sửa:** BP ĐT → Thiết kế lộ trình → bản nháp → tab **Khung năng lực**. Theo từng Level: thông tin Level (số ngày, số tháng), mục tiêu, phân công trách nhiệm, chỉ tiêu doanh số và cách xét KPI, nhiệm vụ LMS / tại quầy, phiếu đánh giá (tiêu chí, phần nhận xét, gia hạn, chuỗi ký). Dùng chung: Rubric và phần giới thiệu. Đi qua cùng luồng nháp → gửi duyệt → ban hành với checklist; kiểm tra KNL-xx chạy ngay khi gõ (ví dụ DS hệ số 1 lớn hơn DS tổng là lỗi KNL-04).
+- **Xem:** mọi người (trừ NV) mở tab **Khung năng lực** trên thanh trên cùng để xem phiên bản đang hiệu lực, chỉ đọc. CHT, QLKV, người duyệt không sửa được nội dung (máy chủ trả 403).
+- **Ai ban hành (V20):** BP ĐT → Quản trị → "BP Đào tạo tự duyệt và ban hành phiên bản". Mặc định tắt: cần người có quyền duyệt (QLKV Huy). Bật: BP ĐT quản lý trọn vòng đời.
 
 ## Cấu trúc
 
@@ -109,10 +143,12 @@ apps/api/src      NestJS (mục 14.4–14.5 đặc tả)
   adapters/         phần hạ tầng tối giản thay được khi chạy thật: clock (ngày giả lập)
   common/           lỗi { code, message }, kiểm tra dữ liệu vào bằng Zod, phiên đăng nhập
   db/               schema Drizzle, migration SQL, dữ liệu mẫu, lệnh db:*
-  modules/          access (ma trận quyền CASL + lọc phạm vi), audit, auth, demo, health,
-                    me (Hôm nay, Việc cần xử lý), runs, staff, tasks, versions (vòng đời phiên bản),
-                    sales, observations, reviews (phiếu đánh giá, chuỗi ký, lên Level)
-  db/migrations/    SQL; 0002 là trigger chặn sửa, xóa bản đã ban hành (R03)
+  modules/          access (ma trận quyền CASL + lọc phạm vi), audit (ghi và xem nhật ký), auth (đăng nhập, đăng ký), demo,
+                    health, me (Hôm nay, Việc cần xử lý), runs (checklist, ký giai đoạn, tạm dừng, phân công), staff,
+                    tasks, versions (vòng đời phiên bản), sales, observations, reviews (phiếu đánh giá, lên Level),
+                    users (tài khoản, chuyển giao, nhập CSV), org (cửa hàng, khu vực), alerts, notifications,
+                    jobs (bản tin, leo thang, nhắc lượt, kích hoạt phiên bản), reports (CSV)
+  db/migrations/    SQL; 0002 là trigger chặn sửa, xóa bản đã ban hành (R03); 0004 bảng của giai đoạn 2
 apps/web/src      Vue 3: api, components (ItemRow, StageChecklist, design/ trình soạn checklist…), designer/ (thao tác soạn),
                   pages, styles (bảng màu N3)
 packages/shared   Lõi nghiệp vụ dùng chung API ↔ giao diện: schema phiên bản, tính lịch, trạng thái đầu việc,

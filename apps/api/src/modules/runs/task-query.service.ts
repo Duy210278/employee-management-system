@@ -1,13 +1,27 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { and, asc, eq, inArray, isNull } from 'drizzle-orm';
 import type { Db } from '../../db/client';
-import { runTasks, taskConfirmations, users } from '../../db/schema';
+import { runTasks, stageSignoffs, taskConfirmations, users } from '../../db/schema';
 import { DB } from '../../db/db.provider';
-import type { RunTaskData } from './task-views';
+import type { RunTaskData, SignoffRow } from './task-views';
 
 @Injectable()
 export class TaskQueryService {
   constructor(@Inject(DB) private readonly db: Db) {}
+
+  /** Chữ ký cuối giai đoạn của các lượt, kèm tên người ký */
+  async loadSignoffs(runIds: number[]): Promise<Map<number, SignoffRow[]>> {
+    const out = new Map<number, SignoffRow[]>(runIds.map((id) => [id, []]));
+    if (!runIds.length) return out;
+    const rows = await this.db
+      .select({ s: stageSignoffs, userName: users.fullName })
+      .from(stageSignoffs)
+      .innerJoin(users, eq(users.id, stageSignoffs.userId))
+      .where(inArray(stageSignoffs.runId, runIds))
+      .orderBy(asc(stageSignoffs.step));
+    for (const { s, userName } of rows) out.get(s.runId)?.push({ ...s, userName });
+    return out;
+  }
 
   /** Đầu việc, xác nhận còn hiệu lực và tên người liên quan của các lượt */
   async loadForRuns(runIds: number[]): Promise<Map<number, RunTaskData>> {

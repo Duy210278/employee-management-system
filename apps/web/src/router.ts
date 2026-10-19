@@ -3,22 +3,33 @@ import { createRouter, createWebHistory } from 'vue-router';
 import { ApiError } from './api/client';
 import { fetchMe, queryClient } from './api/queries';
 import AppShell from './components/AppShell.vue';
-import AdminPage from './pages/AdminPage.vue';
+import AccountDetailPage from './pages/admin/AccountDetailPage.vue';
+import AccountsPage from './pages/admin/AccountsPage.vue';
+import AdminLayout from './pages/admin/AdminLayout.vue';
+import AuditPage from './pages/admin/AuditPage.vue';
+import ImportPage from './pages/admin/ImportPage.vue';
+import OrgPage from './pages/admin/OrgPage.vue';
+import SystemPage from './pages/admin/SystemPage.vue';
+import AlertsPage from './pages/AlertsPage.vue';
 import DesignPage from './pages/design/DesignPage.vue';
+import FrameworkPage from './pages/FrameworkPage.vue';
 import InboxPage from './pages/InboxPage.vue';
 import LoginPage from './pages/LoginPage.vue';
+import NotificationsPage from './pages/NotificationsPage.vue';
+import PendingPage from './pages/PendingPage.vue';
 import PlaceholderPage from './pages/PlaceholderPage.vue';
+import RegisterPage from './pages/RegisterPage.vue';
 import StaffCreatePage from './pages/staff/StaffCreatePage.vue';
 import StaffListPage from './pages/staff/StaffListPage.vue';
 import StaffProfilePage from './pages/staff/StaffProfilePage.vue';
 import TodayPage from './pages/TodayPage.vue';
 
-const soon = (title: string, slice: string) => ({ component: PlaceholderPage, meta: { title, slice } });
-
 export const router = createRouter({
   history: createWebHistory(),
   routes: [
     { path: '/dang-nhap', name: 'login', component: LoginPage, meta: { public: true } },
+    { path: '/dang-ky', name: 'register', component: RegisterPage, meta: { public: true } },
+    { path: '/cho-duyet', name: 'pending', component: PendingPage, meta: { public: true } },
     {
       path: '/',
       component: AppShell,
@@ -40,17 +51,30 @@ export const router = createRouter({
         { path: 'nhan-su', name: 'staff', component: StaffListPage },
         { path: 'nhan-su/them', name: 'staff-create', component: StaffCreatePage },
         { path: 'nhan-su/:id(\\d+)', name: 'staff-profile', component: StaffProfilePage },
-        { path: 'quan-tri', name: 'admin', component: AdminPage },
-        { path: 'canh-bao', name: 'alerts', ...soon('Cảnh báo', 'giai đoạn 2') },
-        { path: 'khung-nang-luc', name: 'framework', ...soon('Khung năng lực', 'giai đoạn 2') },
+        { path: 'canh-bao', name: 'alerts', component: AlertsPage },
+        { path: 'thong-bao', name: 'notifications', component: NotificationsPage },
+        { path: 'khung-nang-luc', name: 'framework', component: FrameworkPage },
         { path: 'thiet-ke/:id(\\d+)?', name: 'design', component: DesignPage, meta: { wide: true } },
+        {
+          path: 'quan-tri',
+          component: AdminLayout,
+          children: [
+            { path: '', redirect: { name: 'accounts' } },
+            { path: 'tai-khoan', name: 'accounts', component: AccountsPage },
+            { path: 'tai-khoan/:id(\\d+)', name: 'account', component: AccountDetailPage },
+            { path: 'danh-muc', name: 'org', component: OrgPage },
+            { path: 'nhap-csv', name: 'import', component: ImportPage },
+            { path: 'nhat-ky', name: 'audit', component: AuditPage },
+            { path: 'he-thong', name: 'admin', component: SystemPage },
+          ],
+        },
       ],
     },
     { path: '/:pathMatch(.*)*', redirect: '/' },
   ],
 });
 
-/** Mọi trang (trừ đăng nhập) cần phiên hợp lệ; thông tin người dùng nạp một lần rồi dùng chung */
+/** Mọi trang (trừ đăng nhập, đăng ký) cần phiên hợp lệ; thông tin người dùng nạp một lần rồi dùng chung */
 router.beforeEach(async (to) => {
   if (to.meta.public) return true;
   try {

@@ -22,6 +22,7 @@ import { badRequest, forbidden, notFound, staleData } from '../../common/errors'
 import { toActor, type SessionUser } from '../../common/session';
 import { AccessService } from '../access/access.service';
 import { ClockService } from '../../adapters/clock/clock.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { DB } from '../../db/db.provider';
 import { RunContextService, type RunContext } from '../runs/run-context.service';
 import { TaskQueryService } from '../runs/task-query.service';
@@ -76,7 +77,38 @@ export class TasksService {
     private readonly runs: RunContextService,
     private readonly taskQuery: TaskQueryService,
     private readonly access: AccessService,
+    private readonly notifications: NotificationsService,
   ) {}
+
+  /** Thông báo ngay (mục 10.6): NV báo xong / cần hỗ trợ → người xác nhận kế tiếp; yêu cầu làm lại → NV */
+  private async announce(user: SessionUser, taskId: number, kind: 'report_done' | 'help' | 'rework', note: string | null) {
+    const [task] = await this.db.select().from(runTasks).where(eq(runTasks.id, taskId));
+    const ctx = await this.runs.load(task.runId);
+    const item = levelItems(ctx.level).find((x) => x.item.key === task.itemKey)?.item;
+    if (!item) return;
+    const link = `/nhan-su/${ctx.staff.id}?tab=check&run=${ctx.run.id}`;
+    const short = item.content.length > 80 ? `${item.content.slice(0, 77)}…` : item.content;
+    if (kind === 'rework') {
+      await this.notifications.notify(await this.notifications.recipientsOf(['nv'], ctx.people), {
+        type: 'rework',
+        title: `Yêu cầu làm lại: ${short}`,
+        body: note,
+        link: ctx.staff.userId ? '/hom-nay' : link,
+      }, user.id);
+      return;
+    }
+    const confirmed = await this.db
+      .select({ role: taskConfirmations.role })
+      .from(taskConfirmations)
+      .where(and(eq(taskConfirmations.taskId, taskId), isNull(taskConfirmations.revokedAt)));
+    const missing = requiredRoles(item).filter((r) => r !== 'nv' && !confirmed.some((c) => c.role === r));
+    await this.notifications.notify(await this.notifications.recipientsOf(missing.slice(0, 1), ctx.people), {
+      type: kind,
+      title: kind === 'help' ? `${ctx.staff.fullName} cần hỗ trợ: ${short}` : `${ctx.staff.fullName} đã báo xong, chờ bạn xác nhận: ${short}`,
+      body: note,
+      link,
+    }, user.id);
+  }
 
   /** Khóa đầu việc, kiểm tra phạm vi và rowVersion, tính quyền của người gọi bằng cùng hàm với giao diện */
   private async lock(tx: Tx, user: SessionUser, taskId: number, rowVersion: number): Promise<Locked> {
@@ -135,7 +167,7 @@ export class TasksService {
   }
 
   async confirm(user: SessionUser, taskId: number, body: ConfirmBodyT): Promise<TaskView> {
-    await this.db.transaction(async (tx) => {
+    const reported = await this.db.transaction(async (tx) => {
       const l = await this.lock(tx, user, taskId, body.rowVersion);
       const slot = l.actions.confirmAs;
       if (!slot) throw forbidden('CANNOT_CONFIRM', this.cannotConfirmReason(l, user));
@@ -161,7 +193,9 @@ export class TasksService {
         note,
         at: now,
       });
+      return slot.role === 'nv';
     });
+    if (reported) await this.announce(user, taskId, 'report_done', body.note || null);
     return this.view(user, taskId);
   }
 
@@ -205,12 +239,13 @@ export class TasksService {
       await this.save(tx, taskId, { status: 'todo', doneDate: null, reworkNote: body.note, reworkBy: user.id, reworkAt: now });
       await tx.insert(taskEvents).values({ taskId, userId: user.id, role: user.role, action: 'rework', note: body.note, at: now });
     });
+    await this.announce(user, taskId, 'rework', body.note);
     return this.view(user, taskId);
   }
 
   /** Đổi trạng thái tay: Cần hỗ trợ, Bỏ qua/N-A (R09), Đang thực hiện, Chưa bắt đầu */
   async setStatus(user: SessionUser, taskId: number, body: StatusBodyT): Promise<TaskView> {
-    await this.db.transaction(async (tx) => {
+    const action = await this.db.transaction(async (tx) => {
       const l = await this.lock(tx, user, taskId, body.rowVersion);
       const now = await this.clock.now();
       const note = body.note?.trim() || null;
@@ -253,7 +288,9 @@ export class TasksService {
       }
       await this.save(tx, taskId, { ...patch, status });
       await tx.insert(taskEvents).values({ taskId, userId: user.id, role: user.role, action, note, at: now });
+      return action;
     });
+    if (action === 'help') await this.announce(user, taskId, 'help', body.note?.trim() || null);
     return this.view(user, taskId);
   }
 

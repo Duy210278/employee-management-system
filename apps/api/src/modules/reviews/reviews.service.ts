@@ -12,6 +12,7 @@ import {
   reviewProblems,
   rubricOf,
   SIGN_STEP_LABEL,
+  stageWindow,
   type CriterionResult,
   type ReviewDraft,
   type ReviewResponse,
@@ -26,6 +27,7 @@ import type { Db, Tx } from '../../db/client';
 import { DB } from '../../db/db.provider';
 import { levelReviews, levelRuns, observations, reviewSignatures, salesMonthly, staff, users } from '../../db/schema';
 import { AccessService } from '../access/access.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { createRun, findVersionForDate } from '../runs/run-factory';
 import { RunContextService, type RunContext } from '../runs/run-context.service';
 import { TaskQueryService } from '../runs/task-query.service';
@@ -53,6 +55,7 @@ export class ReviewsService {
     private readonly runs: RunContextService,
     private readonly taskQuery: TaskQueryService,
     private readonly access: AccessService,
+    private readonly notifications: NotificationsService,
   ) {}
 
   private async reviewsOf(runIds: number[]) {
@@ -78,7 +81,7 @@ export class ReviewsService {
   /** Phiếu mở từ ngày mở giai đoạn cuối (mục 10.2); vòng sau gia hạn mở ngay */
   private opensOn(ctx: RunContext) {
     const last = ctx.level.stages.at(-1);
-    return addDays(ctx.run.startDate, last?.offsetStart ?? 0);
+    return last ? stageWindow(last, ctx.run.startDate, ctx.pauses).from : ctx.run.startDate;
   }
 
   /** Điền phiếu: Buddy (Level 1), CHT, BP ĐT (mục 3.3) */
@@ -260,6 +263,21 @@ export class ReviewsService {
       }
       await tx.update(levelReviews).set(patch).where(eq(levelReviews.id, row.id));
     });
+    // Báo người ký bước sau (mục 10.6)
+    const following = form.signers[step + 1];
+    if (following) {
+      await this.notifications.notify(
+        await this.notifications.recipientsOf([following], ctx.people),
+        {
+          type: 'review_sign',
+          title: `Phiếu đánh giá Level ${ctx.level.key} của ${ctx.staff.fullName} chờ bạn ký`,
+          body: SIGN_STEP_LABEL[following],
+          link: `/nhan-su/${ctx.staff.id}?tab=review&run=${runId}`,
+          dedupeKey: `review-sign:${runId}:${step + 1}:${now.getTime()}`,
+        },
+        user.id,
+      );
+    }
     return this.get(user, runId);
   }
 
@@ -311,6 +329,7 @@ export class ReviewsService {
       const mine = canSignAs(actor, ctx.people, role) || (fillFirst && this.canFill(user, ctx) && user.role !== 'bp');
       if (!mine) continue;
       out.push({
+        kind: 'review',
         runId: ctx.run.id,
         staffId: ctx.staff.id,
         staffName: ctx.staff.fullName,
@@ -319,6 +338,10 @@ export class ReviewsService {
         step: next,
         totalSteps: form.signers.length,
         label: fillFirst ? `Điền phiếu đánh giá Level ${ctx.level.key}${round ? ` (vòng gia hạn ${round})` : ''}` : SIGN_STEP_LABEL[role],
+        detail: 'Phiếu đánh giá tổng kết',
+        dueOn: ctx.run.plannedEnd,
+        overdue: today > ctx.run.plannedEnd,
+        tab: 'review',
       });
     }
     return out;

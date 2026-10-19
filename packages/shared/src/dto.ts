@@ -1,5 +1,7 @@
 import type { IsoDate } from './dates';
-import type { AccountRole, TaskRole, UserStatus } from './roles';
+import type { Alert, AlertSeverity } from './alerts/rules';
+import type { AccountRole, AssignmentRole, TaskRole, UserStatus } from './roles';
+import type { PauseSpan } from './schedule/run';
 import type { InboxPriority } from './rules/assignee';
 import type { TaskActions } from './rules/confirm';
 import type { TaskState, TaskStatus } from './schedule/state';
@@ -84,6 +86,10 @@ export interface RunSummary {
   currentStage: { key: string; label: string; name: string; index: number } | null;
   progress: { done: number; total: number; pct: number };
   counts: { overdue: number; rework: number; waiting: number };
+  /** Lần tạm dừng đang diễn ra hôm nay (mục 9.3) */
+  pause: PauseSpan | null;
+  /** Tổng số ngày đã tạm dừng (đã duyệt) */
+  pausedDays: number;
 }
 
 export interface ConfirmationView {
@@ -160,8 +166,44 @@ export interface InboxResponse {
   groups: InboxGroup[];
   /** Lượt sắp bắt đầu: việc giai đoạn đầu ở trạng thái "Sắp mở" */
   upcoming: InboxGroup[];
-  /** Phiếu đánh giá cần người dùng điền hoặc ký */
+  /** Ký giai đoạn, phiếu đánh giá, đề xuất tạm dừng cần người dùng xử lý */
   signatures: SignatureTodo[];
+  /** QLKV: việc của người khác trong khu vực quá hạn hơn escalateDays (mục 11.3, T-L08) */
+  areaAlerts: AreaAlertItem[];
+}
+
+export interface AreaAlertItem {
+  taskId: number;
+  runId: number;
+  staffId: number;
+  staffName: string;
+  storeName: string;
+  itemKey: string;
+  content: string;
+  overdueDays: number;
+  /** Vai trò còn thiếu xác nhận */
+  waitingFor: TaskRole[];
+}
+
+export interface StageSignStepView {
+  step: number;
+  role: TaskRole;
+  label: string;
+  signedByName: string | null;
+  at: string | null;
+  state: 'signed' | 'next' | 'waiting';
+  canSign: boolean;
+}
+
+/** Ký cuối giai đoạn (mục 10.2, R11, R12) */
+export interface StageSignView {
+  opensOn: IsoDate;
+  dueOn: IsoDate;
+  complete: boolean;
+  ready: boolean;
+  overdue: boolean;
+  blocked: string | null;
+  steps: StageSignStepView[];
 }
 
 export interface StageView {
@@ -172,6 +214,8 @@ export interface StageView {
   goal: string;
   from: IsoDate;
   to: IsoDate;
+  /** null khi giai đoạn không cấu hình chuỗi ký */
+  sign: StageSignView | null;
 }
 
 export interface RunTasksResponse {
@@ -199,19 +243,46 @@ export interface StaffListItem {
   staff: StaffSummary;
   run: RunSummary | null;
   level: LevelSummary | null;
-  /** Tín hiệu cảnh báo tối thiểu khi chưa có module Cảnh báo (giai đoạn 2) */
-  flags: { overdue7: number; noBuddy: boolean; noCht: boolean };
+  /** Cảnh báo theo quy tắc mục 11.6 */
+  alerts: Alert[];
 }
 
 export interface StaffListResponse {
   today: IsoDate;
   items: StaffListItem[];
   canCreate: boolean;
+  canExport: boolean;
+}
+
+/** Trang Cảnh báo (mục 11.6): mỗi dòng một cảnh báo, đỏ trước vàng sau */
+export interface AlertRow extends Alert {
+  staffId: number;
+  staffName: string;
+  employeeCode: string | null;
+  storeName: string;
+  levelKey: number;
+  runId: number;
+}
+
+export interface AlertsResponse {
+  today: IsoDate;
+  items: AlertRow[];
+  counts: { red: number; yellow: number; staff: number };
 }
 
 export interface StaffProfileResponse {
   today: IsoDate;
-  staff: StaffSummary & { hireDate: IsoDate; currentLevel: number; accountEmail: string | null };
+  alerts: Alert[];
+  /** Người xem được đổi phân công, tạm dừng, chuyển cửa hàng, ngừng theo dõi */
+  canManage: boolean;
+  staff: StaffSummary & {
+    hireDate: IsoDate;
+    currentLevel: number;
+    accountEmail: string | null;
+    active: boolean;
+    stopReason: string | null;
+    stoppedAt: string | null;
+  };
   /** Lượt Level đang mở (hoặc gần nhất) */
   run: RunSummary | null;
   level: LevelSummary | null;
@@ -237,6 +308,21 @@ export interface StaffFormOptions {
   /** Tài khoản NV đã duyệt, chưa gắn hồ sơ nào */
   accounts: PersonOption[];
   levels: { key: number; name: string; durationLabel: string }[];
+}
+
+/** Khung năng lực đang hiệu lực, chỉ xem (mục 4.3) */
+export interface FrameworkResponse {
+  today: IsoDate;
+  versionCode: string;
+  effectiveFrom: IsoDate | null;
+  framework: VersionContent['framework'] | null;
+  rubric: Rubric;
+  levels: (Omit<VersionContent['levels'][number], 'stages'> & { stageCount: number; itemCount: number })[];
+}
+
+export interface PublishingSettings {
+  /** V20: BP Đào tạo tự duyệt và ban hành phiên bản, không cần người duyệt riêng */
+  bpSelfPublish: boolean;
 }
 
 /** Trạng thái hiển thị của phiên bản (mục 8.2); "đang hiệu lực" tính theo ngày hiệu lực so với hôm nay */
@@ -380,8 +466,9 @@ export interface ReviewResponse {
   history: { round: number; result: ReviewResult | null; goals: string; appliedAt: string | null }[];
 }
 
-/** Một chữ ký đang chờ người dùng (nhóm "Chữ ký chờ bạn", mục 11.3) */
+/** Một việc ký/duyệt đang chờ người dùng (nhóm "Chữ ký chờ bạn", mục 11.3) */
 export interface SignatureTodo {
+  kind: 'review' | 'stage' | 'pause';
   runId: number;
   staffId: number;
   staffName: string;
@@ -390,7 +477,202 @@ export interface SignatureTodo {
   step: number;
   totalSteps: number;
   label: string;
+  /** Dòng phụ: tên giai đoạn, khoảng tạm dừng… */
+  detail: string | null;
+  dueOn: IsoDate | null;
+  overdue: boolean;
+  /** Tab của hồ sơ NV để mở thẳng */
+  tab: 'review' | 'check' | 'manage';
 }
+
+// ---------- Quản trị người dùng (mục 5) ----------
+
+export interface OrgOptions {
+  areas: { id: number; code: string; name: string; active: boolean }[];
+  stores: { id: number; code: string; name: string; areaId: number; areaName: string; active: boolean }[];
+}
+
+export interface UserListItem {
+  id: number;
+  fullName: string;
+  employeeCode: string | null;
+  email: string;
+  phone: string | null;
+  role: AccountRole;
+  status: UserStatus;
+  canBuddy: boolean;
+  canApproveVersions: boolean;
+  stores: { id: number; name: string }[];
+  areas: { id: number; name: string }[];
+  staffId: number | null;
+  lastSeenAt: string | null;
+  createdAt: string;
+  /** Đề nghị lúc đăng ký (chỉ với tài khoản tự đăng ký) */
+  requested: { role: AccountRole; storeId: number | null; storeName: string | null; areaId: number | null; areaName: string | null } | null;
+  reviewNote: string | null;
+}
+
+export interface UserListResponse {
+  items: UserListItem[];
+  options: OrgOptions;
+}
+
+export interface UserChangeView {
+  id: number;
+  at: string;
+  byName: string | null;
+  field: string;
+  fieldLabel: string;
+  oldValue: string | null;
+  newValue: string | null;
+}
+
+/** Một phân công đang hiệu lực trên lượt Level còn mở */
+export interface AssignmentView {
+  runId: number;
+  staffId: number;
+  staffName: string;
+  /** Tài khoản của chính NV (không được làm Buddy cho chính mình) */
+  staffUserId: number | null;
+  storeName: string;
+  levelKey: number;
+  role: AssignmentRole;
+}
+
+export interface UserDetailResponse {
+  user: UserListItem & { rowVersion: number; staffName: string | null };
+  history: UserChangeView[];
+  assignments: AssignmentView[];
+  /** Người nhận chuyển giao theo vai trò phân công */
+  candidates: Record<AssignmentRole, PersonOption[]>;
+  options: OrgOptions;
+  /** Là BP ĐT hoạt động cuối cùng (R19) */
+  isLastBp: boolean;
+}
+
+export interface ImportRowView {
+  line: number;
+  employeeCode: string;
+  fullName: string;
+  email: string;
+  phone: string;
+  role: string;
+  storeCode: string;
+  areaCode: string;
+  canBuddy: boolean;
+  errors: string[];
+}
+
+export interface ImportUsersResponse {
+  rows: ImportRowView[];
+  valid: number;
+  invalid: number;
+  /** Số tài khoản đã tạo khi commit = true */
+  imported: number | null;
+  /** Mật khẩu ban đầu của tài khoản được nhập */
+  initialPassword: string;
+}
+
+export interface OrgResponse {
+  areas: { id: number; code: string; name: string; active: boolean; storeCount: number; qlkvNames: string[] }[];
+  stores: { id: number; code: string; name: string; address: string | null; areaId: number; areaName: string; active: boolean; chtNames: string[]; staffCount: number }[];
+}
+
+// ---------- Vận hành lượt Level (mục 9.3) ----------
+
+export interface PauseView {
+  id: number;
+  from: IsoDate;
+  to: IsoDate;
+  days: number;
+  reason: string;
+  status: 'pending' | 'approved' | 'rejected';
+  requestedByName: string;
+  requestedAt: string;
+  decidedByName: string | null;
+  decidedAt: string | null;
+  decisionNote: string | null;
+}
+
+export interface RunManageResponse {
+  today: IsoDate;
+  runId: number;
+  staffId: number;
+  levelKey: number;
+  runStatus: string;
+  startDate: IsoDate;
+  plannedEnd: IsoDate;
+  storeId: number;
+  people: { buddyId: number | null; chtId: number | null; qlkvId: number | null };
+  options: {
+    buddies: PersonOption[];
+    chts: PersonOption[];
+    qlkvs: PersonOption[];
+    stores: { id: number; name: string; areaName: string; defaultChtId: number | null; defaultQlkvId: number | null }[];
+  };
+  pauses: PauseView[];
+  permissions: { assign: boolean; requestPause: boolean; decidePause: boolean; transfer: boolean; stop: boolean };
+  /** Lượt của người khác mà NV này đang làm Buddy: phải chuyển giao khi ngừng theo dõi */
+  buddyOf: AssignmentView[];
+  active: boolean;
+}
+
+// ---------- Thông báo, nhật ký, job ----------
+
+export interface NotificationView {
+  id: number;
+  type: string;
+  title: string;
+  body: string | null;
+  link: string | null;
+  businessDate: IsoDate;
+  createdAt: string;
+  read: boolean;
+}
+
+export interface NotificationsResponse {
+  items: NotificationView[];
+  unread: number;
+}
+
+export interface AuditLogView {
+  id: number;
+  at: string;
+  userId: number | null;
+  userName: string | null;
+  action: string;
+  label: string;
+  entity: string | null;
+  entityId: string | null;
+  payload: unknown;
+  ip: string | null;
+}
+
+export interface AuditLogResponse {
+  items: AuditLogView[];
+  total: number;
+  page: number;
+  pageSize: number;
+  users: { id: number; fullName: string }[];
+  actions: { value: string; label: string }[];
+}
+
+export type JobName = 'version-activate' | 'daily-digest' | 'escalation' | 'alerts-refresh' | 'run-start-reminder';
+
+export interface JobResult {
+  name: JobName;
+  label: string;
+  date: IsoDate;
+  created: number;
+  message: string;
+}
+
+export interface RegisterOptions {
+  areas: { id: number; name: string }[];
+  stores: { id: number; name: string; areaId: number; areaName: string }[];
+}
+
+export type { AlertSeverity };
 
 export interface TaskEventView {
   id: number;

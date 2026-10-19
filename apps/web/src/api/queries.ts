@@ -1,12 +1,35 @@
 import type {
+  AlertsResponse,
+  ApproveUserBodyT,
+  AreaBodyT,
+  AssignmentRole,
+  AuditLogResponse,
   ClockView,
+  CreateUserBodyT,
+  ImportUsersResponse,
+  JobName,
+  JobResult,
+  NotificationsResponse,
+  OrgResponse,
+  PauseBodyT,
+  RegisterBodyT,
+  RegisterOptions,
+  RunManageResponse,
+  StopStaffBodyT,
+  StoreBodyT,
+  TransferBodyT,
+  UpdateUserBodyT,
+  UserDetailResponse,
+  UserListResponse,
   CreateStaffBodyT,
   DemoAccount,
+  FrameworkResponse,
   InboxResponse,
   MeResponse,
   ObservationBodyT,
   ObservationsResponse,
   OverviewResponse,
+  PublishingSettings,
   ReviewResponse,
   RunTasksResponse,
   SalesResponse,
@@ -80,6 +103,34 @@ export const useVersion = (id: Ref<number | null>) =>
     staleTime: 0,
     refetchOnWindowFocus: false,
   });
+export const useFramework = () => useQuery({ queryKey: ['framework'], queryFn: () => api.get<FrameworkResponse>('/framework') });
+export const usePublishing = (enabled: Ref<boolean>) =>
+  useQuery({ queryKey: ['settings', 'publishing'], queryFn: () => api.get<PublishingSettings>('/settings/publishing'), enabled });
+export const useAlerts = (enabled: Ref<boolean>) => useQuery({ queryKey: ['alerts'], queryFn: () => api.get<AlertsResponse>('/alerts'), enabled });
+/** Chuông thông báo: tự làm mới mỗi phút */
+export const useNotifications = (enabled: Ref<boolean>) =>
+  useQuery({ queryKey: ['notifications'], queryFn: () => api.get<NotificationsResponse>('/me/notifications'), enabled, refetchInterval: 60_000 });
+export const useUsers = (enabled: Ref<boolean> = ref(true)) => useQuery({ queryKey: ['users'], queryFn: () => api.get<UserListResponse>('/users'), enabled });
+export const useUser = (id: Ref<number | null>) =>
+  useQuery({
+    queryKey: computed(() => ['users', id.value]),
+    queryFn: () => api.get<UserDetailResponse>(`/users/${id.value}`),
+    enabled: computed(() => id.value !== null),
+    staleTime: 0,
+  });
+export const useOrg = () => useQuery({ queryKey: ['org'], queryFn: () => api.get<OrgResponse>('/org') });
+export const useRegisterOptions = () => useQuery({ queryKey: ['register-options'], queryFn: () => api.get<RegisterOptions>('/auth/register-options'), staleTime: 60_000 });
+export const useAuditLogs = (params: Ref<Record<string, string | number>>) =>
+  useQuery({
+    queryKey: computed(() => ['audit', params.value]),
+    queryFn: () => api.get<AuditLogResponse>(`/audit-logs?${new URLSearchParams(Object.entries(params.value).filter(([, v]) => v !== '' && v !== 0).map(([k, v]) => [k, String(v)]))}`),
+  });
+export const useRunManage = (runId: Ref<number | null>) =>
+  useQuery({
+    queryKey: computed(() => ['manage', runId.value]),
+    queryFn: () => api.get<RunManageResponse>(`/runs/${runId.value}/manage`),
+    enabled: computed(() => runId.value !== null),
+  });
 const runQuery = <T>(name: string, runId: Ref<number | null>, path: string) =>
   useQuery({
     queryKey: computed(() => [name, runId.value]),
@@ -142,6 +193,7 @@ export const versionApi = {
   approve: (id: number, effectiveFrom: string) => api.post<VersionDetailResponse>(`/versions/${id}/approve`, { effectiveFrom }),
   remove: (id: number) => api.del<{ ok: true }>(`/versions/${id}`),
   exportUrl: (id: number) => `/api/v1/versions/${id}/export`,
+  setPublishing: (body: PublishingSettings) => api.put<PublishingSettings>('/settings/publishing', body),
 };
 
 export const assessmentApi = {
@@ -155,4 +207,39 @@ export const assessmentApi = {
 
 export const staffApi = {
   create: (body: CreateStaffBodyT) => api.post<{ staffId: number; runId: number }>('/staff', body),
+  transfer: (staffId: number, body: TransferBodyT) => api.post<RunManageResponse>(`/staff/${staffId}/transfer`, body),
+  stop: (staffId: number, body: StopStaffBodyT) => api.post<RunManageResponse>(`/staff/${staffId}/stop`, body),
+  exportUrl: '/api/v1/reports/progress.csv',
+};
+
+export const runApi = {
+  signStage: (runId: number, stageKey: string, step: number) => api.post<RunTasksResponse>(`/runs/${runId}/stages/${encodeURIComponent(stageKey)}/sign`, { step }),
+  pause: (runId: number, body: PauseBodyT) => api.post<RunManageResponse>(`/runs/${runId}/pauses`, body),
+  decidePause: (runId: number, pauseId: number, approve: boolean, note: string) =>
+    api.post<RunManageResponse>(`/runs/${runId}/pauses/${pauseId}/decision`, { approve, note }),
+  assign: (runId: number, role: AssignmentRole, userId: number) => api.post<RunManageResponse>(`/runs/${runId}/assignments`, { role, userId }),
+};
+
+export const userApi = {
+  register: (body: RegisterBodyT) => api.post<{ ok: true }>('/auth/register', body),
+  create: (body: CreateUserBodyT) => api.post<{ id: number }>('/users', body),
+  update: (id: number, body: UpdateUserBodyT) => api.put<UserDetailResponse>(`/users/${id}`, body),
+  approve: (id: number, body: ApproveUserBodyT) => api.post<UserDetailResponse>(`/users/${id}/approve`, body),
+  reject: (id: number, note: string) => api.post<UserDetailResponse>(`/users/${id}/reject`, { note }),
+  importCsv: (csv: string, commit: boolean) => api.post<ImportUsersResponse>('/users/import', { csv, commit }),
+};
+
+export const orgApi = {
+  createArea: (body: AreaBodyT) => api.post<OrgResponse>('/org/areas', body),
+  updateArea: (id: number, body: AreaBodyT) => api.put<OrgResponse>(`/org/areas/${id}`, body),
+  createStore: (body: StoreBodyT) => api.post<OrgResponse>('/org/stores', body),
+  updateStore: (id: number, body: StoreBodyT) => api.put<OrgResponse>(`/org/stores/${id}`, body),
+};
+
+export const notificationApi = {
+  read: (body: { ids?: number[]; all?: boolean }) => api.post<NotificationsResponse>('/me/notifications/read', body),
+};
+
+export const demoApi = {
+  runJob: (name: JobName) => api.post<JobResult>(`/demo/jobs/${name}/run`),
 };

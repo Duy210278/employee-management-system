@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { classifyChanges, proposeVersionCode } from '../change-kind/classify';
 import { VersionContentSchema, type VersionContent } from '../schemas/version';
 import { countIssues, validateChecklist } from './checklist';
+import { validateFramework, validateVersion } from './framework';
 
 const seed = VersionContentSchema.parse(JSON.parse(fs.readFileSync(path.resolve(__dirname, '../../../../seed/v2.1.json'), 'utf8')));
 let draft: VersionContent;
@@ -79,6 +80,37 @@ describe('kiểm tra hợp lệ checklist (mục 7.7)', () => {
   it('CK-11: giai đoạn không có chuỗi ký', () => {
     l1().stages[0].signers = [];
     expect(codes(draft)).toContain('CK-11');
+  });
+});
+
+describe('kiểm tra hợp lệ Khung năng lực (mục 6.2)', () => {
+  const kcodes = (c: VersionContent) => validateFramework(c).map((i) => i.code);
+
+  it('bộ v2.1 không có lỗi Khung năng lực', () => {
+    expect(countIssues(validateFramework(seed)).errors).toBe(0);
+    expect(countIssues(validateVersion(seed)).errors).toBe(0);
+  });
+
+  it('KNL-03: cửa sổ KPI ngoài thời gian Level; KNL-04: HS1 lớn hơn DS tổng; KNL-05: tỉ trọng khai báo lệch', () => {
+    draft.levels[1].kpi.windowTo = 12;
+    draft.levels[0].kpi.coef1 = 40;
+    draft.levels[2].kpi.ratio = 30;
+    const issues = validateFramework(draft);
+    expect(issues.find((i) => i.code === 'KNL-03')).toMatchObject({ level: 'error', at: { levelKey: 2, section: 'kpi' } });
+    expect(kcodes(draft)).toContain('KNL-04');
+    expect(issues.find((i) => i.code === 'KNL-05')?.level).toBe('warning');
+  });
+
+  it('KNL-06: ngưỡng Rubric vượt tổng điểm, mã tiêu chí trùng', () => {
+    draft.rubric!.passTotal = 16;
+    draft.rubric!.criteria[1].key = draft.rubric!.criteria[0].key;
+    expect(validateFramework(draft).filter((i) => i.code === 'KNL-06')).toHaveLength(2);
+  });
+
+  it('KNL-10: phiếu không có bước ký; CK-12: tiêu chí phiếu thiếu ngưỡng', () => {
+    draft.levels[0].review!.signers = [];
+    draft.levels[0].reviewCriteria[0].threshold = '';
+    expect(kcodes(draft)).toEqual(expect.arrayContaining(['KNL-10', 'CK-12']));
   });
 });
 

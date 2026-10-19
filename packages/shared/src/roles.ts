@@ -28,3 +28,23 @@ export const ROLE_SHORT: Record<TaskRole, string> = {
 
 export const USER_STATUSES = ['pending', 'active', 'locked', 'left', 'rejected'] as const;
 export type UserStatus = (typeof USER_STATUSES)[number];
+
+export const USER_STATUS_LABEL: Record<UserStatus, string> = {
+  pending: 'Chờ duyệt',
+  active: 'Hoạt động',
+  locked: 'Tạm khóa',
+  left: 'Đã nghỉ',
+  rejected: 'Bị từ chối',
+};
+
+export const ASSIGNMENT_LABEL: Record<AssignmentRole, string> = { buddy: 'Buddy', cht: 'Cửa hàng trưởng', qlkv: 'QLKV' };
+
+/**
+ * Tài khoản còn giữ được một phân công trên lượt Level không (mục 5.4 điều 3, R20):
+ * phải đang hoạt động; Buddy cần quyền "Có thể làm Buddy" hoặc là CHT; CHT, QLKV đúng vai trò tài khoản.
+ */
+export function canHoldAssignment(role: AssignmentRole, user: { role: AccountRole; status: UserStatus; canBuddy: boolean }): boolean {
+  if (user.status !== 'active') return false;
+  if (role === 'buddy') return user.canBuddy || user.role === 'cht';
+  return user.role === role;
+}

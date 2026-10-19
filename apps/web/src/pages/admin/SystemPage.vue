@@ -1,19 +1,41 @@
 <script setup lang="ts">
-import { addDays, ROLE_LABEL } from '@lotrinh/shared';
+import { addDays, ROLE_LABEL, type JobName, type JobResult } from '@lotrinh/shared';
 import { useQueryClient } from '@tanstack/vue-query';
 import { computed, ref } from 'vue';
-import { sessionApi, useDemoAccounts, useMe, useMutate } from '@/api/queries';
+import { demoApi, sessionApi, useDemoAccounts, useMe, useMutate, usePublishing, versionApi } from '@/api/queries';
 import { useToast } from '@/composables/toast';
 import { diffDays, fmtDate } from '@/format';
 
-/** Quản trị (mục 4.3). Bản MVP mới có Công cụ demo (mục 14.7); quản trị tài khoản thuộc giai đoạn 2 */
+/** Cấu hình hệ thống (V20) và Công cụ demo (mục 14.7): ngày giả lập, chạy job ngay, khôi phục dữ liệu mẫu */
 const { data: me } = useMe();
 const qc = useQueryClient();
 const toast = useToast();
 const mutate = useMutate();
 const { data: accounts } = useDemoAccounts(computed(() => !!me.value?.demoMode));
+const { data: publishing } = usePublishing(computed(() => me.value?.user.role === 'bp'));
 const armed = ref(false);
 const busy = ref(false);
+
+function setSelfPublish(e: Event) {
+  const on = (e.target as HTMLInputElement).checked;
+  void mutate(
+    () => versionApi.setPublishing({ bpSelfPublish: on }),
+    on ? 'BP Đào tạo tự duyệt và ban hành phiên bản' : 'Phiên bản cần người có quyền duyệt',
+  );
+}
+
+const JOBS: [JobName, string][] = [
+  ['daily-digest', 'Bản tin sáng'],
+  ['escalation', 'Báo QLKV việc quá hạn lâu'],
+  ['run-start-reminder', 'Nhắc lượt sắp bắt đầu'],
+  ['version-activate', 'Kích hoạt phiên bản'],
+  ['alerts-refresh', 'Tính lại cảnh báo'],
+];
+const jobResults = ref<JobResult[]>([]);
+async function runJob(name: JobName) {
+  const res = await mutate(() => demoApi.runJob(name), 'Đã chạy job');
+  if (res) jobResults.value = [res, ...jobResults.value.filter((r) => r.name !== name)];
+}
 
 const clock = computed(() => me.value?.clock);
 const offset = computed(() => (clock.value ? diffDays(clock.value.today, clock.value.realToday) : 0));
@@ -44,11 +66,18 @@ async function reset() {
 
 <template>
   <div class="stack">
-    <div class="h2">Quản trị</div>
-    <div v-if="me?.user.role !== 'bp'" class="card empty"><h3>Chỉ BP Đào tạo dùng được trang này</h3></div>
-    <template v-else>
-      <div class="card pad stack" style="color: var(--mut)">
-        <div class="sm">Tài khoản và vai trò, hàng chờ duyệt đăng ký, danh mục cửa hàng, nhập CSV, nhật ký hệ thống: có ở giai đoạn 2.</div>
+    <template v-if="me">
+      <div class="sec">Phiên bản Bộ lộ trình</div>
+      <div class="card pad stack">
+        <div class="h2">Ai ban hành Khung năng lực và checklist</div>
+        <label class="p cb">
+          <input type="checkbox" :checked="publishing?.bpSelfPublish ?? false" :disabled="!publishing" @change="setSelfPublish" />
+          BP Đào tạo tự duyệt và ban hành phiên bản
+        </label>
+        <div class="sm mut">
+          Tắt (mặc định): BP Đào tạo soạn và gửi duyệt; người được cấp quyền "Duyệt phiên bản" duyệt và ban hành. Bật: BP Đào tạo quản lý trọn vòng đời, tự
+          duyệt bản nháp của mình. Dù bật hay tắt, chỉ BP Đào tạo sửa được nội dung; người duyệt chỉ duyệt hoặc trả về.
+        </div>
       </div>
 
       <template v-if="me.demoMode && clock">
@@ -84,6 +113,19 @@ async function reset() {
               </button>
             </div>
           </div>
+        </div>
+
+        <div class="card pad stack">
+          <div class="h2">Chạy job ngay</div>
+          <div class="sm mut">
+            Job chạy tự động khi khởi động, khi sang ngày mới và mỗi lần đổi ngày giả lập. Chạy lại không tạo thông báo trùng (mỗi người một bản tin mỗi ngày).
+          </div>
+          <div class="rowf">
+            <button v-for="[name, label] in JOBS" :key="name" class="btn sm" type="button" @click="runJob(name)">{{ label }}</button>
+          </div>
+          <ul v-if="jobResults.length" class="ul sm">
+            <li v-for="r in jobResults" :key="r.name"><b>{{ r.label }}</b> ({{ fmtDate(r.date) }}): {{ r.message }}<template v-if="r.created"> · {{ r.created }} thông báo mới</template></li>
+          </ul>
         </div>
 
         <div class="card">

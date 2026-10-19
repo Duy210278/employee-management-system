@@ -12,6 +12,11 @@ export const intOf = (e: Event, fallback = 0): number => {
   const n = parseInt((e.target as HTMLInputElement).value, 10);
   return Number.isFinite(n) ? n : fallback;
 };
+/** Ô số thập phân (doanh số, tỉ lệ), chấp nhận dấu phẩy */
+export const numOf = (e: Event, fallback = 0): number => {
+  const n = Number((e.target as HTMLInputElement).value.replace(',', '.'));
+  return Number.isFinite(n) ? n : fallback;
+};
 export const optIntOf = (e: Event): number | undefined => {
   const n = parseInt((e.target as HTMLInputElement).value, 10);
   return Number.isFinite(n) ? n : undefined;

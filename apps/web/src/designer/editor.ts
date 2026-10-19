@@ -2,16 +2,19 @@ import {
   classifyChanges,
   countIssues,
   proposeVersionCode,
-  validateChecklist,
+  validateVersion,
   type ValidationIssue,
   type VersionContent,
   type VersionDetailResponse,
 } from '@lotrinh/shared';
 import { computed, inject, nextTick, provide, reactive, ref, type ComputedRef, type InjectionKey, type Ref } from 'vue';
 
+export type DesignerTab = 'framework' | 'checklist' | 'settings';
+
 /** Trạng thái chung của trình soạn bản lộ trình, chia sẻ cho các thẻ giai đoạn và dòng đầu việc */
 export interface DesignerContext {
   content: Ref<VersionContent>;
+  tab: Ref<DesignerTab>;
   /** "Hôm nay" theo đồng hồ nghiệp vụ của máy chủ (có tính ngày giả lập) */
   today: ComputedRef<string>;
   editable: ComputedRef<boolean>;
@@ -32,10 +35,11 @@ const KEY: InjectionKey<DesignerContext> = Symbol('designer');
 
 export function createDesigner(detail: Ref<VersionDetailResponse>, content: Ref<VersionContent>): DesignerContext {
   const levelKey = ref(1);
+  const tab = ref<DesignerTab>('checklist');
   const collapsed = reactive(new Set<string>());
   const flashKey = ref<string | null>(null);
   const editable = computed(() => detail.value.permissions.edit);
-  const issues = computed(() => validateChecklist(content.value));
+  const issues = computed(() => validateVersion(content.value));
   const byItem = computed(() => {
     const m = new Map<string, ValidationIssue[]>();
     for (const i of issues.value) {
@@ -56,9 +60,12 @@ export function createDesigner(detail: Ref<VersionDetailResponse>, content: Ref<
   function focus(at: ValidationIssue['at']) {
     if (at.levelKey) levelKey.value = at.levelKey;
     if (at.stageKey) collapsed.delete(at.stageKey);
-    const key = at.itemKey ?? at.stageKey ?? null;
+    // Lỗi Khung năng lực có section; lỗi tham số lịch chỉ có field; còn lại là lỗi checklist
+    tab.value = at.section ? 'framework' : at.stageKey || at.itemKey ? 'checklist' : 'settings';
+    const id = at.section ? `knl-${at.levelKey ?? 'all'}-${at.section}` : at.itemKey ? `it-${at.itemKey}` : at.stageKey ? `st-${at.stageKey}` : 'settings';
+    const key = at.section ? id : (at.itemKey ?? at.stageKey ?? null);
     void nextTick(() => {
-      const el = document.getElementById(at.itemKey ? `it-${at.itemKey}` : `st-${at.stageKey}`);
+      const el = document.getElementById(id);
       if (!el) return;
       el.scrollIntoView({ block: 'center', behavior: 'smooth' });
       const field = at.field ? el.querySelector<HTMLElement>(`[data-field="${at.field}"]`) : null;
@@ -70,6 +77,7 @@ export function createDesigner(detail: Ref<VersionDetailResponse>, content: Ref<
 
   const ctx: DesignerContext = {
     content,
+    tab,
     today: computed(() => detail.value.today),
     editable,
     levelKey,

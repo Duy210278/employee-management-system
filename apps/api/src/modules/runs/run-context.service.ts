@@ -1,9 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { findLevel, type Level, type RunPeople, type StaffSummary, type VersionContent } from '@lotrinh/shared';
-import { and, eq, inArray, isNull } from 'drizzle-orm';
+import { findLevel, type Level, type PauseSpan, type RunPeople, type StaffSummary, type VersionContent } from '@lotrinh/shared';
+import { and, asc, eq, inArray, isNull } from 'drizzle-orm';
 import { notFound } from '../../common/errors';
 import type { Db } from '../../db/client';
-import { areas, levelRuns, runAssignments, staff, stores, users, versions } from '../../db/schema';
+import { areas, levelRuns, runAssignments, runPauses, staff, stores, users, versions } from '../../db/schema';
 import { DB } from '../../db/db.provider';
 import { ClockService } from '../../adapters/clock/clock.service';
 import { VersionsService } from '../versions/versions.service';
@@ -12,8 +12,10 @@ export type LevelRunRow = typeof levelRuns.$inferSelect;
 
 export interface RunContext {
   run: LevelRunRow;
-  staff: StaffSummary & { userId: number | null; storeId: number; areaId: number };
+  staff: StaffSummary & { userId: number | null; storeId: number; areaId: number; active: boolean };
   people: RunPeople;
+  /** Các lần tạm dừng đã duyệt (mục 9.3): mọi mốc tính ngày đều lùi theo */
+  pauses: PauseSpan[];
   names: { buddy: string | null; cht: string | null; qlkv: string | null; ackBy: string | null };
   /** Phiên bản gắn với lượt */
   versionCode: string;
@@ -44,6 +46,7 @@ export class RunContextService {
         run: levelRuns,
         staffId: staff.id,
         staffUserId: staff.userId,
+        staffActive: staff.active,
         staffName: staff.fullName,
         employeeCode: staff.employeeCode,
         storeId: stores.id,
@@ -64,6 +67,11 @@ export class RunContextService {
       .from(runAssignments)
       .innerJoin(users, eq(users.id, runAssignments.userId))
       .where(and(inArray(runAssignments.runId, runIds), isNull(runAssignments.toDate)));
+    const pauses = await this.db
+      .select({ runId: runPauses.runId, from: runPauses.fromDate, to: runPauses.toDate })
+      .from(runPauses)
+      .where(and(inArray(runPauses.runId, runIds), eq(runPauses.status, 'approved')))
+      .orderBy(asc(runPauses.fromDate));
 
     const ackIds = [...new Set(rows.map((r) => r.run.ackBy).filter((id): id is number => id !== null))];
     const ackNames = new Map(
@@ -89,7 +97,9 @@ export class RunContextService {
           userId: r.staffUserId,
           storeId: r.storeId,
           areaId: r.areaId,
+          active: r.staffActive,
         },
+        pauses: pauses.filter((p) => p.runId === r.run.id).map(({ from, to }) => ({ from, to })),
         people: {
           staffUserId: r.staffUserId,
           buddyId: assigned('buddy')?.userId ?? null,

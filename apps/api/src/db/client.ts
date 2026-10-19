@@ -13,7 +13,8 @@ export type Tx = Parameters<Parameters<Db['transaction']>[0]>[0];
 export type DbLike = Db | Tx;
 
 export function createDb(url: string): { pool: pg.Pool; db: Db } {
-  const pool = new pg.Pool({ connectionString: url, max: 10 });
+  // pg không tự đọc channel_binding từ chuỗi kết nối (Neon thêm sẵn tham số này): bật theo đúng chuỗi
+  const pool = new pg.Pool({ connectionString: url, max: 10, enableChannelBinding: /[?&]channel_binding=require\b/.test(url) });
   return { pool, db: drizzle(pool, { schema }) };
 }
 

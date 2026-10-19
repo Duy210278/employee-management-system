@@ -4,7 +4,7 @@
   "description": "Lộ trình Upharma: quản lý khung năng lực, checklist onboarding và lộ trình 4 Level cho NVBH",
   "packageManager": "pnpm@9.15.9",
   "engines": {
-    "node": ">=20"
+    "node": ">=20 <25"
   },
   "scripts": {
     "dev": "pnpm -F @lotrinh/shared build && concurrently -k -n shared,api,web -c gray,blue,green \"pnpm -F @lotrinh/shared dev\" \"pnpm -F @lotrinh/api dev\" \"pnpm -F @lotrinh/web dev\"",

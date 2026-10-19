@@ -4,7 +4,7 @@ import {
   classifyChanges,
   countIssues,
   proposeVersionCode,
-  validateChecklist,
+  validateVersion,
   VersionContentSchema,
   type ApproveBodyT,
   type SaveDraftBodyT,
@@ -23,6 +23,7 @@ import type { Db } from '../../db/client';
 import { DB } from '../../db/db.provider';
 import { levelRuns, users, versions } from '../../db/schema';
 import { AccessService } from '../access/access.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { findVersionForDate, PUBLISHED } from '../runs/run-factory';
 
 type VersionRow = typeof versions.$inferSelect;
@@ -38,6 +39,7 @@ export class VersionLifecycleService {
     @Inject(DB) private readonly db: Db,
     private readonly clock: ClockService,
     private readonly access: AccessService,
+    private readonly notifications: NotificationsService,
   ) {}
 
   private async assert(user: SessionUser, action: 'read' | 'update' | 'approve', message: string) {
@@ -184,7 +186,7 @@ export class VersionLifecycleService {
   /** Kiểm tra trước khi gửi duyệt / ban hành: hết lỗi CK, có ghi chú, có thay đổi so với bản gốc */
   private readyCheck(row: VersionRow, parent: VersionRow | null, changeNote: string) {
     const content = VersionContentSchema.parse(row.content);
-    const { errors } = countIssues(validateChecklist(content));
+    const { errors } = countIssues(validateVersion(content));
     if (errors) throw badRequest('VALIDATION_FAILED', `Còn ${errors} lỗi trong khung "Kiểm tra trước khi gửi duyệt". Sửa hết lỗi rồi gửi lại`);
     if (!changeNote.trim()) throw badRequest('CHANGE_NOTE_REQUIRED', 'Nhập ghi chú thay đổi trước khi gửi duyệt');
     if (!parent) throw badRequest('NO_PARENT', 'Bản nháp không có bản gốc để so sánh');
@@ -203,6 +205,13 @@ export class VersionLifecycleService {
       .update(versions)
       .set({ status: 'pending', changeKind: kind, changeNote: note, submittedBy: user.id, submittedAt: new Date(), reviewNote: null, updatedAt: new Date() })
       .where(and(eq(versions.id, id), eq(versions.status, 'draft')));
+    // Mục 10.6: bản nháp chờ duyệt → người duyệt phiên bản
+    await this.notifications.notify(await this.notifications.activeIds({ canApproveVersions: true }), {
+      type: 'version_pending',
+      title: 'Bản nháp Bộ lộ trình chờ duyệt',
+      body: note || null,
+      link: `/thiet-ke/${id}`,
+    }, user.id);
     return this.detail(user, id);
   }
 
@@ -219,6 +228,7 @@ export class VersionLifecycleService {
     const row = await this.get(id);
     if (row.status !== 'pending') throw conflict('NOT_PENDING', 'Chỉ trả về được bản đang chờ duyệt');
     await this.db.update(versions).set({ status: 'draft', reviewNote: note, updatedAt: new Date() }).where(eq(versions.id, id));
+    await this.notifications.notify([row.submittedBy], { type: 'version_returned', title: 'Bản nháp Bộ lộ trình bị trả về', body: note, link: `/thiet-ke/${id}` }, user.id);
     return this.detail(user, id);
   }
 

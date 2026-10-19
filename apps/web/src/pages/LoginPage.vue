@@ -3,6 +3,7 @@ import { ROLE_LABEL, type AccountRole } from '@lotrinh/shared';
 import { useQueryClient } from '@tanstack/vue-query';
 import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { ApiError } from '@/api/client';
 import { sessionApi, useDemoAccounts } from '@/api/queries';
 import { useToast } from '@/composables/toast';
 
@@ -14,6 +15,7 @@ const email = ref('');
 const password = ref('');
 const busy = ref(false);
 const { data: accounts, isError: noDemo } = useDemoAccounts(ref(true));
+const quickId = ref(0);
 
 const groups = computed(() => {
   const order: AccountRole[] = ['bp', 'qlkv', 'cht', 'nv'];
@@ -21,6 +23,7 @@ const groups = computed(() => {
     .map((role) => ({ role, label: ROLE_LABEL[role], items: (accounts.value ?? []).filter((a) => a.role === role) }))
     .filter((g) => g.items.length);
 });
+const picked = computed(() => accounts.value?.find((a) => a.id === quickId.value) ?? null);
 
 async function enter(fn: () => Promise<unknown>) {
   busy.value = true;
@@ -29,46 +32,54 @@ async function enter(fn: () => Promise<unknown>) {
     qc.clear();
     await router.push('/');
   } catch (err) {
-    toast.show((err as Error).message);
+    // Tài khoản chờ duyệt: chuyển sang màn "Đang chờ duyệt" (mục 5.1)
+    if (err instanceof ApiError && err.code === 'ACCOUNT_PENDING') await router.push({ name: 'pending', query: { email: email.value || undefined } });
+    else toast.show((err as Error).message);
   } finally {
     busy.value = false;
   }
 }
 
 const submit = () => enter(() => sessionApi.login(email.value, password.value));
-const quick = (id: number) => enter(() => sessionApi.loginAs(id));
+function quick() {
+  if (!picked.value) return toast.show('Chọn một tài khoản mẫu');
+  void enter(() => sessionApi.loginAs(picked.value!.id));
+}
 </script>
 
 <template>
-  <div class="auth stack">
+  <div class="auth stack" style="max-width: 460px">
     <div class="brand"><i>U</i>Lộ trình Upharma</div>
-    <div class="grid g2" style="align-items: start">
-      <form class="card pad stack" @submit.prevent="submit">
+    <div class="card pad stack">
+      <form class="stack" @submit.prevent="submit">
         <div class="h1">Đăng nhập</div>
         <label class="f">Email công ty<input v-model="email" type="email" autocomplete="username" required /></label>
         <label class="f">Mật khẩu<input v-model="password" type="password" autocomplete="current-password" required /></label>
-        <div><button class="btn pri" type="submit" :disabled="busy">Đăng nhập</button></div>
-        <div v-if="accounts?.length" class="sm mut">Bản demo: mọi tài khoản mẫu dùng mật khẩu <b class="mono">Demo@123</b>.</div>
+        <button class="btn pri wide" type="submit" :disabled="busy">Đăng nhập</button>
+        <div class="sm" style="text-align: center"><RouterLink to="/dang-ky">Chưa có tài khoản? Đăng ký</RouterLink></div>
       </form>
 
-      <div v-if="accounts?.length && !noDemo" class="card pad stack">
-        <div class="h2">Đăng nhập nhanh (bản demo)</div>
-        <div class="sm mut">Bấm một tài khoản mẫu để vào ngay. Sau khi vào có thể đổi tài khoản ở thanh trên cùng.</div>
-        <div v-for="g in groups" :key="g.role" class="stack" style="gap: 6px">
-          <div class="sec">{{ g.label }}</div>
-          <button
-            v-for="a in g.items"
-            :key="a.id"
-            class="btn acct"
-            type="button"
-            :disabled="busy || a.status !== 'active'"
-            @click="quick(a.id)"
-          >
-            <span>{{ a.fullName }} <span v-if="a.status !== 'active'" class="pill warn">Chờ duyệt</span></span>
-            <span class="sm mut" style="font-weight: 400">{{ a.note }}</span>
-          </button>
-        </div>
-      </div>
+      <!-- Đăng nhập nhanh chỉ có ở bản demo (DEMO_MODE) -->
+      <template v-if="accounts?.length && !noDemo">
+        <div class="or" role="separator"><span>hoặc đăng nhập nhanh (bản demo)</span></div>
+        <form class="stack" style="gap: 8px" @submit.prevent="quick">
+          <div class="rowf" style="flex-wrap: nowrap">
+            <select v-model.number="quickId" class="grow" aria-label="Chọn tài khoản mẫu">
+              <option :value="0" disabled>Chọn tài khoản mẫu…</option>
+              <optgroup v-for="g in groups" :key="g.role" :label="g.label">
+                <option v-for="a in g.items" :key="a.id" :value="a.id" :disabled="a.status !== 'active'">
+                  {{ a.fullName }}{{ a.status !== 'active' ? ' (chờ duyệt)' : '' }}
+                </option>
+              </optgroup>
+            </select>
+            <button class="btn" type="submit" :disabled="busy || !picked">Vào</button>
+          </div>
+          <div class="sm mut">
+            <template v-if="picked">{{ picked.note }}</template>
+            <template v-else>Mọi tài khoản mẫu dùng mật khẩu <b class="mono">Demo@123</b>. Sau khi vào có thể đổi tài khoản ở thanh trên cùng.</template>
+          </div>
+        </form>
+      </template>
     </div>
   </div>
 </template>

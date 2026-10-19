@@ -103,23 +103,7 @@ const exampleDate = computed(() => {
         <label class="p cb" data-field="gpp"><input :checked="item.gpp" type="checkbox" :disabled="ro" @change="setGpp(item, ($event.target as HTMLInputElement).checked)" /> GPP</label>
         <label class="p cb"><input v-model="item.required" type="checkbox" :disabled="ro || item.gpp" /> Bắt buộc</label>
         <label class="p cb"><input v-model="item.allowNa" type="checkbox" :disabled="ro || item.gpp" /> Cho phép N/A</label>
-        <label class="p">
-          Nguồn
-          <select v-model="item.dataSource" :disabled="ro">
-            <option value="manual">Thủ công</option>
-            <option value="lms">LMS</option>
-            <option value="pos">POS</option>
-          </select>
-        </label>
-        <label class="p">
-          Bằng chứng
-          <select v-model="item.evidence" :disabled="ro">
-            <option value="none">Không</option>
-            <option value="score">Điểm số</option>
-            <option value="note">Ghi chú / biên bản</option>
-            <option value="file">Tệp đính kèm</option>
-          </select>
-        </label>
+        <!-- Nguồn (LMS/POS) và Bằng chứng đã ẩn: chưa có tích hợp và đính kèm, mọi mục xác nhận tay. Dữ liệu vẫn giữ trong phiên bản -->
         <label class="p">
           Phụ thuộc
           <input :value="depsText" data-field="dependsOn" class="mono" size="12" placeholder="vd. L1-2-9" :disabled="ro" @change="setDeps(($event.target as HTMLInputElement).value)" />

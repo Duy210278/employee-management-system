@@ -1,5 +1,5 @@
-import { Body, Controller, HttpCode, Post, Req, Res } from '@nestjs/common';
-import { LoginBody, type LoginBodyT } from '@lotrinh/shared';
+import { Body, Controller, Get, HttpCode, Post, Req, Res } from '@nestjs/common';
+import { LoginBody, RegisterBody, type LoginBodyT, type RegisterBodyT, type RegisterOptions } from '@lotrinh/shared';
 import type { Request, Response } from 'express';
 import { Public } from '../../common/session';
 import { ZodPipe } from '../../common/zod.pipe';
@@ -28,6 +28,20 @@ export class AuthController {
   @HttpCode(200)
   logout(@Res({ passthrough: true }) res: Response) {
     this.auth.endSession(res);
+    return { ok: true };
+  }
+
+  @Public()
+  @Get('register-options')
+  registerOptions(): Promise<RegisterOptions> {
+    return this.auth.registerOptions();
+  }
+
+  @Public()
+  @Post('register')
+  async register(@Body(new ZodPipe(RegisterBody)) body: RegisterBodyT, @Req() req: Request) {
+    const { id } = await this.auth.register(body);
+    await this.audit.log({ userId: id, action: 'auth.register', entity: 'users', entityId: String(id), payload: { email: body.email, role: body.requestedRole }, ip: req.ip });
     return { ok: true };
   }
 }

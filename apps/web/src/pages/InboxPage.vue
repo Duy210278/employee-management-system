@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ROLE_SHORT, type SignatureTodo, type TaskRole } from '@lotrinh/shared';
 import { computed, ref } from 'vue';
 import { useInbox } from '@/api/queries';
 import ItemRow from '@/components/ItemRow.vue';
@@ -8,6 +9,9 @@ import { fmtDate, yearOf } from '@/format';
 const { data, isLoading, error } = useInbox(ref(true));
 const refYear = computed(() => (data.value ? yearOf(data.value.today) : new Date().getFullYear()));
 const empty = computed(() => !!data.value && !data.value.groups.length && !data.value.upcoming.length);
+const KIND_LABEL: Record<SignatureTodo['kind'], string> = { review: 'Phiếu đánh giá', stage: 'Ký giai đoạn', pause: 'Tạm dừng' };
+const waiting = (roles: TaskRole[]) => roles.map((r) => ROLE_SHORT[r]).join(' + ');
+const ACTION_LABEL: Record<SignatureTodo['kind'], string> = { review: 'Mở phiếu', stage: 'Mở checklist', pause: 'Xem đề xuất' };
 </script>
 
 <template>
@@ -26,17 +30,39 @@ const empty = computed(() => !!data.value && !data.value.groups.length && !data.
     <template v-if="data.signatures.length">
       <div class="sec">Chữ ký chờ bạn · {{ data.signatures.length }}</div>
       <div class="card clip">
-        <div v-for="s in data.signatures" :key="s.runId" class="item rowf sp">
+        <div v-for="(s, i) in data.signatures" :key="`${s.kind}-${s.runId}-${i}`" class="item rowf sp">
           <div>
             <b>{{ s.staffName }}</b> <span class="pill info">Level {{ s.levelKey }}</span> <span class="sm mut">{{ s.storeName }}</span>
-            <div class="sm">Phiếu đánh giá · {{ s.label }} · bước {{ s.step + 1 }}/{{ s.totalSteps }}</div>
+            <div class="sm">
+              <span class="pill">{{ KIND_LABEL[s.kind] }}</span> {{ s.label }}<template v-if="s.totalSteps > 1"> · bước {{ s.step + 1 }}/{{ s.totalSteps }}</template>
+              <span v-if="s.overdue" class="pill bad">Quá hạn</span>
+              <span v-else-if="s.dueOn && s.kind === 'stage'" class="sm mut"> · hạn {{ fmtDate(s.dueOn, refYear) }}</span>
+            </div>
+            <div v-if="s.detail" class="sm mut">{{ s.detail }}</div>
           </div>
-          <RouterLink class="btn sm pri" :to="{ path: `/nhan-su/${s.staffId}`, query: { tab: 'review', run: s.runId } }">Mở phiếu</RouterLink>
+          <RouterLink class="btn sm pri" :to="{ path: `/nhan-su/${s.staffId}`, query: { tab: s.tab, run: s.runId } }">{{ ACTION_LABEL[s.kind] }}</RouterLink>
         </div>
       </div>
     </template>
 
-    <div v-if="empty && !data.signatures.length" class="card empty">
+    <template v-if="data.areaAlerts.length">
+      <div class="sec">Cảnh báo trong khu vực · {{ data.areaAlerts.length }} việc quá hạn lâu</div>
+      <div class="card clip">
+        <div v-for="a in data.areaAlerts" :key="a.taskId" class="item rowf sp">
+          <div style="min-width: 0">
+            <b>{{ a.staffName }}</b> <span class="sm mut">{{ a.storeName }}</span>
+            <div class="sm"><span class="mono">{{ a.itemKey }}</span> {{ a.content }}</div>
+            <div class="sm mut">Chờ {{ waiting(a.waitingFor) }}</div>
+          </div>
+          <div class="rowf">
+            <span class="pill bad">Trễ {{ a.overdueDays }} ngày</span>
+            <RouterLink class="btn sm" :to="{ path: `/nhan-su/${a.staffId}`, query: { tab: 'check', run: a.runId } }">Mở hồ sơ</RouterLink>
+          </div>
+        </div>
+      </div>
+    </template>
+
+    <div v-if="empty && !data.signatures.length && !data.areaAlerts.length" class="card empty">
       <h3>Không có việc cần xử lý</h3>
       <div>Khi nhân viên báo hoàn thành hoặc có mục đến hạn, việc sẽ hiện ở đây.</div>
     </div>

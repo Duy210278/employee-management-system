@@ -1,10 +1,15 @@
 import {
+  activePause,
+  canSignAs,
   computeTaskState,
   currentStageIndex,
   dayIndex,
   decideActions,
   levelItems,
+  pauseLength,
   requiredRoles,
+  STAGE_SIGN_LABEL,
+  stageSignState,
   stageWindow,
   type Actor,
   type IsoDate,
@@ -13,11 +18,14 @@ import {
   type PathStep,
   type RunSummary,
   type Stage,
+  type StageSignView,
   type StageView,
   type TaskView,
 } from '@lotrinh/shared';
-import type { runTasks, taskConfirmations } from '../../db/schema';
+import type { runTasks, stageSignoffs, taskConfirmations } from '../../db/schema';
 import type { RunContext } from './run-context.service';
+
+export type SignoffRow = typeof stageSignoffs.$inferSelect & { userName: string };
 
 export type RunTaskRow = typeof runTasks.$inferSelect;
 export type ConfirmationRow = typeof taskConfirmations.$inferSelect & { userName: string };
@@ -96,11 +104,12 @@ export function buildTaskViews(ctx: RunContext, data: RunTaskData, today: IsoDat
   return views;
 }
 
-const OPEN_RUN_STATUSES = ['active', 'paused', 'review'];
+export const OPEN_RUN_STATUSES = ['active', 'paused', 'review'] as const;
+export const isOpenRun = (status: string) => (OPEN_RUN_STATUSES as readonly string[]).includes(status);
 
 /** Lượt đang mở của NV, nếu không có thì lượt gần nhất (danh sách đã xếp mới nhất trước) */
 export function currentRunOf<T extends { status: string }>(runsNewestFirst: T[]): T | undefined {
-  return runsNewestFirst.find((r) => OPEN_RUN_STATUSES.includes(r.status)) ?? runsNewestFirst[0];
+  return runsNewestFirst.find((r) => isOpenRun(r.status)) ?? runsNewestFirst[0];
 }
 
 /** Thanh "Lộ trình 4 Level" (mục 9.2) */
@@ -133,21 +142,74 @@ export function levelSummary(ctx: RunContext): LevelSummary {
   };
 }
 
-export function stageViews(ctx: RunContext): StageView[] {
+const FINISHED = new Set(['done', 'na', 'void']);
+
+/**
+ * Ký cuối giai đoạn (mục 10.2, R11, R12) của từng giai đoạn: cửa sổ ký, số mục bắt buộc còn dở, ai ký bước kế tiếp.
+ * Dùng cho tab Checklist, nhóm "Chữ ký chờ bạn", cảnh báo trễ ký và kiểm tra khi ký.
+ */
+export function buildStageSigns(ctx: RunContext, views: TaskView[], signoffs: SignoffRow[], today: IsoDate, actor: Actor | null): Map<string, StageSignView> {
+  const out = new Map<string, StageSignView>();
+  const open = isOpenRun(ctx.run.status);
+  for (const stage of ctx.level.stages) {
+    if (!stage.signers.length) continue;
+    const required = new Set(stage.items.filter((i) => i.required).map((i) => i.key));
+    const requiredLeft = views.filter((v) => v.stageKey === stage.key && required.has(v.itemKey) && !FINISHED.has(v.status)).length;
+    const signed = signoffs.filter((s) => s.stageKey === stage.key);
+    const st = stageSignState(
+      {
+        signers: stage.signers,
+        signedSteps: signed.map((s) => s.step),
+        window: stageWindow(stage, ctx.run.startDate, ctx.pauses),
+        params: ctx.content.scheduleParams,
+        requiredLeft,
+      },
+      today,
+    );
+    out.set(stage.key, {
+      opensOn: st.opensOn,
+      dueOn: st.dueOn,
+      complete: st.complete,
+      ready: st.ready && open,
+      overdue: st.overdue && open,
+      blocked: open ? st.blocked : st.complete ? null : 'Lượt Level đã đóng',
+      steps: stage.signers.map((role, step) => {
+        const s = signed.find((x) => x.step === step);
+        const isNext = step === st.next;
+        return {
+          step,
+          role,
+          label: STAGE_SIGN_LABEL[role],
+          signedByName: s?.userName ?? null,
+          at: s?.at.toISOString() ?? null,
+          state: s ? 'signed' : isNext ? 'next' : 'waiting',
+          canSign: open && isNext && st.ready && actor !== null && canSignAs(actor, ctx.people, role),
+        };
+      }),
+    });
+  }
+  return out;
+}
+
+export function stageViews(ctx: RunContext, signs: Map<string, StageSignView> = new Map()): StageView[] {
   return ctx.level.stages.map((s, index) => ({
     key: s.key,
     index,
     label: s.label,
     name: s.name,
     goal: s.goal,
-    ...stageWindow(s, ctx.run.startDate),
+    ...stageWindow(s, ctx.run.startDate, ctx.pauses),
+    sign: signs.get(s.key) ?? null,
   }));
 }
+
+/** Ngày thứ mấy của lượt, đã trừ ngày tạm dừng */
+export const dayIndexOf = (ctx: RunContext, today: IsoDate) => dayIndex(ctx.run.startDate, today, ctx.pauses);
 
 export function summarizeRun(ctx: RunContext, views: TaskView[], today: IsoDate): RunSummary {
   const counted = views.filter((v) => v.status !== 'na' && v.status !== 'void');
   const done = counted.filter((v) => v.status === 'done').length;
-  const stageIdx = currentStageIndex(ctx.level, ctx.run.startDate, today);
+  const stageIdx = currentStageIndex(ctx.level, ctx.run.startDate, today, ctx.pauses);
   const stage = stageIdx >= 0 ? ctx.level.stages[stageIdx] : null;
   return {
     id: ctx.run.id,
@@ -156,7 +218,9 @@ export function summarizeRun(ctx: RunContext, views: TaskView[], today: IsoDate)
     startDate: ctx.run.startDate,
     plannedEnd: ctx.run.plannedEnd,
     status: ctx.run.status,
-    dayIndex: dayIndex(ctx.run.startDate, today),
+    pause: isOpenRun(ctx.run.status) ? activePause(today, ctx.pauses) : null,
+    pausedDays: ctx.pauses.reduce((a, p) => a + pauseLength(p), 0),
+    dayIndex: dayIndex(ctx.run.startDate, today, ctx.pauses),
     acknowledged: ctx.run.ackAt !== null,
     ackAt: ctx.run.ackAt?.toISOString() ?? null,
     ackByName: ctx.names.ackBy,

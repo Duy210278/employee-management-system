@@ -39,7 +39,7 @@ describe('danh sách nhân sự theo phạm vi (mục 11.4, R22)', () => {
   it('bảng có tiến độ, số mục trễ và tín hiệu cảnh báo', async () => {
     const lan = (await listOf(await as('ha'))).items.find((i) => i.staff.fullName === 'Nguyễn Thị Lan')!;
     expect(lan.run).toMatchObject({ levelKey: 1, dayIndex: 26, counts: { overdue: 3 } });
-    expect(lan.flags).toEqual({ overdue7: 0, noBuddy: false, noCht: false });
+    expect(lan.alerts.map((a) => [a.key, a.severity])).toEqual([['overdue', 'yellow']]);
   });
 });
 

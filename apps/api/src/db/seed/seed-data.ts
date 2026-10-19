@@ -38,8 +38,14 @@ export const SEED_USERS: SeedUser[] = [
   { key: 'linh', email: 'linh@upharma.local', fullName: 'Hoàng Thùy Linh', employeeCode: 'NV204', role: 'nv', status: 'active', note: 'NV Level 1 ngày thứ 62: đến kỳ phiếu đánh giá' },
   { key: 'nam', email: 'nam@upharma.local', fullName: 'Đặng Văn Nam', employeeCode: 'NV205', role: 'nv', status: 'active', note: 'NV Level 2 ngày thứ 139, có mục đã báo xong chờ CHT xác nhận' },
   { key: 'hanh', email: 'hanh@upharma.local', fullName: 'Bùi Thị Hạnh', employeeCode: 'NV206', role: 'nv', status: 'active', note: 'NV mới, tài khoản đã duyệt nhưng chưa có hồ sơ: dùng để demo "Thêm nhân viên"' },
-  { key: 'moi', email: 'moi@upharma.local', fullName: 'Lý Thu Trang', employeeCode: 'NV207', role: 'nv', status: 'pending', note: 'Tài khoản đang chờ BP Đào tạo duyệt' },
+  { key: 'moi', email: 'moi@upharma.local', fullName: 'Lý Thu Trang', employeeCode: 'NV207', role: 'nv', status: 'pending', stores: ['NTA'], note: 'Tự đăng ký, đang chờ BP Đào tạo duyệt' },
 ];
+
+/** Lần vào cuối cách hôm nay bao nhiêu ngày (mặc định 1); null là chưa đăng nhập lần nào */
+export const LAST_SEEN_DAYS_AGO: Record<string, number | null> = { tuan: 7, hanh: null };
+
+/** Đề xuất tạm dừng đang chờ duyệt: CHT Bình đề xuất cho Nam, QLKV Huy duyệt */
+export const SEED_PAUSE = { user: 'nam', by: 'binh', fromOffset: 5, toOffset: 14, reason: 'Nghỉ phép năm 10 ngày' };
 
 /** Kịch bản tiến độ tạo sẵn cho một lượt Level */
 export interface ProgressPlan {

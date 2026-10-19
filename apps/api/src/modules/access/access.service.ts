@@ -5,9 +5,12 @@ import { forbidden } from '../../common/errors';
 import type { SessionUser } from '../../common/session';
 import type { Db } from '../../db/client';
 import { DB } from '../../db/db.provider';
-import { levelRuns, runAssignments, staff, stores, userAreaScopes, userStoreScopes } from '../../db/schema';
+import { levelRuns, runAssignments, staff, stores, systemSettings, userAreaScopes, userStoreScopes } from '../../db/schema';
 import type { RunContext } from '../runs/run-context.service';
 import { defineAbilityFor, type Action, type AppAbility, type StaffRecord, type SubjectName, type UserScopes } from './ability';
+
+/** Khóa cấu hình V20 trong system_settings */
+export const BP_SELF_PUBLISH_KEY = 'bp_self_publish';
 
 /**
  * Phạm vi dữ liệu kiểm tra ở tầng máy chủ (R22, mục 14.8), không chỉ ẩn trên giao diện.
@@ -23,12 +26,13 @@ export class AccessService {
     let entry = this.cache.get(user);
     if (!entry) {
       entry = (async () => {
-        const [storeRows, areaRows] = await Promise.all([
+        const [storeRows, areaRows, selfPublish] = await Promise.all([
           this.db.select({ id: userStoreScopes.storeId }).from(userStoreScopes).where(eq(userStoreScopes.userId, user.id)),
           this.db.select({ id: userAreaScopes.areaId }).from(userAreaScopes).where(eq(userAreaScopes.userId, user.id)),
+          this.db.select({ value: systemSettings.value }).from(systemSettings).where(eq(systemSettings.key, BP_SELF_PUBLISH_KEY)),
         ]);
         const scopes = { storeIds: storeRows.map((r) => r.id), areaIds: areaRows.map((r) => r.id) };
-        return { ability: defineAbilityFor(user, scopes), scopes };
+        return { ability: defineAbilityFor(user, scopes, { bpSelfPublish: selfPublish[0]?.value === true }), scopes };
       })();
       this.cache.set(user, entry);
     }

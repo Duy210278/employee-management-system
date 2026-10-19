@@ -51,6 +51,8 @@ async function bootstrap() {
   configureApp(app);
   serveWeb(app);
   app.enableShutdownHooks();
+  // Khi chạy sau proxy (Render), lấy IP thật của người dùng cho nhật ký hệ thống
+  app.set('trust proxy', 1);
   const { PORT, DEMO_MODE } = env();
   await app.listen(PORT);
   log.log(`Mở http://localhost:${PORT} (API: /api/v1, DEMO_MODE=${DEMO_MODE})`);
