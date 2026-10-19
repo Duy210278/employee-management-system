@@ -758,6 +758,8 @@ export interface ChtFormOptions {
   /** Lượt CHT đang mở (nếu có thì không gán thêm) */
   openChtRun: { runId: number; staffId: number; track: ChtTrackKey } | null;
   tracks: { key: ChtTrackKey; name: string; title: string; days: number; items: number }[];
+  /** Checklist CHT chỉ có ở bản sắp hiệu lực: Ngày D phải từ ngày hiệu lực của bản đó */
+  chtFrom: { date: IsoDate; code: string } | null;
   suggestedTrack: ChtTrackKey;
   stores: { id: number; name: string; areaName: string; defaultQlkvId: number | null }[];
   trainers: PersonOption[];

@@ -15,7 +15,7 @@ import type {
   VersionDetailResponse,
   VersionListResponse,
 } from '@lotrinh/shared';
-import { addDays } from '@lotrinh/shared';
+import { addDays, DEFAULT_CHT_TRACKS, type VersionContent } from '@lotrinh/shared';
 import { and, eq, ne } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { Db } from '../src/db/client';
@@ -217,5 +217,39 @@ describe('gán checklist CHT', () => {
     await admin.put(`${API}/versions/${draft.id}/content`).send({ content, changeNote: 'Thử', rowVersion: detail.version.rowVersion }).expect(200);
     const res = await admin.post(`${API}/versions/${draft.id}/submit`).send({ changeNote: 'Thử' }).expect(400);
     expect(res.body.message).toMatch(/^Còn 1 lỗi/);
+  });
+});
+
+describe('checklist CHT chỉ có ở bản sắp hiệu lực (như bản online nâng cấp từ v2.1 cũ)', () => {
+  /** Tạo bản nháp từ bản đang hiệu lực, sửa nội dung, gửi duyệt và để QLKV Huy ban hành */
+  async function publish(change: (c: VersionContent) => void, effectiveFrom: string, note: string) {
+    const items = ((await admin.get(`${API}/versions`).expect(200)).body as VersionListResponse).items;
+    const current = items.find((i) => i.state === 'current')!;
+    const { id } = (await admin.post(`${API}/versions`).send({ fromId: current.id }).expect(201)).body as { id: number };
+    const detail = (await admin.get(`${API}/versions/${id}`).expect(200)).body as VersionDetailResponse;
+    const content = structuredClone(detail.content);
+    change(content);
+    await admin.put(`${API}/versions/${id}/content`).send({ content, changeNote: note, rowVersion: detail.version.rowVersion }).expect(200);
+    await admin.post(`${API}/versions/${id}/submit`).send({ changeNote: note }).expect(200);
+    return ((await huy.post(`${API}/versions/${id}/approve`).send({ effectiveFrom }).expect(200)).body as VersionDetailResponse).version.code;
+  }
+
+  it('form gán checklist lấy checklist của bản sắp hiệu lực; Ngày D trước ngày hiệu lực bị chặn', async () => {
+    const draft = ((await admin.get(`${API}/versions`).expect(200)).body as VersionListResponse).items.find((i) => i.state === 'draft')!;
+    await admin.delete(`${API}/versions/${draft.id}`).expect(200);
+    await publish((c) => delete c.chtTracks, harness.today, 'Bản chưa có checklist CHT');
+    const haId = await userId('ha@upharma.local');
+    const before = (await admin.get(`${API}/cht/form-options/${haId}`).expect(200)).body as ChtFormOptions;
+    expect(before).toMatchObject({ tracks: [], chtFrom: null });
+
+    const tomorrow = addDays(harness.today, 1);
+    const code = await publish((c) => (c.chtTracks = structuredClone(DEFAULT_CHT_TRACKS)), tomorrow, 'Thêm checklist CHT');
+    const opt = (await admin.get(`${API}/cht/form-options/${haId}`).expect(200)).body as ChtFormOptions;
+    expect(opt.chtFrom).toEqual({ date: tomorrow, code });
+    expect(opt.tracks).toHaveLength(2);
+
+    const body = { userId: haId, track: 'cht_moi_tuyen', storeId: opt.stores[0].id, startDate: harness.today, trainingMode: 'offline', trainerId: opt.trainers[0].id, qlkvId: opt.qlkvs[0].id };
+    expect((await admin.post(`${API}/cht/runs`).send(body).expect(400)).body.code).toBe('NO_CHT_CHECKLIST');
+    await admin.post(`${API}/cht/runs`).send({ ...body, startDate: tomorrow }).expect(201);
   });
 });

@@ -18,17 +18,17 @@ import {
   type CreateChtRunBodyT,
   type PersonOption,
 } from '@lotrinh/shared';
-import { and, asc, desc, eq, inArray, notInArray } from 'drizzle-orm';
+import { and, asc, desc, eq, gt, inArray, notInArray } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
 import { ClockService } from '../../adapters/clock/clock.service';
 import { badRequest, conflict, forbidden, notFound } from '../../common/errors';
 import type { SessionUser } from '../../common/session';
 import type { Db } from '../../db/client';
 import { DB } from '../../db/db.provider';
-import { areas, levelRuns, runEvaluations, runJournal, runTasks, staff, stores, userAreaScopes, users, userStoreScopes } from '../../db/schema';
+import { areas, levelRuns, runEvaluations, runJournal, runTasks, staff, stores, userAreaScopes, users, userStoreScopes, versions } from '../../db/schema';
 import { AccessService } from '../access/access.service';
 import { NotificationsService } from '../notifications/notifications.service';
-import { createRun, findVersionForDate } from '../runs/run-factory';
+import { createRun, findVersionForDate, PUBLISHED } from '../runs/run-factory';
 import { RunContextService, type RunContext } from '../runs/run-context.service';
 import { isOpenRun, OPEN_RUN_STATUSES } from '../runs/task-views';
 
@@ -98,6 +98,25 @@ export class ChtService {
       };
     }
 
+    // Bản đang hiệu lực chưa có checklist CHT nhưng bản sắp hiệu lực có: lấy checklist của bản đó, Ngày D chọn từ ngày hiệu lực
+    let source = version;
+    let chtFrom: ChtFormOptions['chtFrom'] = null;
+    if (!version.content.chtTracks?.length) {
+      const upcoming = await this.db
+        .select({ from: versions.effectiveFrom })
+        .from(versions)
+        .where(and(PUBLISHED, gt(versions.effectiveFrom, today)))
+        .orderBy(asc(versions.effectiveFrom));
+      for (const { from } of upcoming) {
+        const v = await findVersionForDate(this.db, from!);
+        if (v.content.chtTracks?.length) {
+          source = v;
+          chtFrom = { date: from!, code: v.code ?? '' };
+          break;
+        }
+      }
+    }
+
     const opt = (u: (typeof active)[number]): PersonOption => ({ id: u.id, fullName: u.fullName, note: ROLE_LABEL[u.role] });
     const assignable = [];
     for (const st of storeRows) if (await this.canAssignAt(user, st)) assignable.push(st);
@@ -106,7 +125,8 @@ export class ChtService {
       user: { id: account.id, fullName: account.fullName, employeeCode: account.employeeCode, role: account.role, status: account.status, storeIds: storeScopes.map((x) => x.id) },
       staff: staffInfo,
       openChtRun,
-      tracks: (version.content.chtTracks ?? []).map((t) => ({ key: t.key, name: t.name, title: t.title, days: t.totalDays, items: t.stages.reduce((a, x) => a + x.items.length, 0) })),
+      tracks: (source.content.chtTracks ?? []).map((t) => ({ key: t.key, name: t.name, title: t.title, days: t.totalDays, items: t.stages.reduce((a, x) => a + x.items.length, 0) })),
+      chtFrom,
       suggestedTrack: hadNvbh ? 'cht_thang_tien' : 'cht_moi_tuyen',
       stores: assignable.map((st) => ({
         id: st.id,

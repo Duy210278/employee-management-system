@@ -34,7 +34,7 @@ watch(
   (o) => {
     if (!o) return;
     if (!form.track) form.track = o.suggestedTrack;
-    if (!form.startDate) form.startDate = o.today;
+    if (!form.startDate) form.startDate = o.chtFrom?.date ?? o.today;
     if (!form.storeId && o.stores.length) form.storeId = o.stores.find((s) => o.user.storeIds.includes(s.id))?.id ?? o.stores[0].id;
     if (!form.trainerId) form.trainerId = o.trainers.find((t) => t.id === me.value?.user.id)?.id ?? o.trainers[0]?.id ?? 0;
   },
@@ -70,6 +70,10 @@ async function submit() {
     buddyId: form.buddyId || null,
     seniorityMonths: form.track === 'cht_thang_tien' && !opt.value?.staff && form.seniorityMonths !== '' ? Number(form.seniorityMonths) : null,
   };
+  if (opt.value?.chtFrom && form.startDate < opt.value.chtFrom.date) {
+    toast.show(`Checklist CHT có hiệu lực từ ${fmtDate(opt.value.chtFrom.date, refYear.value)}: chọn Ngày D từ ngày đó`);
+    return;
+  }
   const parsed = CreateChtRunBody.safeParse(body);
   if (!parsed.success) {
     toast.show(parsed.error.issues[0]?.message ?? 'Kiểm tra lại thông tin');
@@ -105,7 +109,7 @@ async function submit() {
             <option v-for="s in opt.stores" :key="s.id" :value="s.id">{{ s.name }} · {{ s.areaName }}</option>
           </select>
         </label>
-        <label class="f">Ngày D (ngày đầu tại cửa hàng)<input v-model="form.startDate" type="date" required /></label>
+        <label class="f">Ngày D (ngày đầu tại cửa hàng)<input v-model="form.startDate" type="date" :min="opt.chtFrom?.date" required /></label>
         <label class="f">
           Hình thức training tuần đầu
           <select v-model="form.trainingMode">
@@ -137,6 +141,9 @@ async function submit() {
           Thâm niên NVBH (tháng)
           <input v-model.number="form.seniorityMonths" type="number" min="0" max="600" placeholder="Chưa có hồ sơ NVBH trong hệ thống" />
         </label>
+      </div>
+      <div v-if="opt.chtFrom" class="alert info">
+        <div>Checklist CHT có trong v{{ opt.chtFrom.code }}, hiệu lực từ <b>{{ fmtDate(opt.chtFrom.date, refYear) }}</b>: Ngày D chọn từ ngày đó (trước ngày D, lượt hiện "Sắp bắt đầu").</div>
       </div>
       <div v-if="opt.staff" class="alert info">
         <div>
