@@ -31,6 +31,8 @@ Mở http://localhost:3000. Lần chạy đầu, API tự tạo bảng và nạp
 Màn đăng nhập có ô **đăng nhập nhanh** (bản demo): chọn tài khoản mẫu trong danh sách thả xuống, theo nhóm vai trò, rồi bấm "Vào". Mật khẩu chung `Demo@123`; sau khi vào có thể đổi tài khoản ở thanh trên cùng.
 Đăng nhập BP Đào tạo (Ngô Quốc Bảo) để tua ngày giả lập (dải dưới thanh tab) và khôi phục dữ liệu mẫu (tab Quản trị).
 
+**Tài liệu API (Swagger):** http://localhost:3000/api/docs (JSON OpenAPI ở `/api/docs/json`). Liệt kê mọi API theo nhóm, body mẫu lấy từ schema Zod dùng chung. Muốn thử: gọi `POST /api/v1/auth/login` ngay trên trang (cookie tự lưu), rồi gọi các API khác. Đặt `API_DOCS=false` trong `.env` để tắt.
+
 ## Đưa lên mạng miễn phí (Render + Neon)
 
 Ứng dụng chạy trên Render (gói Free, vùng Singapore), cơ sở dữ liệu ở Neon; cấu hình sẵn trong [render.yaml](render.yaml). Hướng dẫn từng bước: [docs/ke-hoach/TRIEN_KHAI_RENDER_NEON.md](docs/ke-hoach/TRIEN_KHAI_RENDER_NEON.md).

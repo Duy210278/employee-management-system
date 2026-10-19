@@ -6,6 +6,7 @@ import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import type { NextFunction, Request, Response } from 'express';
+import { setupApiDocs } from './api-docs';
 import { AppModule } from './app.module';
 import { configureApp } from './app.setup';
 import { env } from './config';
@@ -49,13 +50,14 @@ async function bootstrap() {
   await prepareDatabase();
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   configureApp(app);
+  if (env().API_DOCS) setupApiDocs(app);
   serveWeb(app);
   app.enableShutdownHooks();
   // Khi chạy sau proxy (Render), lấy IP thật của người dùng cho nhật ký hệ thống
   app.set('trust proxy', 1);
   const { PORT, DEMO_MODE } = env();
   await app.listen(PORT);
-  log.log(`Mở http://localhost:${PORT} (API: /api/v1, DEMO_MODE=${DEMO_MODE})`);
+  log.log(`Mở http://localhost:${PORT} (API: /api/v1${env().API_DOCS ? `, tài liệu API: http://localhost:${PORT}/api/docs` : ''}, DEMO_MODE=${DEMO_MODE})`);
 }
 
 bootstrap().catch((err) => {

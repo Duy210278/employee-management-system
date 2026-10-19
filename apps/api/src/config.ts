@@ -16,6 +16,11 @@ const EnvSchema = z.object({
     .default('false')
     .transform((v) => v === 'true'),
   STORAGE_DIR: z.string().default('./storage'),
+  /** Trang Swagger /api/docs; đặt false để tắt */
+  API_DOCS: z
+    .string()
+    .default('true')
+    .transform((v) => v !== 'false'),
 });
 
 export type Env = z.infer<typeof EnvSchema>;
