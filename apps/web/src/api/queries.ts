@@ -21,6 +21,7 @@ import type {
   RegisterOptions,
   RunManageResponse,
   StopStaffBodyT,
+  DeleteStaffBodyT,
   StoreBodyT,
   TransferBodyT,
   UpdateUserBodyT,
@@ -228,6 +229,7 @@ export const staffApi = {
   create: (body: CreateStaffBodyT) => api.post<{ staffId: number; runId: number }>('/staff', body),
   transfer: (staffId: number, body: TransferBodyT) => api.post<RunManageResponse>(`/staff/${staffId}/transfer`, body),
   stop: (staffId: number, body: StopStaffBodyT) => api.post<RunManageResponse>(`/staff/${staffId}/stop`, body),
+  remove: (staffId: number, body: DeleteStaffBodyT) => api.del<{ ok: true; fullName: string; runs: number }>(`/staff/${staffId}`, body),
   exportUrl: '/api/v1/reports/progress.csv',
 };
 

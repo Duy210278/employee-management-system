@@ -193,7 +193,7 @@ const STATUS_LABEL: Record<string, string> = {
         <ReviewTab v-else-if="tab === 'review'" :key="`v${selectedRunId}`" :run-id="selectedRunId" />
         <ChtJournal v-else-if="tab === 'cht-journal'" :key="`j${selectedRunId}`" :run-id="selectedRunId" :ref-year="refYear" />
         <ChtEvaluation v-else-if="tab === 'cht-review'" :key="`e${selectedRunId}`" :run-id="selectedRunId" />
-        <RunManagePanel v-else-if="tab === 'manage' && run" :key="`m${run.id}`" :run-id="run.id" :staff-id="p.staff.id" :staff-name="p.staff.fullName" />
+        <RunManagePanel v-else-if="tab === 'manage' && run" :key="`m${run.id}`" :run-id="run.id" :staff-id="p.staff.id" :staff-name="p.staff.fullName" :can-delete="p.canDelete" />
       </template>
       <div v-if="tab === 'history'" class="card">
         <table class="rt">

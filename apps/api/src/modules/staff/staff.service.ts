@@ -3,19 +3,42 @@ import {
   countAlerts,
   ROLE_LABEL,
   type CreateStaffBodyT,
+  type DeleteStaffBodyT,
   type PersonOption,
   type StaffFormOptions,
   type StaffListItem,
   type StaffListResponse,
   type StaffProfileResponse,
 } from '@lotrinh/shared';
-import { and, asc, desc, eq, inArray } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, like, or } from 'drizzle-orm';
 import { ClockService } from '../../adapters/clock/clock.service';
 import { badRequest, forbidden, notFound } from '../../common/errors';
 import { toActor, type SessionUser } from '../../common/session';
 import type { Db } from '../../db/client';
 import { DB } from '../../db/db.provider';
-import { areas, levelRuns, staff, stores, userAreaScopes, users, userStoreScopes } from '../../db/schema';
+import {
+  areas,
+  levelReviews,
+  levelRuns,
+  notifications,
+  observations,
+  reviewSignatures,
+  runAssignments,
+  runEvaluations,
+  runJournal,
+  runPauses,
+  runTasks,
+  salesMonthly,
+  stageSignoffs,
+  staff,
+  stores,
+  taskConfirmations,
+  taskDateChanges,
+  taskEvents,
+  userAreaScopes,
+  users,
+  userStoreScopes,
+} from '../../db/schema';
 import { AccessService } from '../access/access.service';
 import { AlertsService } from '../alerts/alerts.service';
 import { createRun, findVersionForDate } from '../runs/run-factory';
@@ -79,6 +102,7 @@ export class StaffService {
       alerts,
       // Lượt onboarding CHT: chỉ BP ĐT, QLKV quản lý (CHT không tự đổi phân công, tạm dừng)
       canManage: !(ctx.track !== 'nvbh' && (user.role === 'cht' || user.id === ctx.staff.userId)) && (await this.access.can(user, 'update', AccessService.recordOf(ctx))),
+      canDelete: user.role === 'bp',
       staff: {
         ...ctx.staff,
         hireDate: row.staff.hireDate,
@@ -210,5 +234,38 @@ export class StaffService {
       });
       return { staffId: st.id, runId: run.id };
     });
+  }
+
+  /**
+   * Xóa hẳn hồ sơ nhân viên (nhập nhầm, dữ liệu thử): mọi lượt Level, đầu việc, xác nhận, doanh số, Rubric, phiếu đánh giá,
+   * nhật ký onboarding và thông báo trỏ tới hồ sơ. Tài khoản đăng nhập giữ nguyên (khóa ở Quản trị nếu cần).
+   * Nghỉ việc thì dùng "Ngừng theo dõi" để giữ dữ liệu. Nhật ký hệ thống ghi lại họ tên và lý do (body của request).
+   */
+  async remove(user: SessionUser, staffId: number, body: DeleteStaffBodyT): Promise<{ ok: true; fullName: string; runs: number }> {
+    if (user.role !== 'bp') throw forbidden('CANNOT_DELETE_STAFF', 'Chỉ BP Đào tạo xóa được hồ sơ nhân viên');
+    const [row] = await this.db.select().from(staff).where(eq(staff.id, staffId));
+    if (!row) throw notFound('STAFF_NOT_FOUND', 'Không tìm thấy hồ sơ nhân viên');
+    if (body.confirmName.trim().toLowerCase() !== row.fullName.trim().toLowerCase()) {
+      throw badRequest('CONFIRM_MISMATCH', `Họ tên nhập vào không khớp với "${row.fullName}"`);
+    }
+
+    const runIds = (await this.db.select({ id: levelRuns.id }).from(levelRuns).where(eq(levelRuns.staffId, staffId))).map((r) => r.id);
+    await this.db.transaction(async (tx) => {
+      if (runIds.length) {
+        const taskIds = tx.select({ id: runTasks.id }).from(runTasks).where(inArray(runTasks.runId, runIds));
+        await tx.delete(taskConfirmations).where(inArray(taskConfirmations.taskId, taskIds));
+        await tx.delete(taskEvents).where(inArray(taskEvents.taskId, taskIds));
+        await tx.delete(taskDateChanges).where(inArray(taskDateChanges.taskId, taskIds));
+        const reviewIds = tx.select({ id: levelReviews.id }).from(levelReviews).where(inArray(levelReviews.runId, runIds));
+        await tx.delete(reviewSignatures).where(inArray(reviewSignatures.reviewId, reviewIds));
+        for (const t of [runTasks, runAssignments, stageSignoffs, runPauses, runJournal, runEvaluations, salesMonthly, observations, levelReviews]) {
+          await tx.delete(t).where(inArray(t.runId, runIds));
+        }
+        await tx.delete(levelRuns).where(inArray(levelRuns.id, runIds));
+      }
+      await tx.delete(notifications).where(or(eq(notifications.link, `/nhan-su/${staffId}`), like(notifications.link, `/nhan-su/${staffId}?%`)));
+      await tx.delete(staff).where(eq(staff.id, staffId));
+    });
+    return { ok: true, fullName: row.fullName, runs: runIds.length };
   }
 }

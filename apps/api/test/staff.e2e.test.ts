@@ -1,11 +1,13 @@
 import {
   addDays,
   diffDays,
+  type AuditLogResponse,
   type CreateStaffBodyT,
   type InboxResponse,
   type StaffFormOptions,
   type StaffListResponse,
   type StaffProfileResponse,
+  type UserListResponse,
 } from '@lotrinh/shared';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { API, runTasks, setupApp, todayOf, type Agent, type TestApp } from './helpers';
@@ -152,5 +154,38 @@ describe('công cụ demo', () => {
     expect((await listOf(admin)).items).toHaveLength(9);
     await admin.post(`${API}/demo/reset`).expect(200);
     expect((await listOf(await as('admin'))).items).toHaveLength(8);
+  });
+});
+
+describe('xóa hồ sơ nhân viên (chỉ BP Đào tạo)', () => {
+  it('phải gõ đúng họ tên; xóa mọi lượt Level và dữ liệu, giữ tài khoản; người Hùng kèm cặp vẫn giữ Buddy', async () => {
+    const admin = await as('admin');
+    const hung = (await listOf(admin)).items.find((i) => i.staff.fullName === 'Trần Văn Hùng')!;
+    const url = `${API}/staff/${hung.staff.id}`;
+    const profile = (await admin.get(url).expect(200)).body as StaffProfileResponse;
+    expect(profile.canDelete).toBe(true);
+    const ha = await as('ha');
+    expect(((await ha.get(url).expect(200)).body as StaffProfileResponse).canDelete).toBe(false);
+    expect((await ha.delete(url).send({ confirmName: 'Trần Văn Hùng', reason: 'Thử' }).expect(403)).body.code).toBe('CANNOT_DELETE_STAFF');
+    await (await as('huy')).delete(url).send({ confirmName: 'Trần Văn Hùng', reason: 'Thử' }).expect(403);
+    expect((await admin.delete(url).send({ confirmName: 'Trần Văn Hưng', reason: 'Nhập nhầm' }).expect(400)).body.code).toBe('CONFIRM_MISMATCH');
+    await admin.delete(url).send({ confirmName: 'Trần Văn Hùng' }).expect(400);
+
+    const res = (await admin.delete(url).send({ confirmName: 'trần văn hùng', reason: 'Hồ sơ tạo nhầm' }).expect(200)).body as { fullName: string; runs: number };
+    expect(res).toMatchObject({ fullName: 'Trần Văn Hùng', runs: profile.history.length });
+    await admin.get(url).expect(404);
+    expect(names(await listOf(admin))).not.toContain('Trần Văn Hùng');
+
+    // Tài khoản giữ nguyên, không còn gắn hồ sơ; Lan vẫn có Buddy Hùng
+    const account = ((await admin.get(`${API}/users`).expect(200)).body as UserListResponse).items.find((u) => u.email === 'hung@upharma.local')!;
+    expect(account).toMatchObject({ status: 'active', staffId: null });
+    const lan = (await listOf(admin)).items.find((i) => i.staff.fullName === 'Nguyễn Thị Lan')!;
+    expect(((await admin.get(`${API}/staff/${lan.staff.id}`).expect(200)).body as StaffProfileResponse).people.buddy).toBe('Trần Văn Hùng');
+    const inbox = (await (await as('hung')).get(`${API}/me/inbox`).expect(200)).body as InboxResponse;
+    expect(inbox.groups.some((g) => g.staff.fullName === 'Nguyễn Thị Lan')).toBe(true);
+
+    // Nhật ký hệ thống ghi họ tên và lý do
+    const logs = (await admin.get(`${API}/audit-logs`).expect(200)).body as AuditLogResponse;
+    expect(logs.items.find((i) => i.label === 'Xóa hồ sơ nhân viên')).toMatchObject({ entityId: String(hung.staff.id), payload: { confirmName: 'trần văn hùng', reason: 'Hồ sơ tạo nhầm' } });
   });
 });

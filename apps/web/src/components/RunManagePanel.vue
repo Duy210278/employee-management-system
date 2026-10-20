@@ -1,15 +1,19 @@
 <script setup lang="ts">
 import { addDays, ASSIGNMENT_LABEL, PauseBody, runTitle, type AssignmentRole, type PauseView } from '@lotrinh/shared';
+import { useQueryClient } from '@tanstack/vue-query';
 import { computed, reactive, ref, toRef, watch } from 'vue';
+import { useRouter } from 'vue-router';
 import { runApi, staffApi, useMutate, useRunManage } from '@/api/queries';
 import { useToast } from '@/composables/toast';
 import { fmtDate, fmtDateTime } from '@/format';
 
 /**
  * Các tình huống vận hành của lượt Level (mục 9.3): đổi Buddy/CHT/QLKV, tạm dừng (CHT đề xuất, QLKV/BP ĐT duyệt),
- * chuyển cửa hàng, ngừng theo dõi (nghỉ việc, có chuyển giao nếu NV đang làm Buddy).
+ * chuyển cửa hàng, ngừng theo dõi (nghỉ việc, có chuyển giao nếu NV đang làm Buddy); BP ĐT xóa hẳn hồ sơ tạo nhầm.
  */
-const props = defineProps<{ runId: number; staffId: number; staffName: string }>();
+const props = defineProps<{ runId: number; staffId: number; staffName: string; canDelete?: boolean }>();
+const router = useRouter();
+const qc = useQueryClient();
 const { data: m, isLoading, error } = useRunManage(toRef(() => props.runId));
 const mutate = useMutate();
 const toast = useToast();
@@ -20,6 +24,8 @@ const pause = reactive({ from: '', to: '', reason: '' });
 const decideNote = ref('');
 const transfer = reactive({ storeId: 0, chtId: 0, qlkvId: 0 });
 const stop = reactive({ reason: '', handover: {} as Record<number, number> });
+const del = reactive({ name: '', reason: '' });
+const nameMatches = computed(() => del.name.trim().toLowerCase() === props.staffName.trim().toLowerCase());
 
 watch(
   m,
@@ -100,6 +106,26 @@ async function doStop() {
   if (!confirm(`Ngừng theo dõi ${props.staffName}? Lượt Level chuyển "Dừng", dữ liệu vẫn được giữ.`)) return;
   const handover = (m.value?.buddyOf ?? []).map((a) => ({ runId: a.runId, role: a.role, userId: stop.handover[a.runId] }));
   await run(() => staffApi.stop(props.staffId, { reason: stop.reason.trim(), handover }), `Đã ngừng theo dõi ${props.staffName}`);
+}
+
+/** Xóa hẳn hồ sơ: chuyển về danh sách trước rồi mới tải lại dữ liệu, để trang hồ sơ không gọi lại hồ sơ đã xóa */
+async function doDelete() {
+  if (!nameMatches.value) return toast.show(`Gõ đúng họ tên "${props.staffName}" để xác nhận`);
+  if (!del.reason.trim()) return toast.show('Nhập lý do xóa hồ sơ');
+  if (!confirm(`Xóa hẳn hồ sơ ${props.staffName} cùng mọi lượt Level, đầu việc, doanh số, phiếu đánh giá? Không khôi phục được.`)) return;
+  busy.value = true;
+  try {
+    const res = await staffApi.remove(props.staffId, { confirmName: del.name.trim(), reason: del.reason.trim() });
+    // Bỏ danh sách đang lưu đệm để trang Nhân sự không hiện lại người vừa xóa trong lúc tải
+    qc.removeQueries({ queryKey: ['staff'], exact: true });
+    await router.replace('/nhan-su');
+    toast.show(`Đã xóa hồ sơ ${res.fullName} (${res.runs} lượt)`);
+    await qc.invalidateQueries();
+  } catch (err) {
+    toast.show((err as Error).message);
+  } finally {
+    busy.value = false;
+  }
 }
 </script>
 
@@ -229,6 +255,18 @@ async function doStop() {
       </template>
       <label class="f">Lý do<input v-model="stop.reason" placeholder="vd. Nghỉ việc từ 01/11" /></label>
       <div><button class="btn bad" type="button" :disabled="busy" @click="doStop">Ngừng theo dõi</button></div>
+    </div>
+
+    <!-- Xóa hồ sơ (chỉ BP ĐT) -->
+    <div v-if="canDelete" class="card pad stack" style="border-color: var(--bad)">
+      <div class="h2">Xóa hồ sơ nhân viên</div>
+      <div class="sm mut">
+        Dùng khi hồ sơ tạo nhầm hoặc là dữ liệu thử. Xóa hẳn hồ sơ và mọi lượt Level, đầu việc, xác nhận, doanh số, Rubric, phiếu đánh giá; không khôi phục được.
+        Tài khoản đăng nhập giữ nguyên (vẫn làm Buddy, CHT cho người khác nếu đang được phân công). Nhân viên nghỉ việc thì dùng "Ngừng theo dõi" để giữ lịch sử.
+      </div>
+      <label class="f">Gõ lại họ tên "{{ staffName }}" để xác nhận<input v-model="del.name" autocomplete="off" :placeholder="staffName" /></label>
+      <label class="f">Lý do (ghi vào nhật ký hệ thống)<input v-model="del.reason" placeholder="vd. Tạo nhầm hồ sơ" /></label>
+      <div><button class="btn bad" type="button" :disabled="busy || !nameMatches || !del.reason.trim()" @click="doDelete">Xóa hẳn hồ sơ</button></div>
     </div>
   </div>
 </template>

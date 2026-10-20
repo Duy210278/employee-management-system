@@ -1,9 +1,11 @@
-import { Body, Controller, Get, HttpCode, Param, ParseIntPipe, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, ParseIntPipe, Post } from '@nestjs/common';
 import {
   CreateStaffBody,
+  DeleteStaffBody,
   StopStaffBody,
   TransferBody,
   type CreateStaffBodyT,
+  type DeleteStaffBodyT,
   type RunManageResponse,
   type StaffFormOptions,
   type StaffListResponse,
@@ -53,5 +55,11 @@ export class StaffController {
   @HttpCode(200)
   stop(@Param('id', ParseIntPipe) id: number, @Body(new ZodPipe(StopStaffBody)) body: StopStaffBodyT, @CurrentUser() user: SessionUser): Promise<RunManageResponse> {
     return this.manage.stop(user, id, body);
+  }
+
+  /** Chỉ BP Đào tạo: xóa hẳn hồ sơ và mọi lượt Level; tài khoản đăng nhập giữ nguyên */
+  @Delete(':id')
+  remove(@Param('id', ParseIntPipe) id: number, @Body(new ZodPipe(DeleteStaffBody)) body: DeleteStaffBodyT, @CurrentUser() user: SessionUser) {
+    return this.staff.remove(user, id, body);
   }
 }

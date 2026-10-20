@@ -130,6 +130,7 @@ Lưu ý có sẵn: CK-09 báo mục L1-6-5 nhắc "3 tháng" trong khi Level 1 d
 - **Tạm dừng:** Hồ sơ NV → tab **Phân công & tạm dừng**. CHT đề xuất → QLKV hoặc BP ĐT duyệt (đề xuất hiện ở "Chữ ký chờ bạn" của QLKV). Khi duyệt, mọi mốc chưa xong từ ngày dừng lùi đúng số ngày nghỉ, ngày kết thúc dự kiến lùi theo; "ngày thứ N" đứng yên trong lúc dừng. QLKV, BP ĐT tạm dừng thì có hiệu lực ngay.
 - **Đổi Buddy / CHT / QLKV, chuyển cửa hàng:** cùng tab; lịch không đổi, người mới nhận các việc chưa xác nhận và được thông báo.
 - **Ngừng theo dõi (nghỉ việc):** lượt chuyển Dừng, dữ liệu giữ nguyên; nếu NV đang là Buddy của người khác thì phải chọn Buddy thay.
+- **Xóa hồ sơ nhân viên (chỉ BP ĐT):** cùng tab, khung cuối trang. Gõ lại đúng họ tên và nhập lý do; xóa hẳn hồ sơ cùng mọi lượt Level, đầu việc, xác nhận, doanh số, Rubric, phiếu đánh giá, nhật ký onboarding và thông báo trỏ tới hồ sơ. Tài khoản đăng nhập giữ nguyên (vẫn là Buddy/CHT của người khác nếu đang được phân công, có thể gán checklist lại). Không khôi phục được; nhật ký hệ thống ghi họ tên và lý do. Nghỉ việc thì dùng "Ngừng theo dõi".
 
 ## Onboarding Cửa hàng trưởng (CHT)
 

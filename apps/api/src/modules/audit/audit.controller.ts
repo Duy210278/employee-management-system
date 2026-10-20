@@ -38,6 +38,7 @@ const LABELS: [RegExp, string][] = [
   [/^PUT \/runs\/:id\/cht\/meta$/, 'Ghi chú quản lý (onboarding CHT)'],
   [/^POST \/staff\/:id\/transfer$/, 'Chuyển cửa hàng'],
   [/^POST \/staff\/:id\/stop$/, 'Ngừng theo dõi nhân viên'],
+  [/^DELETE \/staff\/:id$/, 'Xóa hồ sơ nhân viên'],
   [/^POST \/versions$/, 'Tạo bản nháp phiên bản'],
   [/^PUT \/versions\/:id\/content$/, 'Lưu bản nháp phiên bản'],
   [/^POST \/versions\/:id\/submit$/, 'Gửi duyệt phiên bản'],

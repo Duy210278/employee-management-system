@@ -283,6 +283,8 @@ export interface StaffProfileResponse {
   alerts: Alert[];
   /** Người xem được đổi phân công, tạm dừng, chuyển cửa hàng, ngừng theo dõi */
   canManage: boolean;
+  /** Chỉ BP Đào tạo: xóa hẳn hồ sơ (nhập nhầm, dữ liệu thử) */
+  canDelete: boolean;
   staff: StaffSummary & {
     hireDate: IsoDate;
     currentLevel: number;

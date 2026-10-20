@@ -210,6 +210,12 @@ export const StopStaffBody = z.object({
   handover: z.array(HandoverItem).default([]),
 });
 
+/** Xóa hẳn hồ sơ nhân viên: gõ lại đúng họ tên để xác nhận, lý do ghi vào nhật ký hệ thống */
+export const DeleteStaffBody = z.object({
+  confirmName: z.string().trim().min(1, 'Nhập họ tên nhân viên để xác nhận'),
+  reason: z.string().trim().min(1, 'Nhập lý do xóa hồ sơ').max(500),
+});
+
 export const MarkReadBody = z.object({ ids: z.array(id).optional(), all: z.boolean().optional() });
 
 // ---------- Onboarding Cửa hàng trưởng ----------
@@ -256,6 +262,7 @@ export type StoreBodyT = z.infer<typeof StoreBody>;
 export type PauseBodyT = z.infer<typeof PauseBody>;
 export type TransferBodyT = z.infer<typeof TransferBody>;
 export type StopStaffBodyT = z.infer<typeof StopStaffBody>;
+export type DeleteStaffBodyT = z.infer<typeof DeleteStaffBody>;
 
 export type SalesBodyT = z.infer<typeof SalesBody>;
 export type ObservationBodyT = z.infer<typeof ObservationBody>;
