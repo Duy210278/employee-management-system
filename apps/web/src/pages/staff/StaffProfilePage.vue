@@ -9,11 +9,13 @@ import ChtJournal from '@/components/cht/ChtJournal.vue';
 import ChtOverview from '@/components/cht/ChtOverview.vue';
 import RubricTab from '@/components/assessment/RubricTab.vue';
 import SalesTab from '@/components/assessment/SalesTab.vue';
+import Avatar from '@/components/Avatar.vue';
 import LevelOverview from '@/components/LevelOverview.vue';
 import PathBar from '@/components/PathBar.vue';
 import RoleChip from '@/components/RoleChip.vue';
 import RunManagePanel from '@/components/RunManagePanel.vue';
 import StageChecklist from '@/components/StageChecklist.vue';
+import { usePageHeader } from '@/composables/pageHeader';
 import { fmtDate, yearOf } from '@/format';
 
 /** Hồ sơ nhân viên (mục 11.5); "Lộ trình của tôi" là chế độ xem của chính NV */
@@ -82,12 +84,23 @@ const STATUS_LABEL: Record<string, string> = {
   stopped: 'Dừng',
   promoted: 'Thăng chức CHT',
 };
+const historyDesc = computed(() => [...(p.value?.history ?? [])].reverse());
+const runLabel = (h: NonNullable<typeof selected.value>) =>
+  `${runTitle(h)}${h.runId === run.value?.id ? ' (hiện tại)' : h.status !== 'active' ? ` · ${STATUS_LABEL[h.status] ?? h.status}` : ''}`;
+function pickRun(e: Event) {
+  go({ run: Number((e.target as HTMLSelectElement).value) });
+}
+
+// Dải tiêu đề: tên nhân viên; hồ sơ của người khác có đường dẫn về danh sách Nhân sự
+usePageHeader(() => {
+  if (!p.value) return null;
+  if (isMine.value) return { desc: `${p.value.staff.fullName} · ${p.value.staff.storeName}` };
+  return { title: p.value.staff.fullName, crumbs: [{ label: 'Nhân sự', to: '/nhan-su' }] };
+});
 </script>
 
 <template>
-  <div class="stack">
-    <div v-if="!isMine"><RouterLink class="btn sm" to="/nhan-su">← Danh sách nhân sự</RouterLink></div>
-
+  <div class="page">
     <div v-if="isMine && me && !me.staffId" class="card empty">
       <h3>Hồ sơ của bạn chưa được tạo</h3>
       <div>Nhờ Cửa hàng trưởng hoặc BP Đào tạo tạo hồ sơ nhân viên và gắn với tài khoản của bạn.</div>
@@ -100,40 +113,46 @@ const STATUS_LABEL: Record<string, string> = {
 
     <template v-else-if="p && run && p.level">
       <div class="card pad stack">
-        <div class="rowf sp">
-          <div>
-            <div class="h1">{{ p.staff.fullName }}</div>
-            <div class="sm mut">
-              <template v-if="p.staff.employeeCode">{{ p.staff.employeeCode }} · </template>{{ p.staff.storeName }} · {{ p.staff.areaName }} · Nhận việc
-              {{ fmtDate(p.staff.hireDate, refYear) }}
-              <template v-if="p.staff.accountEmail"> · {{ p.staff.accountEmail }}</template>
-              <template v-else> · chưa có tài khoản</template>
+        <div class="rowf sp start">
+          <div class="rowf keep grow">
+            <Avatar :name="p.staff.fullName" size="lg" />
+            <div class="grow">
+              <div class="rowf tight">
+                <span class="pill info">
+                  {{ runTitle(run) }} ·
+                  {{ run.dayIndex < 0 ? `bắt đầu ${fmtDate(run.startDate, refYear)}` : `ngày ${run.dayIndex + 1}/${p.level.totalDays}` }}
+                </span>
+                <span class="pill" :class="run.acknowledged ? 'ok' : 'warn'">{{ run.acknowledged ? 'Đã đọc tổng quan' : 'Chưa đọc tổng quan' }}</span>
+                <span class="pill">{{ p.level.checklistName }} v{{ run.versionCode }}</span>
+              </div>
+              <div class="sm mut mt6">
+                <template v-if="p.staff.employeeCode">{{ p.staff.employeeCode }} · </template>{{ p.staff.storeName }} · {{ p.staff.areaName }} · Nhận việc
+                {{ fmtDate(p.staff.hireDate, refYear) }}
+                <template v-if="p.staff.accountEmail"> · {{ p.staff.accountEmail }}</template>
+                <template v-else> · chưa có tài khoản</template>
+              </div>
             </div>
           </div>
-          <div class="rowf">
-            <span class="pill info">
-              {{ runTitle(run) }} ·
-              {{ run.dayIndex < 0 ? `bắt đầu ${fmtDate(run.startDate, refYear)}` : `ngày ${run.dayIndex + 1}/${p.level.totalDays}` }}
-            </span>
-            <span class="pill" :class="run.acknowledged ? 'ok' : 'warn'">{{ run.acknowledged ? 'Đã đọc tổng quan' : 'Chưa đọc tổng quan' }}</span>
-            <span class="pill">{{ p.level.checklistName }} v{{ run.versionCode }}</span>
+          <div class="ta-r">
+            <b class="big">{{ pct }}%</b>
+            <div class="sm mut">{{ run.progress.done }}/{{ run.progress.total }} mục</div>
           </div>
         </div>
-        <div v-if="run.track === 'nvbh'" class="rowf sm">
-          <span><RoleChip role="buddy" /> {{ p.people.buddy ?? 'chưa gắn' }}</span>
-          <span><RoleChip role="cht" /> {{ p.people.cht ?? 'chưa gắn' }}</span>
-          <span><RoleChip role="qlkv" /> {{ p.people.qlkv ?? 'chưa gắn' }}</span>
-        </div>
-        <div v-else class="rowf sm">
-          <span><RoleChip role="bp" :track="run.track" /> {{ p.people.trainer ?? 'chưa gắn' }}</span>
-          <span><RoleChip role="qlkv" /> {{ p.people.qlkv ?? 'chưa gắn' }}</span>
-          <span><RoleChip role="buddy" /> {{ p.people.buddy ?? 'không có' }}</span>
+        <div class="bar lg" role="progressbar" :aria-valuenow="pct" aria-valuemin="0" aria-valuemax="100" :aria-label="`Tiến độ ${runTitle(run)}`"><i :style="{ width: pct + '%' }"></i></div>
+        <div class="rowf sm">
+          <span class="mut b">Người đồng hành:</span>
+          <template v-if="run.track === 'nvbh'">
+            <span><RoleChip role="buddy" /> {{ p.people.buddy ?? 'chưa gắn' }}</span>
+            <span><RoleChip role="cht" /> {{ p.people.cht ?? 'chưa gắn' }}</span>
+            <span><RoleChip role="qlkv" /> {{ p.people.qlkv ?? 'chưa gắn' }}</span>
+          </template>
+          <template v-else>
+            <span><RoleChip role="bp" :track="run.track" /> {{ p.people.trainer ?? 'chưa gắn' }}</span>
+            <span><RoleChip role="qlkv" /> {{ p.people.qlkv ?? 'chưa gắn' }}</span>
+            <span><RoleChip role="buddy" /> {{ p.people.buddy ?? 'không có' }}</span>
+          </template>
         </div>
         <PathBar v-if="p.path.length" :path="p.path" :for-staff="p.isSelf" :ref-year="refYear" />
-        <div class="rowf">
-          <div class="bar grow"><i :style="{ width: pct + '%' }"></i></div>
-          <span class="sm mut">{{ runTitle(run) }}: {{ run.progress.done }}/{{ run.progress.total }} mục · {{ pct }}%</span>
-        </div>
         <div v-if="!p.staff.active" class="alert">
           <div><b>Đã ngừng theo dõi</b><template v-if="p.staff.stopReason">: {{ p.staff.stopReason }}</template>. Dữ liệu được giữ nguyên để tra cứu.</div>
         </div>
@@ -141,7 +160,7 @@ const STATUS_LABEL: Record<string, string> = {
           <div>Đang <b>tạm dừng</b> {{ fmtDate(run.pause.from, refYear) }} → {{ fmtDate(run.pause.to, refYear) }}. Các mốc chưa xong đã lùi tương ứng.</div>
         </div>
         <div v-if="p.alerts.length && !p.isSelf" class="alert" :class="{ bad: hasRed }">
-          <ul class="ul" style="margin: 0">
+          <ul class="ul plain">
             <li v-for="a in p.alerts" :key="a.key"><span class="pill" :class="a.severity === 'red' ? 'bad' : 'warn'">{{ a.severity === 'red' ? 'Đỏ' : 'Vàng' }}</span> {{ a.message }}</li>
           </ul>
         </div>
@@ -151,8 +170,8 @@ const STATUS_LABEL: Record<string, string> = {
       <div v-if="gated" class="alert">
         <div>Hãy đọc <b>Tổng quan {{ runTitle(run) }}</b> và xác nhận ở cuối trang. Các mục còn lại sẽ mở sau đó.</div>
       </div>
-      <div class="rowf sp">
-        <div class="sub" role="tablist">
+      <div class="tabbar">
+        <div class="sub grow" role="tablist">
           <button
             v-for="t in tabs"
             :key="t.key"
@@ -166,17 +185,12 @@ const STATUS_LABEL: Record<string, string> = {
             {{ t.label }}
           </button>
         </div>
-        <div v-if="p.history.length > 1" class="sub" aria-label="Chọn Level để xem">
-          <button
-            v-for="h in [...p.history].reverse()"
-            :key="h.runId"
-            type="button"
-            :aria-current="h.runId === selectedRunId"
-            @click="go({ run: h.runId })"
-          >
-            {{ runTitle(h) }}<template v-if="h.status !== 'active'"> · {{ STATUS_LABEL[h.status] ?? h.status }}</template>
-          </button>
-        </div>
+        <label v-if="p.history.length > 1" class="p">
+          Đang xem
+          <select :value="selectedRunId ?? undefined" aria-label="Chọn Level để xem" @change="pickRun">
+            <option v-for="h in historyDesc" :key="h.runId" :value="h.runId">{{ runLabel(h) }}</option>
+          </select>
+        </label>
       </div>
       <div v-if="!viewingCurrent && selected" class="alert info">
         <div>Đang xem lại <b>{{ runTitle(selected) }}</b> ({{ fmtDate(selected.startDate, refYear) }} → {{ fmtDate(selected.plannedEnd, refYear) }}).</div>

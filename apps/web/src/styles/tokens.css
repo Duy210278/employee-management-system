@@ -1,13 +1,15 @@
-/* Bảng màu và chữ theo mục 15.1–15.2 (lấy trực tiếp từ CSS của N3) */
+/* Bảng màu và chữ theo mục 15.1–15.2 (lấy trực tiếp từ CSS của N3); bóng, vòng sáng, bo góc bổ sung khi làm mới giao diện */
 :root {
   color-scheme: light;
-  --bg: #f1f5f5;
+  --bg: #f3f6f6;
   --surface: #ffffff;
-  --surface2: #f6f9f9;
+  --surface2: #f5f8f8;
   --ink: #13272b;
   --mut: #5a6f73;
-  --line: #dae3e4;
+  --line: #e1e8e9;
+  --line-strong: #cbd6d8;
   --accent: #0a7b67;
+  --accent-hover: #086655;
   --accent-ink: #ffffff;
   --soft: #dff1ec;
   --ok: #1c7c4b;
@@ -16,6 +18,7 @@
   --warn-bg: #fff1d4;
   --bad: #b93a27;
   --bad-bg: #fce8e4;
+  --bad-ink: #ffffff;
   --info: #245aa8;
   --info-bg: #e3edfa;
   --r-nv: #6b4fb3;
@@ -28,6 +31,15 @@
   --r-qlkv-bg: #fff1d4;
   --r-bp: #b93a27;
   --r-bp-bg: #fce8e4;
+  /* Dải tiêu đề trang: nền nhạt chuyển dần sang trong suốt, đường cong trang trí */
+  --band: #e8f0f0;
+  --deco: #a9c9c2;
+  --shadow-1: 0 1px 2px rgb(19 39 43 / 0.04), 0 1px 3px rgb(19 39 43 / 0.05);
+  --shadow-2: 0 10px 28px rgb(19 39 43 / 0.14), 0 2px 6px rgb(19 39 43 / 0.08);
+  --ring: 0 0 0 3px rgb(10 123 103 / 0.18);
+  --radius: 12px;
+  --radius-sm: 8px;
+  --h-ctl: 38px;
   --font: 'Be Vietnam Pro', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --mono: 'IBM Plex Mono', ui-monospace, Menlo, monospace;
 }
@@ -41,7 +53,9 @@
     --ink: #e5efef;
     --mut: #91a7aa;
     --line: #26393c;
+    --line-strong: #34494c;
     --accent: #3fc3a6;
+    --accent-hover: #62d3ba;
     --accent-ink: #06211b;
     --soft: #14352f;
     --ok: #55cf92;
@@ -50,6 +64,7 @@
     --warn-bg: #3a2d0e;
     --bad: #ff8a76;
     --bad-bg: #40201b;
+    --bad-ink: #2a0d08;
     --info: #7fb0f0;
     --info-bg: #162c4a;
     --r-nv: #b7a2f2;
@@ -62,6 +77,11 @@
     --r-qlkv-bg: #3a2d0e;
     --r-bp: #ff8a76;
     --r-bp-bg: #40201b;
+    --band: #12282b;
+    --deco: #2b5a52;
+    --shadow-1: 0 1px 2px rgb(0 0 0 / 0.25);
+    --shadow-2: 0 10px 28px rgb(0 0 0 / 0.5), 0 2px 6px rgb(0 0 0 / 0.3);
+    --ring: 0 0 0 3px rgb(63 195 166 / 0.25);
   }
 }
 
@@ -73,7 +93,9 @@
   --ink: #e5efef;
   --mut: #91a7aa;
   --line: #26393c;
+  --line-strong: #34494c;
   --accent: #3fc3a6;
+  --accent-hover: #62d3ba;
   --accent-ink: #06211b;
   --soft: #14352f;
   --ok: #55cf92;
@@ -82,6 +104,7 @@
   --warn-bg: #3a2d0e;
   --bad: #ff8a76;
   --bad-bg: #40201b;
+  --bad-ink: #2a0d08;
   --info: #7fb0f0;
   --info-bg: #162c4a;
   --r-nv: #b7a2f2;
@@ -94,4 +117,9 @@
   --r-qlkv-bg: #3a2d0e;
   --r-bp: #ff8a76;
   --r-bp-bg: #40201b;
+  --band: #12282b;
+  --deco: #2b5a52;
+  --shadow-1: 0 1px 2px rgb(0 0 0 / 0.25);
+  --shadow-2: 0 10px 28px rgb(0 0 0 / 0.5), 0 2px 6px rgb(0 0 0 / 0.3);
+  --ring: 0 0 0 3px rgb(63 195 166 / 0.25);
 }

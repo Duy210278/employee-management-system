@@ -83,7 +83,7 @@ const exampleDate = computed(() => {
         </label>
         <span class="p" data-field="verifiers" tabindex="-1">
           Xác nhận
-          <span class="rowf" style="gap: 4px">
+          <span class="rowf tight">
             <span class="rl nv" :title="cht ? 'Phần của CHT' : 'Phần nhân viên'">{{ short('nv') }}</span>
             <button
               v-for="r in verifierRoles"
@@ -119,7 +119,7 @@ const exampleDate = computed(() => {
         </template>
         <label class="p">
           Hạn: ngày
-          <input :value="item.dueOffset" data-field="dueOffset" type="number" min="0" style="width: 72px" :disabled="ro" @change="item.dueOffset = intOf($event)" />
+          <input :value="item.dueOffset" data-field="dueOffset" type="number" min="0" class="w72" :disabled="ro" @change="item.dueOffset = intOf($event)" />
           <span class="sm mut" :title="'Nếu NV bắt đầu Level hôm nay'">({{ exampleDate }})</span>
         </label>
         <label v-if="!cht" class="p cb" data-field="gpp"><input :checked="item.gpp" type="checkbox" :disabled="ro" @change="setGpp(item, ($event.target as HTMLInputElement).checked)" /> GPP</label>

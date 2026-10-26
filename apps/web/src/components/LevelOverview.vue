@@ -27,15 +27,15 @@ function ack() {
   <div v-if="isLoading" class="card empty">Đang tải tổng quan…</div>
   <div v-else-if="error" class="alert bad"><div>{{ error.message }}</div></div>
   <div v-else-if="ov" class="stack">
-    <div class="card pad stack" style="background: var(--soft)">
+    <div class="card pad stack tint">
       <div class="rowf sp">
         <div>
-          <div class="sm mut" style="font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase">
+          <div class="eyebrow">
             Level {{ ov.level.key }} · {{ ov.level.durationLabel }} · Giai đoạn {{ ov.level.phase }}
           </div>
           <div class="h1">{{ ov.level.name }}: “{{ ov.level.motto }}”</div>
         </div>
-        <div class="sm" style="text-align: right">
+        <div class="sm ta-r">
           Bắt đầu <b>{{ fmtDate(ov.run.startDate, refYear) }}</b><br />
           Dự kiến kết thúc <b>{{ fmtDate(ov.run.plannedEnd, refYear) }}</b>
         </div>
@@ -61,7 +61,7 @@ function ack() {
         <div class="card pad stack">
           <div>
             <div class="rowf"><RoleChip :role="levelKey <= 2 ? 'buddy' : 'cht'" /><RoleChip :role="levelKey <= 2 ? 'cht' : 'buddy'" /></div>
-            <div style="font-weight: 700; margin-top: 6px">{{ atCounter.join(' · ') || 'Chưa được gắn' }}</div>
+            <div class="b mt6">{{ atCounter.join(' · ') || 'Chưa được gắn' }}</div>
             <div class="sm mut">Kèm cặp và xác nhận tại quầy</div>
           </div>
           <ul class="ul"><li v-for="(x, i) in resp(0)" :key="i">{{ x }}</li></ul>
@@ -69,7 +69,7 @@ function ack() {
         <div class="card pad stack">
           <div>
             <div class="rowf"><RoleChip role="qlkv" /></div>
-            <div style="font-weight: 700; margin-top: 6px">{{ ov.people.qlkv ?? 'Chưa được gắn' }}</div>
+            <div class="b mt6">{{ ov.people.qlkv ?? 'Chưa được gắn' }}</div>
             <div class="sm mut">Theo dõi hệ thống, xác nhận các mốc lớn</div>
           </div>
           <ul class="ul"><li v-for="(x, i) in resp(1)" :key="i">{{ x }}</li></ul>
@@ -77,7 +77,7 @@ function ack() {
         <div class="card pad stack">
           <div>
             <div class="rowf"><RoleChip role="bp" /></div>
-            <div style="font-weight: 700; margin-top: 6px">{{ ov.people.bp.join(' · ') || 'Chưa được gắn' }}</div>
+            <div class="b mt6">{{ ov.people.bp.join(' · ') || 'Chưa được gắn' }}</div>
             <div class="sm mut">Nội dung, LMS, kiểm tra, chứng nhận, GPP</div>
           </div>
           <ul class="ul"><li v-for="(x, i) in resp(2)" :key="i">{{ x }}</li></ul>
@@ -122,7 +122,7 @@ function ack() {
     <div v-if="ov.run.acknowledged" class="alert ok">
       <div><b>{{ ov.run.ackByName }}</b> đã đọc và xác nhận hiểu mục tiêu, nhiệm vụ Level {{ ov.level.key }} lúc {{ fmtDateTime(ov.run.ackAt) }}.</div>
     </div>
-    <div v-else-if="ov.canAck" class="card pad stack" style="border-color: var(--accent)">
+    <div v-else-if="ov.canAck" class="card pad stack hl">
       <div class="h2">Xác nhận đã đọc</div>
       <div class="mut">
         Trước khi bắt đầu từng nhiệm vụ của Level {{ ov.level.key }}, hãy đọc mục tiêu, người đồng hành và chỉ tiêu ở trên. Sau khi xác nhận, checklist được mở.

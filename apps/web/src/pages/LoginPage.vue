@@ -48,22 +48,24 @@ function quick() {
 </script>
 
 <template>
-  <div class="auth stack" style="max-width: 460px">
-    <div class="brand"><i>U</i>Lộ trình Upharma</div>
-    <div class="card pad stack">
+  <div class="auth-page">
+    <div class="auth-card">
+      <div class="auth-head">
+        <div class="brand-mark" aria-hidden="true">U</div>
+        <h1 class="auth-title">Chào mừng đến với<br />Lộ trình Upharma</h1>
+      </div>
       <form class="stack" @submit.prevent="submit">
-        <div class="h1">Đăng nhập</div>
         <label class="f">Email công ty<input v-model="email" type="email" autocomplete="username" required /></label>
         <label class="f">Mật khẩu<input v-model="password" type="password" autocomplete="current-password" required /></label>
-        <button class="btn pri wide" type="submit" :disabled="busy">Đăng nhập</button>
-        <div class="sm" style="text-align: center"><RouterLink to="/dang-ky">Chưa có tài khoản? Đăng ký</RouterLink></div>
+        <button class="btn pri lg round wide" type="submit" :disabled="busy">Đăng nhập</button>
+        <div class="auth-foot">Chưa có tài khoản? <RouterLink to="/dang-ky">Đăng ký</RouterLink></div>
       </form>
 
       <!-- Đăng nhập nhanh chỉ có ở bản demo (DEMO_MODE) -->
       <template v-if="accounts?.length && !noDemo">
         <div class="or" role="separator"><span>hoặc đăng nhập nhanh (bản demo)</span></div>
-        <form class="stack" style="gap: 8px" @submit.prevent="quick">
-          <div class="rowf" style="flex-wrap: nowrap">
+        <form class="stack tight" @submit.prevent="quick">
+          <div class="rowf keep">
             <select v-model.number="quickId" class="grow" aria-label="Chọn tài khoản mẫu">
               <option :value="0" disabled>Chọn tài khoản mẫu…</option>
               <optgroup v-for="g in groups" :key="g.role" :label="g.label">
@@ -72,11 +74,11 @@ function quick() {
                 </option>
               </optgroup>
             </select>
-            <button class="btn" type="submit" :disabled="busy || !picked">Vào</button>
+            <button class="btn lg" type="submit" :disabled="busy || !picked">Vào</button>
           </div>
           <div class="sm mut">
             <template v-if="picked">{{ picked.note }}</template>
-            <template v-else>Mọi tài khoản mẫu dùng mật khẩu <b class="mono">Demo@123</b>. Sau khi vào có thể đổi tài khoản ở thanh trên cùng.</template>
+            <template v-else>Mọi tài khoản mẫu dùng mật khẩu <b class="mono">Demo@123</b>. Sau khi vào có thể đổi tài khoản ở menu tên người dùng góc phải.</template>
           </div>
         </form>
       </template>

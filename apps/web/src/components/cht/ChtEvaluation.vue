@@ -68,14 +68,14 @@ async function confirm() {
   <div v-else-if="v" class="stack">
     <div class="card pad stack">
       <div class="h2">Đánh giá tổng kết tuần đầu</div>
-      <div v-for="r in v.ratings" :key="r.key" class="rowf sp" style="border-top: 1px solid var(--line); padding-top: 8px">
+      <div v-for="r in v.ratings" :key="r.key" class="rowf sp divided">
         <span>{{ r.label }}</span>
         <select :value="form.ratings[r.key] ?? ''" :disabled="!v.permissions.evaluate" :aria-label="r.label" @change="setRating(r.key, ($event.target as HTMLSelectElement).value)">
           <option value="">–</option>
           <option v-for="s in RATING_SCALE" :key="s.value" :value="s.value">{{ s.label }}</option>
         </select>
       </div>
-      <div class="rowf sp" style="border-top: 1px solid var(--line); padding-top: 8px">
+      <div class="rowf sp divided">
         <span>Nguy cơ nghỉ việc (Đào tạo đánh giá)</span>
         <select v-model="form.risk" :disabled="!v.permissions.evaluate" aria-label="Nguy cơ nghỉ việc">
           <option value="">–</option>
@@ -98,7 +98,7 @@ async function confirm() {
         <template v-if="v.evaluation.confirmNote"> · {{ v.evaluation.confirmNote }}</template>
       </div>
     </div>
-    <div v-else-if="v.permissions.confirm" class="card pad stack" style="border-color: var(--accent)">
+    <div v-else-if="v.permissions.confirm" class="card pad stack hl">
       <div class="h2">Xác nhận quản lý cấp trên</div>
       <ul v-if="v.problems.length" class="ul sm">
         <li v-for="p in v.problems" :key="p">Còn thiếu: {{ p.toLowerCase() }}</li>

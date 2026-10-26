@@ -15,8 +15,10 @@ import { computed, reactive, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { ApiError } from '@/api/client';
 import { userApi, useStaffProfile, useUser } from '@/api/queries';
+import Avatar from '@/components/Avatar.vue';
 import ChtRunForm from '@/components/cht/ChtRunForm.vue';
 import StaffRunForm from '@/components/StaffRunForm.vue';
+import { usePageHeader } from '@/composables/pageHeader';
 import { useToast } from '@/composables/toast';
 import { fmtDateTime } from '@/format';
 import ScopePicker from './ScopePicker.vue';
@@ -33,6 +35,7 @@ const info = reactive({ fullName: '', employeeCode: '', phone: '', status: 'acti
 const scope = ref({ role: 'nv' as AccountRole, storeIds: [] as number[], areaIds: [] as number[], canBuddy: false, canApproveVersions: false });
 const handover = reactive<Record<string, number>>({});
 const rejectNote = ref('');
+usePageHeader(() => (d.value ? { title: d.value.user.fullName, crumbs: [{ label: 'Quản trị', to: '/quan-tri' }, { label: 'Tài khoản và vai trò', to: '/quan-tri/tai-khoan' }] } : null));
 
 function load(v: UserDetailResponse) {
   const u = v.user;
@@ -114,18 +117,20 @@ function reject() {
 </script>
 
 <template>
-  <div class="stack">
-    <div><RouterLink class="btn sm" to="/quan-tri/tai-khoan">← Danh sách tài khoản</RouterLink></div>
+  <div class="page">
     <div v-if="isLoading" class="card empty">Đang tải…</div>
     <div v-else-if="error" class="alert bad"><div>{{ error.message }}</div></div>
     <template v-else-if="d">
       <div class="card pad stack">
         <div class="rowf sp">
-          <div>
-            <div class="h1">{{ d.user.fullName }}</div>
-            <div class="sm mut">
-              {{ d.user.email }} · tạo {{ fmtDateTime(d.user.createdAt) }} · lần vào cuối {{ fmtDateTime(d.user.lastSeenAt) || 'chưa đăng nhập' }}
-              <template v-if="d.user.staffId"> · <RouterLink :to="`/nhan-su/${d.user.staffId}`">hồ sơ NV {{ d.user.staffName }}</RouterLink></template>
+          <div class="rowf keep grow">
+            <Avatar :name="d.user.fullName" size="lg" />
+            <div class="grow">
+              <div class="rowf tight"><b>{{ d.user.fullName }}</b><span class="rl" :class="d.user.role">{{ ROLE_LABEL[d.user.role] }}</span></div>
+              <div class="sm mut">
+                {{ d.user.email }} · tạo {{ fmtDateTime(d.user.createdAt) }} · lần vào cuối {{ fmtDateTime(d.user.lastSeenAt) || 'chưa đăng nhập' }}
+                <template v-if="d.user.staffId"> · <RouterLink :to="`/nhan-su/${d.user.staffId}`">hồ sơ NV {{ d.user.staffName }}</RouterLink></template>
+              </div>
             </div>
           </div>
           <span class="pill" :class="{ ok: d.user.status === 'active', warn: d.user.status === 'pending' || d.user.status === 'locked', bad: d.user.status === 'rejected' }">
@@ -136,8 +141,8 @@ function reject() {
       </div>
 
       <!-- Duyệt đăng ký (mục 5.1) -->
-      <div v-if="d.user.status === 'pending'" class="grid g2" style="align-items: start">
-        <div class="card pad stack" style="border-color: var(--accent)">
+      <div v-if="d.user.status === 'pending'" class="grid g2 start">
+        <div class="card pad stack hl">
           <div class="h2">Duyệt đăng ký</div>
           <div class="sm">
             Đề nghị: <b>{{ ROLE_LABEL[d.user.requested?.role ?? d.user.role] }}</b>
@@ -157,7 +162,7 @@ function reject() {
       </div>
 
       <!-- Lộ trình và checklist (tài khoản NV đang hoạt động) -->
-      <div v-if="isActiveNv" class="card pad stack" :style="d.user.staffId ? '' : 'border-color: var(--accent)'">
+      <div v-if="isActiveNv" class="card pad stack" :class="{ hl: !d.user.staffId }">
         <div class="h2">Lộ trình và checklist</div>
         <template v-if="d.user.staffId">
           <div class="rowf sp">
@@ -180,7 +185,7 @@ function reject() {
       </div>
 
       <!-- Checklist onboarding (tài khoản CHT đang hoạt động) -->
-      <div v-if="isActiveCht" class="card pad stack" :style="showChtForm ? 'border-color: var(--accent)' : ''">
+      <div v-if="isActiveCht" class="card pad stack" :class="{ hl: showChtForm }">
         <div class="h2">Checklist onboarding CHT</div>
         <template v-if="chtRun">
           <div class="rowf sp">
@@ -227,7 +232,7 @@ function reject() {
         </div>
 
         <!-- Chuyển giao (mục 5.4 điều 3, R20) -->
-        <div v-if="affected.length" class="card pad stack" style="border-color: var(--warn)">
+        <div v-if="affected.length" class="card pad stack hl-warn">
           <b>Chuyển giao {{ affected.length }} phân công</b>
           <div class="sm mut">
             Sau khi lưu, {{ d.user.fullName }} không còn giữ được các phân công dưới đây. Chọn người thay; người mới nhận các việc chưa xác nhận, xác nhận cũ giữ
@@ -250,7 +255,7 @@ function reject() {
         </div>
       </form>
 
-      <div class="grid g2" style="align-items: start">
+      <div class="grid g2 start">
         <div class="card">
           <div class="stg"><b>Đang phụ trách</b><span class="sm mut">{{ d.assignments.length }} phân công trên lượt Level đang mở</span></div>
           <table v-if="d.assignments.length" class="rt">

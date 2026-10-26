@@ -61,6 +61,8 @@ const STATE_LABEL: Record<VersionState, [string, string]> = {
   expired: ['Hết hiệu lực', ''],
 };
 const title = computed(() => (v.value.code ? `Bộ lộ trình v${v.value.code}` : 'Bản nháp Bộ lộ trình'));
+/** Thẻ dưới đầu trình soạn chỉ hiện khi có nội dung: ghi chú thay đổi, dải tác động, kiểm tra, duyệt, ngày hiệu lực */
+const hasBody = computed(() => perm.value.edit || perm.value.approve || !!v.value.changeNote || ['draft', 'pending', 'scheduled'].includes(v.value.state));
 const refYear = computed(() => Number(props.detail.today.slice(0, 4)));
 
 async function run<T>(fn: () => Promise<T>, success: string): Promise<T | undefined> {
@@ -173,10 +175,11 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="stack">
-    <div class="card pad stack">
-      <div class="rowf sp">
-        <div>
-          <div class="rowf" style="gap: 8px">
+    <!-- Đầu trình soạn dính trên cùng khi cuộn: tên phiên bản, trạng thái, nút thao tác -->
+    <div class="card vhead">
+      <div class="rowf sp vhead-in">
+        <div class="grow">
+          <div class="rowf">
             <div class="h1">{{ title }}</div>
             <span class="pill" :class="STATE_LABEL[v.state][1]">{{ STATE_LABEL[v.state][0] }}</span>
           </div>
@@ -197,7 +200,9 @@ onBeforeUnmount(() => {
           <button v-if="perm.withdraw" class="btn sm" type="button" :disabled="busy" @click="withdraw">Rút về nháp</button>
         </div>
       </div>
+    </div>
 
+    <div v-if="hasBody" class="card pad stack">
       <div v-if="v.state === 'draft' && v.reviewNote" class="alert bad"><div><b>Người duyệt trả về:</b> {{ v.reviewNote }}</div></div>
 
       <label v-if="perm.edit" class="f">
@@ -211,7 +216,7 @@ onBeforeUnmount(() => {
         <div v-if="!d.summary.value" class="alert info"><div>Bản khởi tạo, không có bản gốc để so sánh.</div></div>
         <div v-else-if="!d.summary.value.kind" class="alert"><div>Chưa có thay đổi nào so với v{{ v.parentCode }}.</div></div>
         <div v-else class="alert" :class="d.summary.value.kind === 'criteria' ? '' : 'info'">
-          <div class="stack" style="gap: 6px; width: 100%">
+          <div class="stack tight grow">
             <div v-if="d.summary.value.kind === 'criteria'">
               <b>Có {{ d.summary.value.criteria }} thay đổi tiêu chí</b><template v-if="d.summary.value.text"> và {{ d.summary.value.text }} sửa diễn đạt</template>: chỉ áp
               dụng cho lượt Level bắt đầu từ ngày hiệu lực; NV đang dở Level giữ nguyên phiên bản cũ.
@@ -233,7 +238,7 @@ onBeforeUnmount(() => {
         </div>
 
         <!-- Kiểm tra trước khi gửi duyệt (mục 6.2, 7.7) -->
-        <div class="card" style="border-color: var(--line)">
+        <div class="card">
           <button class="stg vb" type="button" :aria-expanded="showIssues" @click="showIssues = !showIssues">
             <b>Kiểm tra trước khi gửi duyệt</b>
             <span class="rowf">
@@ -254,9 +259,9 @@ onBeforeUnmount(() => {
 
       <!-- Người duyệt phiên bản -->
       <div v-if="perm.approve" class="grid g2">
-        <div class="card pad stack" style="border-color: var(--accent)">
+        <div class="card pad stack hl">
           <div class="h2">Duyệt và ban hành</div>
-          <label class="f" style="max-width: 220px">
+          <label class="f w-sm">
             Ngày hiệu lực
             <input v-model="effectiveFrom" type="date" :min="detail.today" />
           </label>
@@ -273,11 +278,11 @@ onBeforeUnmount(() => {
       </div>
 
       <!-- Bản đã duyệt mà chưa tới ngày: còn đổi được ngày hiệu lực -->
-      <div v-if="v.state === 'scheduled'" class="card pad stack" style="border-color: var(--info)">
+      <div v-if="v.state === 'scheduled'" class="card pad stack hl-info">
         <div class="h2">Ngày hiệu lực</div>
         <template v-if="perm.reschedule && range">
-          <div class="rowf" style="align-items: end">
-            <label class="f" style="max-width: 220px">
+          <div class="rowf bottom">
+            <label class="f w-sm">
               Ngày hiệu lực mới
               <input v-model="newEffective" type="date" :min="range.min" :max="range.max ?? undefined" />
             </label>

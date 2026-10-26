@@ -63,7 +63,7 @@ function saveStore() {
           </tr>
         </tbody>
       </table>
-      <form class="pad rowf" style="border-top: 1px solid var(--line)" @submit.prevent="saveArea">
+      <form class="pad rowf bt" @submit.prevent="saveArea">
         <b class="sm">{{ area.id ? 'Sửa khu vực' : 'Thêm khu vực' }}</b>
         <input v-model="area.code" placeholder="Mã, vd. HN2" size="8" aria-label="Mã khu vực" />
         <input v-model="area.name" placeholder="Tên khu vực" aria-label="Tên khu vực" />
@@ -95,7 +95,7 @@ function saveStore() {
           </tr>
         </tbody>
       </table>
-      <form class="pad stack" style="border-top: 1px solid var(--line)" @submit.prevent="saveStore">
+      <form class="pad stack bt" @submit.prevent="saveStore">
         <b class="sm">{{ store.id ? 'Sửa cửa hàng' : 'Thêm cửa hàng' }}</b>
         <div class="form">
           <label class="f">Mã<input v-model="store.code" placeholder="vd. NTC" /></label>

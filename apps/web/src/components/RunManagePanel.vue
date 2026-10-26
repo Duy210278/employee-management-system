@@ -135,7 +135,7 @@ async function doDelete() {
   <div v-else-if="m" class="stack">
     <div v-if="!m.active" class="alert"><div>Nhân viên đã ngừng theo dõi. Lượt Level ở trạng thái Dừng, dữ liệu được giữ nguyên.</div></div>
 
-    <div class="grid g2" style="align-items: start">
+    <div class="grid g2 start">
       <!-- Phân công -->
       <div class="card pad stack">
         <div class="h2">Người phụ trách · {{ runTitle(m) }}</div>
@@ -150,9 +150,8 @@ async function doDelete() {
           </label>
           <button
             v-if="m.permissions.assign"
-            class="btn sm"
+            class="btn self-end"
             type="button"
-            style="align-self: end"
             :disabled="busy || !people[role] || people[role] === current(role)"
             @click="assign(role)"
           >
@@ -217,7 +216,7 @@ async function doDelete() {
         </tbody>
       </table>
 
-      <div v-if="pending && m.permissions.decidePause" class="card pad stack" style="border-color: var(--accent)">
+      <div v-if="pending && m.permissions.decidePause" class="card pad stack hl">
         <b>Duyệt đề xuất {{ fmtDate(pending.from) }} → {{ fmtDate(pending.to) }} ({{ pending.days }} ngày)</b>
         <textarea v-model="decideNote" rows="2" placeholder="Ghi chú (bắt buộc khi từ chối)" aria-label="Ghi chú duyệt"></textarea>
         <div class="rowf">
@@ -230,8 +229,8 @@ async function doDelete() {
       <div v-if="m.permissions.requestPause && !pending" class="form">
         <label class="f">Từ ngày<input v-model="pause.from" type="date" :min="m.startDate" /></label>
         <label class="f">Đến ngày<input v-model="pause.to" type="date" :min="pause.from" /></label>
-        <label class="f" style="grid-column: span 2">Lý do<input v-model="pause.reason" placeholder="vd. Nghỉ thai sản" /></label>
-        <div style="align-self: end">
+        <label class="f span2">Lý do<input v-model="pause.reason" placeholder="vd. Nghỉ thai sản" /></label>
+        <div class="self-end">
           <button class="btn" type="button" :disabled="busy" @click="requestPause">
             {{ m.permissions.decidePause ? 'Tạm dừng' : 'Gửi đề xuất tạm dừng' }}<template v-if="pauseDays"> ({{ pauseDays }} ngày)</template>
           </button>
@@ -240,7 +239,7 @@ async function doDelete() {
     </div>
 
     <!-- Ngừng theo dõi -->
-    <div v-if="m.permissions.stop" class="card pad stack" style="border-color: var(--bad)">
+    <div v-if="m.permissions.stop" class="card pad stack hl-bad">
       <div class="h2">Ngừng theo dõi (nghỉ việc)</div>
       <div class="sm mut">Lượt Level chuyển trạng thái Dừng, dữ liệu giữ nguyên. Tài khoản đăng nhập (nếu có) do BP Đào tạo khóa ở trang Quản trị.</div>
       <template v-if="m.buddyOf.length">
@@ -258,7 +257,7 @@ async function doDelete() {
     </div>
 
     <!-- Xóa hồ sơ (chỉ BP ĐT) -->
-    <div v-if="canDelete" class="card pad stack" style="border-color: var(--bad)">
+    <div v-if="canDelete" class="card pad stack hl-bad">
       <div class="h2">Xóa hồ sơ nhân viên</div>
       <div class="sm mut">
         Dùng khi hồ sơ tạo nhầm hoặc là dữ liệu thử. Xóa hẳn hồ sơ và mọi lượt Level, đầu việc, xác nhận, doanh số, Rubric, phiếu đánh giá; không khôi phục được.

@@ -20,3 +20,12 @@ export function fmtDateTime(iso: string | null | undefined): string {
 
 /** Tên gọi thân mật: chữ cuối của họ tên tiếng Việt */
 export const givenName = (fullName: string) => fullName.trim().split(/\s+/).slice(-1)[0] ?? fullName;
+
+/** Chữ viết tắt cho vòng tròn đại diện: chữ đầu của họ và của tên ("Phạm Thu Hà" → "PH") */
+export function initials(fullName: string): string {
+  const words = fullName.trim().split(/\s+/).filter(Boolean);
+  if (!words.length) return '?';
+  const first = words[0]![0] ?? '';
+  const last = words.length > 1 ? (words[words.length - 1]![0] ?? '') : '';
+  return (first + last).toLocaleUpperCase('vi');
+}

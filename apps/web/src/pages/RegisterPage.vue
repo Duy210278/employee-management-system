@@ -40,11 +40,13 @@ async function submit() {
 </script>
 
 <template>
-  <div class="auth stack" style="max-width: 640px">
-    <div class="brand"><i>U</i>Lộ trình Upharma</div>
-    <form class="card pad stack" @submit.prevent="submit">
-      <div class="h1">Đăng ký tài khoản</div>
-      <div class="sm mut">Sau khi gửi, tài khoản ở trạng thái <b>Chờ duyệt</b>. BP Đào tạo kiểm tra và chốt vai trò, phạm vi trước khi bạn dùng được hệ thống.</div>
+  <div class="auth-page">
+    <form class="auth-card wide" @submit.prevent="submit">
+      <div class="auth-head">
+        <div class="brand-mark" aria-hidden="true">U</div>
+        <h1 class="auth-title">Đăng ký tài khoản</h1>
+        <p class="auth-sub">Sau khi gửi, tài khoản ở trạng thái <b>Chờ duyệt</b>. BP Đào tạo kiểm tra và chốt vai trò, phạm vi trước khi bạn dùng được hệ thống.</p>
+      </div>
       <div v-if="error" class="alert bad"><div>{{ error.message }}</div></div>
       <div class="form">
         <label class="f">Họ và tên<input v-model="form.fullName" autocomplete="name" required /></label>
@@ -78,10 +80,8 @@ async function submit() {
           </select>
         </label>
       </div>
-      <div class="rowf sp">
-        <RouterLink to="/dang-nhap" class="sm">← Đã có tài khoản? Đăng nhập</RouterLink>
-        <button class="btn pri" type="submit" :disabled="busy">Gửi đăng ký</button>
-      </div>
+      <button class="btn pri lg round wide" type="submit" :disabled="busy">Gửi đăng ký</button>
+      <div class="auth-foot">Đã có tài khoản? <RouterLink to="/dang-nhap">Đăng nhập</RouterLink></div>
     </form>
   </div>
 </template>

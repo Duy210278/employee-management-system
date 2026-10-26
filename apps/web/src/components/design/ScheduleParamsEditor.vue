@@ -28,7 +28,7 @@ const fields: { key: keyof ScheduleParams; label: string; help: string }[] = [
       <label v-for="f in fields" :key="f.key" class="f">
         {{ f.label }}
         <input :value="p[f.key]" type="number" min="0" :data-field="f.key" :disabled="!d.editable.value" @change="p[f.key] = intOf($event)" />
-        <span class="sm" style="font-weight: 400">{{ f.help }}</span>
+        <span class="sm fw4">{{ f.help }}</span>
       </label>
     </div>
   </div>

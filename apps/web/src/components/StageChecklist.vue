@@ -3,6 +3,7 @@ import { diffDays, type StageSignStepView } from '@lotrinh/shared';
 import { computed, reactive, ref, toRef, watch } from 'vue';
 import { runApi, useMutate, useRunTasks } from '@/api/queries';
 import { fmtDate, fmtDateTime } from '@/format';
+import Icon from './Icon.vue';
 import ItemRow from './ItemRow.vue';
 import RoleChip from './RoleChip.vue';
 
@@ -57,29 +58,36 @@ async function sign(stageKey: string, step: StageSignStepView) {
     <div v-if="data?.run.pause" class="alert info">
       <div>Lộ trình đang <b>tạm dừng</b> {{ fmtDate(data.run.pause.from, refYear) }} → {{ fmtDate(data.run.pause.to, refYear) }}; các mốc chưa xong đã lùi tương ứng.</div>
     </div>
-    <details v-for="s in stages" :key="s.key" class="card clip" :open="opened.has(s.key)" @toggle="onToggle(s.key, $event)">
-      <summary class="stg" :style="s.isCurrent ? 'background: var(--soft)' : ''">
-        <div style="min-width: 0; flex: 1">
-          <b>{{ s.label }}: {{ s.name }}</b>
-          <span v-if="s.isCurrent" class="pill info" style="margin-left: 6px">Đang diễn ra</span>
+    <details v-for="(s, i) in stages" :key="s.key" class="card clip" :open="opened.has(s.key)" @toggle="onToggle(s.key, $event)">
+      <summary class="stage-head" :class="{ cur: s.isCurrent, done: s.tasks.length > 0 && s.finished === s.tasks.length }">
+        <span class="stage-no" aria-hidden="true">{{ s.tasks.length > 0 && s.finished === s.tasks.length ? '✓' : i + 1 }}</span>
+        <div class="stage-main">
+          <div class="rowf tight">
+            <b>{{ s.label }}: {{ s.name }}</b>
+            <span v-if="s.isCurrent" class="pill info">Đang diễn ra</span>
+          </div>
           <div class="sm mut">
             {{ fmtDate(s.from, refYear) }}<template v-if="diffDays(s.to, s.from) > 1"> → {{ fmtDate(s.to, refYear) }}</template><template v-if="s.goal"> · {{ s.goal }}</template>
           </div>
         </div>
-        <div class="rowf">
+        <div class="stage-side">
           <span v-if="s.overdue" class="pill bad">{{ s.overdue }} trễ</span>
           <span v-if="s.sign?.complete" class="pill ok">Đã ký</span>
           <span v-else-if="s.sign?.overdue" class="pill bad">Trễ ký</span>
           <span v-else-if="s.canSign" class="pill warn">Chờ bạn ký</span>
-          <span class="pill" :class="{ ok: s.finished === s.tasks.length }">{{ s.finished }}/{{ s.tasks.length }}</span>
+          <span class="mini" :aria-label="`${s.finished}/${s.tasks.length} mục xong`">
+            <span class="bar"><i :style="{ width: (s.tasks.length ? (s.finished / s.tasks.length) * 100 : 0) + '%' }"></i></span>
+            {{ s.finished }}/{{ s.tasks.length }}
+          </span>
+          <Icon class="caret" name="chevron" />
         </div>
       </summary>
       <ItemRow v-for="t in s.tasks" :key="t.id" :task="t" :ref-year="refYear" />
       <div v-if="s.sign" class="signbar">
         <span class="sm"><b>Ký cuối giai đoạn</b></span>
-        <span v-for="st in s.sign.steps" :key="st.step" class="rowf sm" style="gap: 4px">
+        <span v-for="st in s.sign.steps" :key="st.step" class="step">
           <RoleChip :role="st.role" :state="st.state === 'signed' ? 'done' : 'pending'" />
-          <template v-if="st.state === 'signed'">{{ st.signedByName }} · {{ fmtDateTime(st.at) }}</template>
+          <template v-if="st.state === 'signed'">{{ st.signedByName }} <span class="mut">· {{ fmtDateTime(st.at) }}</span></template>
           <button v-else-if="st.canSign" class="btn sm pri" type="button" :disabled="busy" @click="sign(s.key, st)">{{ st.label }}</button>
           <span v-else-if="st.state === 'waiting'" class="mut">Chưa đến lượt</span>
         </span>

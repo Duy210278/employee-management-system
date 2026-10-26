@@ -76,14 +76,14 @@ function newDay() {
       <h3>Bản này chưa có checklist Cửa hàng trưởng</h3>
       <div v-if="!ro">Thêm từ mẫu (trích từ file Excel onboarding CHT của BP Đào tạo) rồi chỉnh sửa, lưu nháp và gửi duyệt.</div>
       <div v-else>Tạo bản nháp từ bản này để thêm checklist CHT.</div>
-      <div v-if="!ro" class="rowf" style="justify-content: center; margin-top: 10px">
+      <div v-if="!ro" class="rowf center">
         <button v-for="t in missing" :key="t.key" class="btn pri" type="button" @click="addFromTemplate(t.key)">+ Thêm {{ t.name }} từ mẫu</button>
       </div>
     </div>
 
     <template v-else-if="track">
       <div class="rowf sp">
-        <div class="sub" role="tablist" aria-label="Chọn checklist CHT">
+        <div class="seg self-start" role="tablist" aria-label="Chọn checklist CHT">
           <button
             v-for="t in tabs"
             :key="t.key"
@@ -93,7 +93,7 @@ function newDay() {
             :aria-selected="track.key === t.key"
             @click="d.chtKey.value = t.key"
           >
-            {{ t.name }} · {{ t.days }} ngày · {{ t.items }} mục<template v-if="t.errors"> · <span style="color: var(--bad)">{{ t.errors }} lỗi</span></template>
+            {{ t.name }} · {{ t.days }} ngày · {{ t.items }} mục<template v-if="t.errors"> · <span class="bad-text">{{ t.errors }} lỗi</span></template>
           </button>
         </div>
         <div v-if="!ro && missing.length" class="rowf">

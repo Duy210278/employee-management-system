@@ -2,6 +2,7 @@
 import { kpiRule, reviewFormOf, ROLE_SHORT } from '@lotrinh/shared';
 import { computed, ref } from 'vue';
 import { useFramework, useMe } from '@/api/queries';
+import { usePageHeader } from '@/composables/pageHeader';
 import { fmtDate } from '@/format';
 
 /**
@@ -15,30 +16,25 @@ const level = computed(() => fw.value?.levels.find((l) => l.key === levelKey.val
 const rule = computed(() => (level.value ? kpiRule(level.value) : null));
 const form = computed(() => (level.value ? reviewFormOf(level.value) : null));
 const refYear = computed(() => Number(fw.value?.today.slice(0, 4) ?? 0));
+usePageHeader(() =>
+  fw.value ? { desc: `Bộ lộ trình v${fw.value.versionCode}${fw.value.effectiveFrom ? ` · hiệu lực từ ${fmtDate(fw.value.effectiveFrom, refYear.value)}` : ''}` } : null,
+);
 </script>
 
 <template>
   <div v-if="isLoading" class="card empty">Đang tải Khung năng lực…</div>
   <div v-else-if="error" class="alert bad"><div>{{ error.message }}</div></div>
-  <div v-else-if="fw" class="stack">
-    <div class="card pad stack" style="background: var(--soft)">
-      <div class="rowf sp">
-        <div>
-          <div class="h1">Khung năng lực NVBH</div>
-          <div class="sm mut">
-            Bộ lộ trình v{{ fw.versionCode }}<template v-if="fw.effectiveFrom"> · hiệu lực từ {{ fmtDate(fw.effectiveFrom, refYear) }}</template>
-          </div>
-        </div>
-        <RouterLink v-if="me?.user.role === 'bp'" class="btn sm" to="/thiet-ke">Sửa trong Thiết kế lộ trình</RouterLink>
-      </div>
-      <div class="sm">
-        Chỉ xem. BP Đào tạo là bộ phận duy nhất sửa Khung năng lực: mọi thay đổi đi qua bản nháp, được duyệt và ban hành thành phiên bản mới.
-      </div>
+  <div v-else-if="fw" class="page">
+    <Teleport defer to="#page-actions">
+      <RouterLink v-if="me?.user.role === 'bp'" class="btn" to="/thiet-ke">Sửa trong Thiết kế lộ trình</RouterLink>
+    </Teleport>
+    <div class="alert info">
+      <div>Chỉ xem. BP Đào tạo là bộ phận duy nhất sửa Khung năng lực: mọi thay đổi đi qua bản nháp, được duyệt và ban hành thành phiên bản mới.</div>
     </div>
 
     <template v-if="fw.framework">
       <div class="card pad stack">
-        <p v-for="(p, i) in fw.framework.intro" :key="i" style="margin: 0">{{ p }}</p>
+        <p v-for="(p, i) in fw.framework.intro" :key="i">{{ p }}</p>
       </div>
       <div v-for="[t, rows] in ([['Định nghĩa Level', fw.framework.levelTable], ['Trách nhiệm ba bên', fw.framework.responsibilityTable], ['Chỉ tiêu doanh số theo Level', fw.framework.kpiTable]] as const)" :key="t" class="card pad stack">
         <div class="h2">{{ t }}</div>
@@ -55,7 +51,8 @@ const refYear = computed(() => Number(fw.value?.today.slice(0, 4) ?? 0));
       </div>
     </template>
 
-    <div class="sub" role="tablist" aria-label="Chọn Level">
+    <div class="sec">Chi tiết theo Level</div>
+    <div class="seg self-start" role="tablist" aria-label="Chọn Level">
       <button
         v-for="l in fw.levels"
         :key="l.key"
@@ -71,7 +68,7 @@ const refYear = computed(() => Number(fw.value?.today.slice(0, 4) ?? 0));
 
     <template v-if="level && rule && form">
       <div class="card pad stack">
-        <div class="sm mut" style="font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase">
+        <div class="eyebrow">
           Level {{ level.key }} · {{ level.durationLabel }} ({{ level.rangeLabel }}) · Giai đoạn {{ level.phase }}
         </div>
         <div class="h1">{{ level.name }}: “{{ level.motto }}”</div>
@@ -150,7 +147,7 @@ const refYear = computed(() => Number(fw.value?.today.slice(0, 4) ?? 0));
           <template v-if="form.extension.enabled"> · Gia hạn {{ form.extension.months }} tháng, tối đa {{ form.extension.maxTimes }} lần</template>
           <template v-if="form.allowFail"> · Không đạt (đóng lượt)</template>
         </div>
-        <div class="rowf sm" style="gap: 4px">
+        <div class="rowf sm tight">
           Chuỗi ký:
           <span v-for="(r, i) in form.signers" :key="r" class="rl" :class="r">{{ i + 1 }}. {{ ROLE_SHORT[r] }}</span>
         </div>

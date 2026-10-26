@@ -45,7 +45,7 @@ const ensureFramework = () => (c.value.framework = { intro: [], levelTable: [['L
 <template>
   <div class="stack">
     <div class="rowf sp">
-      <div class="sub" role="tablist" aria-label="Chọn Level">
+      <div class="seg self-start" role="tablist" aria-label="Chọn Level">
         <button
           v-for="l in c.levels"
           :key="l.key"
@@ -111,9 +111,9 @@ const ensureFramework = () => (c.value.framework = { intro: [], levelTable: [['L
     <section :id="`knl-${level.key}-resp`" class="card pad stack knl">
       <div class="h2">Phân công trách nhiệm</div>
       <div class="grid g3">
-        <div v-for="(r, i) in level.overview.responsibilities" :key="i" class="stack" style="gap: 6px">
+        <div v-for="(r, i) in level.overview.responsibilities" :key="i" class="stack tight">
           <div class="rowf">
-            <input v-model="r.heading" class="grow" style="font-weight: 700" :disabled="ro" :aria-label="`Bên ${i + 1}`" />
+            <input v-model="r.heading" class="grow b" :disabled="ro" :aria-label="`Bên ${i + 1}`" />
             <button v-if="!ro" class="btn sm bad" type="button" aria-label="Xóa nhóm" @click="level.overview.responsibilities.splice(i, 1)">×</button>
           </div>
           <TextListEditor :items="r.items" :readonly="ro" add-label="+ Thêm việc" />
@@ -151,11 +151,11 @@ const ensureFramework = () => (c.value.framework = { intro: [], levelTable: [['L
     <section :id="`knl-${level.key}-tasks`" class="card pad stack knl">
       <div class="h2">Nhiệm vụ LMS và xác nhận tại quầy</div>
       <div class="grid g2">
-        <div class="stack" style="gap: 6px">
+        <div class="stack tight">
           <b class="sm">Nhiệm vụ trên LMS (NV tự hoàn thành)</b>
           <TextListEditor :items="level.overview.lms" :readonly="ro" add-label="+ Thêm nhiệm vụ LMS" />
         </div>
-        <div class="stack" style="gap: 6px">
+        <div class="stack tight">
           <b class="sm">Xác nhận tại quầy (người khác kiểm tra)</b>
           <TextListEditor :items="level.overview.counter" :readonly="ro" add-label="+ Thêm việc kiểm tra" />
         </div>
@@ -189,7 +189,7 @@ const ensureFramework = () => (c.value.framework = { intro: [], levelTable: [['L
         <div v-for="(p, i) in level.review.prompts" :key="i" class="goal">
           <input v-model="p.key" class="mono" size="9" :disabled="ro" aria-label="Mã" />
           <textarea v-model="p.text" rows="1" :disabled="ro" aria-label="Câu hỏi nhận xét"></textarea>
-          <label class="p">Tối thiểu<input :value="p.minPoints" type="number" min="0" style="width: 60px" :disabled="ro" @change="p.minPoints = intOf($event)" /> ý</label>
+          <label class="p">Tối thiểu<input :value="p.minPoints" type="number" min="0" class="w60" :disabled="ro" @change="p.minPoints = intOf($event)" /> ý</label>
           <button v-if="!ro" class="btn sm bad" type="button" aria-label="Xóa" @click="level.review.prompts.splice(i, 1)">×</button>
         </div>
         <div v-if="!ro"><button class="btn sm" type="button" @click="level.review.prompts.push({ key: `p${level.review.prompts.length + 1}`, text: '', minPoints: 0 })">+ Thêm phần nhận xét</button></div>
@@ -207,7 +207,7 @@ const ensureFramework = () => (c.value.framework = { intro: [], levelTable: [['L
         </div>
 
         <div class="sm mut">D. Chuỗi ký (bấm theo thứ tự ký; bước BP Đào tạo áp dụng kết quả chuyển Level)</div>
-        <div class="rowf" style="gap: 4px" data-field="signers">
+        <div class="rowf tight" data-field="signers">
           <button
             v-for="r in TASK_ROLES"
             :key="r"

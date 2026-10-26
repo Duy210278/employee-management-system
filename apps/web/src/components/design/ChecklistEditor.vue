@@ -46,7 +46,7 @@ function newStage() {
 
 <template>
   <div class="stack">
-    <div class="sub" role="tablist" aria-label="Chọn Level">
+    <div class="seg self-start" role="tablist" aria-label="Chọn Level">
       <button
         v-for="l in levels"
         :key="l.key"
@@ -56,7 +56,7 @@ function newStage() {
         :aria-selected="d.levelKey.value === l.key"
         @click="d.levelKey.value = l.key"
       >
-        L{{ l.key }} · {{ l.days }} ngày · {{ l.items }} mục<template v-if="l.errors"> · <span style="color: var(--bad)">{{ l.errors }} lỗi</span></template>
+        L{{ l.key }} · {{ l.days }} ngày · {{ l.items }} mục<template v-if="l.errors"> · <span class="bad-text">{{ l.errors }} lỗi</span></template>
       </button>
     </div>
 
@@ -69,7 +69,7 @@ function newStage() {
           <option value="">Mọi người xác nhận</option>
           <option v-for="r in VERIFIER_ROLES" :key="r" :value="r">{{ ROLE_SHORT[r] }}</option>
         </select>
-        <label class="rowf sm" style="gap: 4px"><input v-model="gppOnly" type="checkbox" /> Chỉ mục GPP</label>
+        <label class="rowf sm tight"><input v-model="gppOnly" type="checkbox" /> Chỉ mục GPP</label>
       </div>
       <div class="rowf">
         <button class="btn sm" type="button" @click="collapseAll(true)">Thu gọn tất cả</button>

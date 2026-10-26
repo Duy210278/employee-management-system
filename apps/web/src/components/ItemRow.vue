@@ -4,6 +4,7 @@ import { computed, ref } from 'vue';
 import { taskApi, useMe, useMutate, useTaskEvents } from '@/api/queries';
 import { useToast } from '@/composables/toast';
 import { fmtDate, fmtDateTime } from '@/format';
+import Icon from './Icon.vue';
 import RoleChip from './RoleChip.vue';
 import StatePill from './StatePill.vue';
 
@@ -36,6 +37,17 @@ const short = (r: TaskView['requiredRoles'][number]) => roleShortFor(r, t.value.
 const waitingLabel = computed(() => a.value.waitingFor.map(short).join(' + '));
 /** Mục cần làm lại / cần hỗ trợ / chờ phụ thuộc mà còn trễ hạn thì vẫn hiện số ngày trễ */
 const extraOverdue = computed(() => ['rework', 'help', 'blocked'].includes(t.value.state.code) && t.value.state.overdueDays > 0);
+/** Dòng chữ phụ: nhóm, ca, hạn (nhãn trạng thái "Hạn dd/mm" đã nói hạn thì không nhắc lại) */
+const metaText = computed(() =>
+  [
+    t.value.category,
+    t.value.session ? SESSION_LABEL[t.value.session] : '',
+    !finished.value && t.value.state.code !== 'scheduled' ? `Hạn ${fmtDate(t.value.dueDate, props.refYear)}` : '',
+    props.showStaff ? t.value.staffName : '',
+  ]
+    .filter(Boolean)
+    .join(' · '),
+);
 
 const confirmLabel = computed(() => {
   const slot = a.value.confirmAs;
@@ -68,7 +80,7 @@ const markNa = () => requireNote('Nhập lý do bỏ qua vào ô ghi chú') && r
 </script>
 
 <template>
-  <div class="item">
+  <div class="item" :class="{ open, gpp: t.gpp }">
     <div
       class="head"
       role="button"
@@ -80,67 +92,77 @@ const markNa = () => requireNote('Nhập lý do bỏ qua vào ô ghi chú') && r
     >
       <span class="chk" :class="chk.cls" aria-hidden="true">{{ chk.mark }}</span>
       <div class="t">
-        <p :class="{ gpp: t.gpp }" :style="{ fontWeight: a.confirmAs ? 600 : 500 }">{{ t.content }}</p>
+        <div class="t-top">
+          <p class="t-title" :class="{ strong: a.confirmAs }">{{ t.content }}</p>
+          <span class="t-state">
+            <StatePill :state="t.state" />
+            <span v-if="extraOverdue" class="pill bad">Trễ {{ t.state.overdueDays }} ngày</span>
+          </span>
+        </div>
         <div class="meta">
-          <RoleChip v-for="r in t.requiredRoles" :key="r" :role="r" :track="t.track" :state="confirmedRoles.includes(r) ? 'done' : 'pending'" />
-          <span v-if="t.session" class="pill info">{{ SESSION_LABEL[t.session] }}</span>
-          <span class="pill">{{ t.category }}</span>
-          <span v-if="t.gpp" class="pill bad">GPP bắt buộc</span>
-          <StatePill :state="t.state" />
-          <span v-if="extraOverdue" class="pill bad">Trễ {{ t.state.overdueDays }} ngày</span>
+          <span class="chips">
+            <RoleChip v-for="r in t.requiredRoles" :key="r" :role="r" :track="t.track" :state="confirmedRoles.includes(r) ? 'done' : 'pending'" />
+          </span>
           <span v-if="waitingLabel" class="pill info">Chờ {{ waitingLabel }}</span>
-          <span v-if="showStaff" class="pill info">{{ t.staffName }}</span>
-          <span class="sm mut mono">{{ t.itemKey }}</span>
+          <span class="mono">{{ t.itemKey }}</span>
+          <span>{{ metaText }}</span>
+          <span v-if="t.gpp" class="gpp-tag">GPP bắt buộc</span>
         </div>
       </div>
+      <Icon class="caret" name="chevron" />
     </div>
 
     <div v-if="open" class="more">
-      <div v-if="t.supporter || t.link" class="sm">
-        <template v-if="t.supporter"><b>Người hỗ trợ:</b> {{ t.supporter }}</template>
-        <template v-if="t.link">
-          <template v-if="t.supporter"> · </template>
-          <a :href="t.link" target="_blank" rel="noopener">Tài liệu hướng dẫn ↗</a>
-        </template>
-      </div>
-      <div v-if="t.guidance">
-        <b class="sm">Hướng dẫn thực hiện</b>
-        <div class="sm mut" style="white-space: pre-line">{{ t.guidance }}</div>
-      </div>
-      <div class="sm mut">
-        Mở {{ fmtDate(t.openDate, refYear) }} · Hạn {{ fmtDate(t.dueDate, refYear) }} · {{ t.stageLabel }}
-        <template v-if="t.doneDate"> · Hoàn thành {{ fmtDate(t.doneDate, refYear) }}</template>
+      <div class="more-grid">
+        <section class="more-box">
+          <h4>Hướng dẫn</h4>
+          <div v-if="t.supporter || t.link">
+            <template v-if="t.supporter"><b>Người hỗ trợ:</b> {{ t.supporter }}</template>
+            <template v-if="t.link">
+              <template v-if="t.supporter"> · </template>
+              <a :href="t.link" target="_blank" rel="noopener">Tài liệu hướng dẫn ↗</a>
+            </template>
+          </div>
+          <div v-if="t.guidance" class="mut pre">{{ t.guidance }}</div>
+          <div class="sm mut">
+            Mở {{ fmtDate(t.openDate, refYear) }} · Hạn {{ fmtDate(t.dueDate, refYear) }} · {{ t.stageLabel }}
+            <template v-if="t.doneDate"> · Hoàn thành {{ fmtDate(t.doneDate, refYear) }}</template>
+          </div>
+        </section>
+        <section class="more-box">
+          <h4>Xác nhận và lịch sử</h4>
+          <ul v-if="t.confirmations.length" class="tline">
+            <li v-for="c in t.confirmations" :key="c.role" class="ok">
+              <RoleChip :role="c.role" :track="t.track" state="done" /> <b>{{ c.userName }}</b>
+              <span v-if="c.proxyRole" class="mut"> ({{ short(c.proxyRole) }} xác nhận thay)</span>
+              <span class="mut"> · {{ fmtDateTime(c.at) }}</span>
+              <span v-if="c.note" class="mut"> · {{ c.note }}</span>
+            </li>
+          </ul>
+          <div v-else class="mut">Chưa có xác nhận nào.</div>
+          <ul v-if="events?.length" class="tline sm">
+            <li v-for="e in events" :key="e.id">
+              <span class="mut">{{ fmtDateTime(e.at) }}</span> · <b>{{ e.userName }}</b><template v-if="e.role"> ({{ short(e.role) }})</template> · {{ e.actionLabel
+              }}<template v-if="e.note">: {{ e.note }}</template>
+            </li>
+          </ul>
+        </section>
       </div>
       <div v-if="t.rework" class="alert bad">
         <div><b>{{ t.rework.byName }} yêu cầu làm lại ({{ fmtDateTime(t.rework.at) }}):</b> {{ t.rework.note }}</div>
       </div>
       <div v-if="t.naReason" class="alert"><div><b>Lý do bỏ qua:</b> {{ t.naReason }}</div></div>
       <div v-if="t.blockedBy.length" class="alert"><div>Chỉ xác nhận được sau khi xong: {{ t.blockedBy.join(', ') }}</div></div>
-      <div v-if="t.confirmations.length" class="sm">
-        <div v-for="c in t.confirmations" :key="c.role">
-          <RoleChip :role="c.role" :track="t.track" state="done" /> {{ c.userName }}
-          <span v-if="c.proxyRole" class="mut">({{ short(c.proxyRole) }} xác nhận thay)</span>
-          <span class="mut"> · {{ fmtDateTime(c.at) }}</span>
-          <span v-if="c.note" class="mut"> · {{ c.note }}</span>
-        </div>
-      </div>
-      <div v-if="events?.length" class="sm mut">
-        <b class="sm" style="color: var(--ink)">Lịch sử</b>
-        <div v-for="e in events" :key="e.id">
-          {{ fmtDateTime(e.at) }} · <b>{{ e.userName }}</b><template v-if="e.role"> ({{ short(e.role) }})</template> · {{ e.actionLabel
-          }}<template v-if="e.note">: {{ e.note }}</template>
-        </div>
-      </div>
 
       <template v-if="!finished || a.canUndo || a.canRework">
-        <textarea v-model="note" :aria-label="'Ghi chú cho ' + t.itemKey" placeholder="Ghi chú (bắt buộc khi yêu cầu làm lại, báo cần hỗ trợ, bỏ qua)"></textarea>
-        <div class="rowf">
+        <textarea v-model="note" rows="2" :aria-label="'Ghi chú cho ' + t.itemKey" placeholder="Ghi chú (bắt buộc khi yêu cầu làm lại, báo cần hỗ trợ, bỏ qua)"></textarea>
+        <div class="actbar">
           <button v-if="a.confirmAs" class="btn pri" type="button" :disabled="busy" @click="confirm">{{ confirmLabel }}</button>
           <button v-if="a.canUndo" class="btn" type="button" :disabled="busy" @click="undo">Hủy xác nhận của tôi</button>
-          <button v-if="a.canHelp" class="btn" type="button" :disabled="busy" @click="help">Cần hỗ trợ</button>
           <button v-if="a.canClearHelp" class="btn" type="button" :disabled="busy" @click="clearHelp">Đã được hỗ trợ</button>
-          <button v-if="a.canRework" class="btn bad" type="button" :disabled="busy" @click="rework">Yêu cầu làm lại</button>
-          <button v-if="a.canNa" class="btn" type="button" :disabled="busy" @click="markNa">Bỏ qua / N-A</button>
+          <button v-if="a.canHelp" class="btn ghost" type="button" :disabled="busy" @click="help">Cần hỗ trợ</button>
+          <button v-if="a.canNa" class="btn ghost" type="button" :disabled="busy" @click="markNa">Bỏ qua / N-A</button>
+          <button v-if="a.canRework" class="btn bad push" type="button" :disabled="busy" @click="rework">Yêu cầu làm lại</button>
         </div>
       </template>
     </div>

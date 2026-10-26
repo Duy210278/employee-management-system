@@ -3,6 +3,7 @@ import { ACCOUNT_ROLES, CreateUserBody, ROLE_LABEL, USER_STATUS_LABEL, USER_STAT
 import { computed, reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useMutate, userApi, useUsers } from '@/api/queries';
+import SearchInput from '@/components/SearchInput.vue';
 import { useToast } from '@/composables/toast';
 import { fmtDateTime } from '@/format';
 import ScopePicker from './ScopePicker.vue';
@@ -75,11 +76,11 @@ async function create() {
 <template>
   <div v-if="isLoading" class="card empty">Đang tải…</div>
   <div v-else-if="error" class="alert bad"><div>{{ error.message }}</div></div>
-  <div v-else-if="data" class="stack">
+  <div v-else-if="data" class="page">
     <!-- Hàng chờ duyệt (mục 5.2) -->
-    <div v-if="pending.length" class="card clip" style="border-color: var(--warn)">
+    <div v-if="pending.length" class="card clip hl-warn">
       <div class="stg"><b>{{ pending.length }} tài khoản đang chờ duyệt</b><span class="sm mut">Duyệt theo đề nghị, hoặc mở chi tiết để chỉnh vai trò, phạm vi</span></div>
-      <div v-for="u in pending" :key="u.id" class="item stack" style="gap: 8px">
+      <div v-for="u in pending" :key="u.id" class="item stack tight">
         <div class="rowf sp">
           <div>
             <b>{{ u.fullName }}</b> <span class="sm mut">{{ u.employeeCode }} · {{ u.email }}<template v-if="u.phone"> · {{ u.phone }}</template></span>
@@ -103,9 +104,9 @@ async function create() {
       </div>
     </div>
 
-    <div class="rowf sp">
-      <div class="rowf">
-        <input v-model="q" placeholder="Tìm tên, mã NV, email" aria-label="Tìm tài khoản" />
+    <div class="card toolbar">
+      <SearchInput v-model="q" placeholder="Tìm tên, mã NV, email" label="Tìm tài khoản" />
+      <div class="grp">
         <select v-model="role" aria-label="Vai trò">
           <option value="">Mọi vai trò</option>
           <option v-for="r in ACCOUNT_ROLES" :key="r" :value="r">{{ ROLE_LABEL[r] }}</option>
@@ -119,13 +120,14 @@ async function create() {
           <option v-for="s in STATUS_FILTER" :key="s" :value="s">{{ USER_STATUS_LABEL[s] }}</option>
         </select>
       </div>
-      <div class="rowf">
+      <div class="grp end">
         <RouterLink class="btn" to="/quan-tri/nhap-csv">Nhập từ CSV</RouterLink>
         <button class="btn pri" type="button" @click="creating = !creating">+ Tạo tài khoản</button>
       </div>
     </div>
+    <div class="summary">Đang hiển thị <b>{{ filtered.length }}</b>/{{ data.items.length }} tài khoản</div>
 
-    <form v-if="creating" class="card pad stack" @submit.prevent="create">
+    <form v-if="creating" class="card pad stack hl" @submit.prevent="create">
       <div class="h2">Tạo tài khoản</div>
       <div class="form">
         <label class="f">Họ và tên<input v-model="form.fullName" required /></label>
@@ -150,14 +152,14 @@ async function create() {
           <tr v-for="u in filtered" :key="u.id">
             <td data-l="Họ tên">
               <div>
-                <b>{{ u.fullName }}</b>
+                <RouterLink class="b" :to="`/quan-tri/tai-khoan/${u.id}`">{{ u.fullName }}</RouterLink>
                 <div class="sm mut">{{ u.employeeCode ?? '—' }} · {{ u.email }}</div>
               </div>
             </td>
             <td data-l="Vai trò"><span class="rl" :class="u.role">{{ ROLE_LABEL[u.role] }}</span></td>
             <td data-l="Phạm vi" class="sm">{{ scopeText(u) }}</td>
             <td data-l="Quyền bổ sung">
-              <div class="rowf" style="gap: 4px">
+              <div class="rowf tight">
                 <span v-if="u.canBuddy" class="pill">Buddy</span>
                 <span v-if="u.canApproveVersions" class="pill info">Duyệt phiên bản</span>
               </div>

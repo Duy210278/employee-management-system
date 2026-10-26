@@ -77,9 +77,9 @@ async function sign(step: number) {
   <div v-else-if="data" class="stack">
     <div class="grid g4">
       <div class="card stat"><b>{{ Math.round(d.auto.checklist.pct * 100) }}%</b><span>Checklist ({{ d.auto.checklist.done }}/{{ d.auto.checklist.total }})</span></div>
-      <div class="card stat"><b :style="{ color: d.auto.overdue ? 'var(--bad)' : 'inherit' }">{{ d.auto.overdue }}</b><span>Mục đang trễ hạn</span></div>
+      <div class="card stat" :class="{ bad: d.auto.overdue }"><b>{{ d.auto.overdue }}</b><span>Mục đang trễ hạn</span></div>
       <div class="card stat"><b>{{ d.auto.rubric.rate === null ? '—' : `${d.auto.rubric.rate}%` }}</b><span>Ca Rubric đạt ({{ d.auto.rubric.count }} ca)</span></div>
-      <div class="card stat"><b style="font-size: 15px; line-height: 1.3" :style="{ color: kpiTone === 'bad' ? 'var(--bad)' : 'inherit' }">{{ d.auto.kpi.label }}</b><span>Doanh số</span></div>
+      <div class="card stat" :class="{ bad: kpiTone === 'bad' }"><b class="txt">{{ d.auto.kpi.label }}</b><span>Doanh số</span></div>
     </div>
 
     <div v-if="d.outcome" class="alert ok"><div><b>{{ d.outcome }}</b></div></div>
@@ -107,14 +107,14 @@ async function sign(step: number) {
             <tr v-for="(c, i) in d.criteria" :key="i">
               <td>{{ c.name }}</td>
               <td>{{ c.threshold }}</td>
-              <td class="sm mut" style="white-space: pre-line">{{ c.source }}</td>
+              <td class="sm mut pre">{{ c.source }}</td>
               <td>
                 <select v-model="draft.criteria[i]" :disabled="!d.canEdit" :aria-label="c.name">
                   <option value="">—</option>
                   <option value="pass">Đạt</option>
                   <option value="fail">Chưa đạt</option>
                 </select>
-                <div v-if="d.suggestions[i]" class="sm" :style="{ color: d.suggestions[i]!.value === 'pass' ? 'var(--ok)' : 'var(--bad)' }">
+                <div v-if="d.suggestions[i]" class="sm" :class="d.suggestions[i]!.value === 'pass' ? 'ok-text' : 'bad-text'">
                   Gợi ý: {{ d.suggestions[i]!.value === 'pass' ? 'Đạt' : 'Chưa đạt' }} · {{ d.suggestions[i]!.reason }}
                 </div>
               </td>
@@ -122,7 +122,7 @@ async function sign(step: number) {
           </tbody>
         </table>
       </div>
-      <span class="pill" :class="{ ok: d.criteria.length > 0 && passed === d.criteria.length }" style="align-self: flex-start">{{ passed }}/{{ d.criteria.length }} tiêu chí đạt</span>
+      <span class="pill self-start" :class="{ ok: d.criteria.length > 0 && passed === d.criteria.length }">{{ passed }}/{{ d.criteria.length }} tiêu chí đạt</span>
 
       <label v-for="p in d.form.prompts" :key="p.key" class="f">
         <span class="rowf sp">
@@ -134,7 +134,7 @@ async function sign(step: number) {
         <textarea v-model="draft.notes[p.key]" rows="3" :disabled="!d.canEdit" placeholder="Mỗi ý một dòng"></textarea>
       </label>
 
-      <label class="f" style="max-width: 340px">
+      <label class="f w-md">
         Kết quả đề xuất
         <select v-model="draft.result" :disabled="!d.canEdit">
           <option value="">Chọn kết quả</option>
@@ -173,7 +173,7 @@ async function sign(step: number) {
       <div v-for="s in d.steps" :key="s.step" class="item rowf sp">
         <div>
           <b>{{ s.step + 1 }}. {{ s.label }}</b>
-          <span v-if="s.step === outcomeIdx" class="pill info" style="margin-left: 6px">áp dụng kết quả</span>
+          <span v-if="s.step === outcomeIdx" class="pill info">áp dụng kết quả</span>
           <div class="sm mut">
             <template v-if="s.signedByName">{{ s.signedByName }} · {{ fmtDateTime(s.at) }}</template>
             <template v-else-if="s.state === 'next'">Đến lượt ký</template>

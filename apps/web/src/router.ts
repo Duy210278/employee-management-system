@@ -24,6 +24,21 @@ import StaffListPage from './pages/staff/StaffListPage.vue';
 import StaffProfilePage from './pages/staff/StaffProfilePage.vue';
 import TodayPage from './pages/TodayPage.vue';
 
+declare module 'vue-router' {
+  interface RouteMeta {
+    public?: boolean;
+    /** Tên trang trên dải tiêu đề; trang có tiêu đề động tự đặt qua usePageHeader() */
+    title?: string;
+    /** Dòng mô tả ngắn dưới tiêu đề của trang cấp 1 */
+    desc?: string;
+    /** false: không có dải tiêu đề (Hôm nay của NV, lời chào đã là tiêu đề) */
+    header?: boolean;
+    /** Khung rộng 1440 px (Thiết kế lộ trình) */
+    wide?: boolean;
+    slice?: string;
+  }
+}
+
 export const router = createRouter({
   history: createWebHistory(),
   routes: [
@@ -44,20 +59,21 @@ export const router = createRouter({
             return me?.user.role === 'nv' ? { name: 'today' } : { name: 'inbox' };
           },
         },
-        { path: 'hom-nay', name: 'today', component: TodayPage },
-        { path: 'viec-kem-cap', name: 'mentoring', component: InboxPage },
-        { path: 'viec-can-xu-ly', name: 'inbox', component: InboxPage },
-        { path: 'lo-trinh', name: 'mine', component: StaffProfilePage },
-        { path: 'nhan-su', name: 'staff', component: StaffListPage },
-        { path: 'nhan-su/them', name: 'staff-create', component: StaffCreatePage },
-        { path: 'nhan-su/:id(\\d+)', name: 'staff-profile', component: StaffProfilePage },
-        { path: 'canh-bao', name: 'alerts', component: AlertsPage },
-        { path: 'thong-bao', name: 'notifications', component: NotificationsPage },
-        { path: 'khung-nang-luc', name: 'framework', component: FrameworkPage },
+        { path: 'hom-nay', name: 'today', component: TodayPage, meta: { header: false } },
+        { path: 'viec-kem-cap', name: 'mentoring', component: InboxPage, meta: { title: 'Việc kèm cặp', desc: 'Việc của nhân viên bạn đang kèm cặp: mục đã báo xong chờ bạn xác nhận, việc sắp đến hạn' } },
+        { path: 'viec-can-xu-ly', name: 'inbox', component: InboxPage, meta: { title: 'Việc cần xử lý', desc: 'Mục nhân viên đã báo xong, chữ ký chờ bạn và việc sắp đến hạn của nhân sự bạn phụ trách' } },
+        { path: 'lo-trinh', name: 'mine', component: StaffProfilePage, meta: { title: 'Lộ trình của tôi' } },
+        { path: 'nhan-su', name: 'staff', component: StaffListPage, meta: { title: 'Nhân sự', desc: 'Nhân sự trong phạm vi của bạn; người có cảnh báo đỏ xếp trước' } },
+        { path: 'nhan-su/them', name: 'staff-create', component: StaffCreatePage, meta: { title: 'Thêm nhân viên' } },
+        { path: 'nhan-su/:id(\\d+)', name: 'staff-profile', component: StaffProfilePage, meta: { title: 'Hồ sơ nhân viên' } },
+        { path: 'canh-bao', name: 'alerts', component: AlertsPage, meta: { title: 'Cảnh báo', desc: 'Tính trực tiếp theo ngày nghiệp vụ mỗi lần mở trang; đỏ trước, vàng sau' } },
+        { path: 'thong-bao', name: 'notifications', component: NotificationsPage, meta: { title: 'Thông báo' } },
+        { path: 'khung-nang-luc', name: 'framework', component: FrameworkPage, meta: { title: 'Khung năng lực NVBH' } },
         { path: 'thiet-ke/:id(\\d+)?', name: 'design', component: DesignPage, meta: { wide: true } },
         {
           path: 'quan-tri',
           component: AdminLayout,
+          meta: { title: 'Quản trị', desc: 'Tài khoản và vai trò, cửa hàng, khu vực, nhập liệu, nhật ký và cấu hình hệ thống' },
           children: [
             { path: '', redirect: { name: 'accounts' } },
             { path: 'tai-khoan', name: 'accounts', component: AccountsPage },

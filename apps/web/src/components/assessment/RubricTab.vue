@@ -56,7 +56,7 @@ async function submit() {
         Chọn ngẫu nhiên, không báo trước nhân viên. Đạt khi tổng ≥ {{ data.rubric.passTotal }}/{{ data.rubric.criteria.length * data.rubric.scaleMax }}
         <template v-if="data.rubric.forbidOne"> và không tiêu chí nào 1 điểm</template>. Quan sát ít nhất {{ data.rubric.minObsPerMonth }} ca/tháng.
       </div>
-      <label class="f" style="max-width: 200px">
+      <label class="f w-sm">
         Ngày quan sát
         <input v-model="form.date" type="date" :min="data.runStart" :max="data.today" required />
       </label>

@@ -3,7 +3,7 @@ import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 import { useMe, useUsers } from '@/api/queries';
 
-/** Quản trị (mục 4.3): chỉ BP Đào tạo */
+/** Quản trị (mục 4.3): chỉ BP Đào tạo; máy tính có cột menu dọc bên trái, điện thoại là dải cuộn ngang */
 const route = useRoute();
 const { data: me } = useMe();
 const isBp = computed(() => me.value?.user.role === 'bp');
@@ -16,19 +16,19 @@ const links = computed(() => [
   { to: '/quan-tri/nhat-ky', label: 'Nhật ký hệ thống' },
   { to: '/quan-tri/he-thong', label: me.value?.demoMode ? 'Cấu hình, công cụ demo' : 'Cấu hình' },
 ]);
+const isOn = (to: string) => route.path === to || route.path.startsWith(to + '/');
 </script>
 
 <template>
-  <div class="stack">
-    <div class="h2">Quản trị</div>
-    <div v-if="!isBp" class="card empty"><h3>Chỉ BP Đào tạo dùng được trang này</h3></div>
-    <template v-else>
-      <nav class="sub" aria-label="Mục quản trị">
-        <RouterLink v-for="l in links" :key="l.to" :to="l.to" class="subl" :aria-current="route.path === l.to || route.path.startsWith(l.to + '/') ? 'page' : undefined">
-          {{ l.label }}<span v-if="l.badge" class="n">{{ l.badge }}</span>
-        </RouterLink>
-      </nav>
+  <div v-if="!isBp" class="card empty"><h3>Chỉ BP Đào tạo dùng được trang này</h3></div>
+  <div v-else class="admin">
+    <nav class="card side-nav" aria-label="Mục quản trị">
+      <RouterLink v-for="l in links" :key="l.to" :to="l.to" :aria-current="isOn(l.to) ? 'page' : undefined">
+        {{ l.label }}<span v-if="l.badge" class="n">{{ l.badge }}</span>
+      </RouterLink>
+    </nav>
+    <div class="page">
       <RouterView />
-    </template>
+    </div>
   </div>
 </template>

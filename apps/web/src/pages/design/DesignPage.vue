@@ -5,6 +5,7 @@ import { computed, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { versionApi, useVersion, useVersions } from '@/api/queries';
 import VersionEditor from '@/components/design/VersionEditor.vue';
+import { usePageHeader } from '@/composables/pageHeader';
 import { useToast } from '@/composables/toast';
 import { fmtDate } from '@/format';
 
@@ -39,6 +40,11 @@ const STATE: Record<VersionState, [string, string]> = {
 const refYear = computed(() => (list.value ? Number(list.value.today.slice(0, 4)) : new Date().getFullYear()));
 const current = computed(() => list.value?.items.find((i) => i.state === 'current'));
 const hasOpen = computed(() => !!list.value?.items.some((i) => i.state === 'draft' || i.state === 'pending'));
+usePageHeader(() => ({
+  desc: list.value?.canEdit
+    ? 'Soạn Khung năng lực, checklist theo Level và checklist CHT; gửi duyệt rồi ban hành thành phiên bản mới'
+    : 'Xem và duyệt các phiên bản Bộ lộ trình do BP Đào tạo gửi lên',
+}));
 
 async function newDraft() {
   if (!current.value) return;
@@ -61,7 +67,7 @@ async function newDraft() {
   <div v-else-if="listError" class="card pad"><div class="alert bad"><div>{{ listError.message }}</div></div></div>
   <div v-else-if="list" class="designer">
     <aside class="card dz-list" aria-label="Danh sách phiên bản">
-      <div class="stg"><b>Phiên bản</b></div>
+      <div class="stg"><b>Phiên bản</b><span class="sm mut">{{ list.items.length }}</span></div>
       <RouterLink
         v-for="i in list.items"
         :key="i.id"
@@ -69,7 +75,7 @@ async function newDraft() {
         class="vitem"
         :aria-current="i.id === selectedId ? 'page' : undefined"
       >
-        <span class="rowf sp" style="gap: 6px">
+        <span class="rowf sp tight">
           <b>{{ i.code ? `v${i.code}` : 'Bản nháp' }}</b>
           <span class="pill" :class="STATE[i.state][1]">{{ STATE[i.state][0] }}</span>
         </span>
@@ -80,7 +86,7 @@ async function newDraft() {
         </span>
         <span v-if="i.changeNote" class="sm vnote">{{ i.changeNote }}</span>
       </RouterLink>
-      <div v-if="list.canEdit && current && !hasOpen" style="padding: 10px 12px">
+      <div v-if="list.canEdit && current && !hasOpen" class="vnew">
         <button class="btn sm pri" type="button" :disabled="creating" @click="newDraft">+ Tạo bản nháp từ v{{ current.code }}</button>
       </div>
     </aside>

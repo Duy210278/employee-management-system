@@ -4,6 +4,7 @@ import { useQueryClient } from '@tanstack/vue-query';
 import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { notificationApi, useNotifications } from '@/api/queries';
+import SegControl from '@/components/SegControl.vue';
 import { useToast } from '@/composables/toast';
 import { fmtDate, fmtDateTime } from '@/format';
 
@@ -14,6 +15,10 @@ const toast = useToast();
 const { data, isLoading, error } = useNotifications(ref(true));
 const onlyUnread = ref(false);
 const items = computed(() => (data.value?.items ?? []).filter((n) => !onlyUnread.value || !n.read));
+const filterOptions = computed(() => [
+  { value: false, label: 'Tất cả' },
+  { value: true, label: 'Chưa đọc', count: data.value?.unread ?? 0 },
+]);
 
 const TYPE_LABEL: Record<string, string> = {
   digest: 'Bản tin sáng',
@@ -51,23 +56,24 @@ async function open(n: NotificationView) {
 <template>
   <div v-if="isLoading" class="card empty">Đang tải…</div>
   <div v-else-if="error" class="alert bad"><div>{{ error.message }}</div></div>
-  <div v-else-if="data" class="stack">
+  <div v-else-if="data" class="page">
+    <Teleport defer to="#page-actions">
+      <button class="btn" type="button" :disabled="!data.unread" @click="markRead({ all: true })">Đánh dấu đã đọc hết</button>
+    </Teleport>
     <div class="rowf sp">
-      <div class="h2">Thông báo <span v-if="data.unread" class="pill bad">{{ data.unread }} chưa đọc</span></div>
-      <div class="rowf">
-        <label class="p cb"><input v-model="onlyUnread" type="checkbox" /> Chỉ chưa đọc</label>
-        <button class="btn sm" type="button" :disabled="!data.unread" @click="markRead({ all: true })">Đánh dấu đã đọc hết</button>
-      </div>
+      <SegControl v-model="onlyUnread" :options="filterOptions" label="Lọc thông báo" />
+      <span class="summary"><b>{{ data.unread }}</b> chưa đọc / {{ data.items.length }} thông báo</span>
     </div>
     <div class="card clip">
       <button v-for="n in items" :key="n.id" type="button" class="note" :class="{ unread: !n.read }" @click="open(n)">
         <span class="dot" aria-hidden="true"></span>
         <span class="grow">
           <b>{{ n.title }}</b>
-          <span v-if="n.body" class="sm mut" style="display: block">{{ n.body }}</span>
+          <span v-if="n.body" class="sm mut block">{{ n.body }}</span>
         </span>
-        <span class="sm mut nowrap" :title="fmtDateTime(n.createdAt)">
-          <span class="pill">{{ TYPE_LABEL[n.type] ?? n.type }}</span> {{ fmtDate(n.businessDate) }}
+        <span class="when sm mut" :title="fmtDateTime(n.createdAt)">
+          <span class="pill">{{ TYPE_LABEL[n.type] ?? n.type }}</span>
+          <span class="nowrap">{{ fmtDate(n.businessDate) }}</span>
         </span>
       </button>
       <div v-if="!items.length" class="empty">

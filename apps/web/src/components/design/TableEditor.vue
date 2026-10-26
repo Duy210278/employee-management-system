@@ -24,6 +24,6 @@ function addRow() {
         </tr>
       </tbody>
     </table>
-    <div v-if="!readonly" style="margin-top: 6px"><button class="btn sm" type="button" @click="addRow">+ Thêm dòng</button></div>
+    <div v-if="!readonly" class="mt6"><button class="btn sm" type="button" @click="addRow">+ Thêm dòng</button></div>
   </div>
 </template>

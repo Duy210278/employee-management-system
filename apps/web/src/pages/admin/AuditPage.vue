@@ -24,7 +24,7 @@ const brief = (payload: unknown) => {
 
 <template>
   <div class="stack">
-    <div class="rowf">
+    <div class="card toolbar">
       <select v-model.number="filter.userId" aria-label="Người thao tác">
         <option :value="0">Mọi người</option>
         <option v-for="u in data?.users" :key="u.id" :value="u.id">{{ u.fullName }}</option>
@@ -59,7 +59,7 @@ const brief = (payload: unknown) => {
         </tbody>
       </table>
       <div v-else class="empty"><h3>Không có bản ghi khớp bộ lọc</h3></div>
-      <div v-if="pages > 1" class="rowf pad" style="justify-content: center">
+      <div v-if="pages > 1" class="rowf pad center">
         <button class="btn sm" type="button" :disabled="page <= 1" @click="page--">← Trước</button>
         <span class="sm">Trang {{ page }}/{{ pages }}</span>
         <button class="btn sm" type="button" :disabled="page >= pages" @click="page++">Sau →</button>

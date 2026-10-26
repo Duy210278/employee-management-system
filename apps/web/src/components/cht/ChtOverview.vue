@@ -41,8 +41,8 @@ const ack = () => mutate(() => sessionApi.ack(props.runId), 'Đã xác nhận. C
   <div v-if="isLoading" class="card empty">Đang tải…</div>
   <div v-else-if="error" class="alert bad"><div>{{ error.message }}</div></div>
   <div v-else-if="v" class="stack">
-    <div class="card pad stack" style="background: var(--soft)">
-      <div class="sm mut" style="font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase">Onboarding · {{ v.trackName }}</div>
+    <div class="card pad stack tint">
+      <div class="eyebrow">Onboarding · {{ v.trackName }}</div>
       <div class="h1">{{ v.title }}</div>
       <div v-if="v.goal"><b>Mục tiêu tuần đầu:</b> {{ v.goal }}</div>
       <div class="sm">
@@ -67,7 +67,7 @@ const ack = () => mutate(() => sessionApi.ack(props.runId), 'Đã xác nhận. C
     <div v-if="v.tip" class="alert info"><div>💡 {{ v.tip }}</div></div>
     <div v-if="v.notes.length" class="card pad stack">
       <div class="h2">{{ v.track === 'cht_thang_tien' ? 'Điểm khác biệt so với CHT mới tuyển' : 'Lưu ý' }}</div>
-      <ul class="ul" style="list-style: none; padding-left: 0">
+      <ul class="ul plain">
         <li v-for="(n, i) in v.notes" :key="i">{{ n }}</li>
       </ul>
     </div>
@@ -78,14 +78,14 @@ const ack = () => mutate(() => sessionApi.ack(props.runId), 'Đã xác nhận. C
         <textarea v-model="note" rows="3" placeholder="QLKV, BP ĐT ghi nhận định hướng, lưu ý cho CHT" aria-label="Ghi chú quản lý cấp trên"></textarea>
         <div><button class="btn sm" type="button" :disabled="busy || note === v.meta.managerNote" @click="saveNote">Lưu ghi chú</button></div>
       </template>
-      <div v-else class="sm" :class="{ mut: !v.meta.managerNote }" style="white-space: pre-line">{{ v.meta.managerNote || 'Chưa có ghi chú.' }}</div>
+      <div v-else class="sm pre" :class="{ mut: !v.meta.managerNote }">{{ v.meta.managerNote || 'Chưa có ghi chú.' }}</div>
     </div>
 
     <template v-if="ov">
       <div v-if="ov.run.acknowledged" class="alert ok">
         <div><b>{{ ov.run.ackByName }}</b> đã đọc và xác nhận hiểu mục tiêu tuần đầu lúc {{ fmtDateTime(ov.run.ackAt) }}.</div>
       </div>
-      <div v-else-if="ov.canAck" class="card pad stack" style="border-color: var(--accent)">
+      <div v-else-if="ov.canAck" class="card pad stack hl">
         <div class="h2">Xác nhận đã đọc</div>
         <div class="mut">Đọc mục tiêu và lưu ý ở trên trước khi bắt đầu. Sau khi xác nhận, checklist tuần đầu được mở.</div>
         <div><button class="btn pri" type="button" @click="ack">Tôi đã đọc và hiểu</button></div>

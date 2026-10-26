@@ -67,26 +67,26 @@ function remove() {
       <div v-if="cht" class="se-meta">
         <label class="p">
           Ngày D +
-          <input :value="stage.offsetStart" data-field="offsetStart" type="number" min="0" style="width: 70px" :disabled="ro" aria-label="Ngày thứ" @change="setChtDay" />
+          <input :value="stage.offsetStart" data-field="offsetStart" type="number" min="0" class="w72" :disabled="ro" aria-label="Ngày thứ" @change="setChtDay" />
         </label>
         <span class="sm mut">Không ký cuối ngày: Đào tạo ghi nhật ký check-in ở tab "Nhật ký theo dõi" của hồ sơ.</span>
       </div>
       <div v-else class="se-meta">
         <label class="p">
           Ngày
-          <input :value="stage.offsetStart" data-field="offsetStart" type="number" min="0" style="width: 70px" :disabled="ro" aria-label="Từ ngày" @change="stage.offsetStart = intOf($event)" />
+          <input :value="stage.offsetStart" data-field="offsetStart" type="number" min="0" class="w72" :disabled="ro" aria-label="Từ ngày" @change="stage.offsetStart = intOf($event)" />
           –
-          <input :value="stage.offsetEnd" data-field="offsetEnd" type="number" min="1" style="width: 70px" :disabled="ro" aria-label="Đến ngày" @change="stage.offsetEnd = intOf($event)" />
+          <input :value="stage.offsetEnd" data-field="offsetEnd" type="number" min="1" class="w72" :disabled="ro" aria-label="Đến ngày" @change="stage.offsetEnd = intOf($event)" />
         </label>
         <label class="p">
           Ca tham khảo
-          <input :value="stage.shiftFrom ?? ''" type="number" min="1" style="width: 60px" :disabled="ro" aria-label="Từ ca" @change="stage.shiftFrom = optIntOf($event)" />
+          <input :value="stage.shiftFrom ?? ''" type="number" min="1" class="w60" :disabled="ro" aria-label="Từ ca" @change="stage.shiftFrom = optIntOf($event)" />
           –
-          <input :value="stage.shiftTo ?? ''" type="number" min="1" style="width: 60px" :disabled="ro" aria-label="Đến ca" @change="stage.shiftTo = optIntOf($event)" />
+          <input :value="stage.shiftTo ?? ''" type="number" min="1" class="w60" :disabled="ro" aria-label="Đến ca" @change="stage.shiftTo = optIntOf($event)" />
         </label>
         <span class="p" data-field="signers" tabindex="-1">
           Ký cuối giai đoạn
-          <span class="rowf" style="gap: 4px">
+          <span class="rowf tight">
             <button
               v-for="r in TASK_ROLES"
               :key="r"
@@ -111,7 +111,7 @@ function remove() {
       </ul>
 
       <ItemEditor v-for="{ it, index } in shown" :key="it.key" :item="it" :index="index" :stage="stage" :level="level" />
-      <div v-if="!shown.length" class="sm mut" style="padding: 8px 0">
+      <div v-if="!shown.length" class="sm mut">
         {{ stage.items.length ? 'Không có đầu việc khớp bộ lọc trong giai đoạn này.' : 'Giai đoạn chưa có đầu việc.' }}
       </div>
       <div v-if="!ro" class="rowf">
