@@ -4,7 +4,9 @@
 }
 :root {
   /* Chiều cao thanh trên cùng: dùng cho phần tử dính khi cuộn */
-  --top-h: 61px;
+  --top-h: 65px;
+  /* Bề rộng thanh bên */
+  --side-w: 248px;
 }
 html,
 body {
@@ -48,7 +50,116 @@ main {
   padding-block: 20px 60px;
 }
 
-/* ---------- Thanh trên cùng: logo, menu, chuông, người dùng trên một dòng ---------- */
+/* ---------- Khung: thanh bên (logo, menu) + cột chính (thanh trên, nội dung) ---------- */
+.shell {
+  display: grid;
+  grid-template-columns: var(--side-w) minmax(0, 1fr);
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+.side {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100dvh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border-right: 1px solid var(--line);
+  z-index: 30;
+}
+.side-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 64px;
+  padding: 0 18px;
+  border-bottom: 1px solid var(--line);
+}
+.side-links {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 14px 12px;
+}
+.side-links a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  color: var(--ink);
+  font-weight: 600;
+  text-decoration: none;
+}
+.side-links a svg {
+  flex: none;
+  color: var(--mut);
+}
+.side-links a:hover {
+  background: var(--surface2);
+}
+.side-links a.on {
+  background: var(--soft);
+  color: var(--accent);
+}
+.side-links a.on svg {
+  color: var(--accent);
+}
+.side-links .n {
+  margin-left: 0;
+}
+/* Mục con (Quản trị): thụt vào thẳng hàng với chữ của mục cha, vạch dọc bên trái */
+.side-sub {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 2px 0 6px 22px;
+  padding-left: 12px;
+  border-left: 1px solid var(--line);
+}
+.side-sub a {
+  padding: 7px 10px;
+  font-weight: 500;
+  font-size: 13.5px;
+  color: var(--mut);
+}
+.side-sub a.on {
+  background: none;
+  color: var(--accent);
+  font-weight: 600;
+}
+.side-close,
+.menu-btn {
+  display: none;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--ink);
+  cursor: pointer;
+}
+.side-close {
+  margin-left: auto;
+}
+.side-close:hover,
+.menu-btn:hover {
+  background: var(--surface2);
+}
+.side-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 29;
+  background: rgb(0 0 0 / 0.35);
+}
+.main-col {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
 .top {
   position: sticky;
   top: env(safe-area-inset-top, 0px);
@@ -57,15 +168,13 @@ main {
   border-bottom: 1px solid var(--line);
 }
 .top-row {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  grid-template-areas: 'brand nav end';
+  display: flex;
   align-items: center;
-  column-gap: 24px;
-  min-height: 60px;
+  gap: 8px;
+  min-height: 64px;
+  padding: 0 24px;
 }
 .brand {
-  grid-area: brand;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -76,46 +185,18 @@ main {
   text-decoration: none;
   white-space: nowrap;
 }
-.brand i {
-  width: 30px;
-  height: 30px;
-  border-radius: 8px;
-  background: var(--accent);
-  display: grid;
-  place-items: center;
-  color: var(--accent-ink);
-  font-style: normal;
-  font-size: 16px;
-  font-weight: 800;
+/* Biểu tượng Upharma (phần chữ U và viên thuốc của logo) */
+.brand img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  flex: none;
 }
-.nav {
-  grid-area: nav;
-  display: flex;
-  gap: 2px;
-  align-self: stretch;
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-.nav a {
-  display: flex;
-  align-items: center;
-  padding: 0 12px;
-  font-weight: 600;
-  font-size: 14.5px;
-  color: var(--ink);
-  border-block: 2px solid transparent;
-  white-space: nowrap;
-  text-decoration: none;
-}
-.nav a:hover {
-  color: var(--accent);
-}
-.nav a.on {
-  color: var(--accent);
-  border-bottom-color: var(--accent);
+/* Logo trên thanh trên chỉ hiện khi thanh bên ẩn (màn hẹp) */
+.top-brand {
+  display: none;
 }
 .top-end {
-  grid-area: end;
   display: flex;
   align-items: center;
   gap: 6px;
@@ -535,7 +616,9 @@ label.btn {
   text-align: left;
 }
 .btn:focus-visible,
-.nav a:focus-visible,
+.side-links a:focus-visible,
+.menu-btn:focus-visible,
+.side-close:focus-visible,
 .um-btn:focus-visible,
 .um-item:focus-visible,
 .bell:focus-visible,
@@ -1600,25 +1683,63 @@ details summary {
   border-radius: 3px;
 }
 
-/* ---------- Đăng nhập, đăng ký, chờ duyệt ---------- */
+/* ---------- Đăng nhập, đăng ký, chờ duyệt: theo trang đăng nhập elearning.upharma.vn ---------- */
 .auth-page {
+  /* Màu riêng của trang đăng nhập Upharma: xanh lá đậm (màu chính), nút xanh lá nhạt chữ tối, thẻ xám xanh nhạt */
+  --ink: #1e293b;
+  --mut: #64748b;
+  --accent: #0e623a;
+  --accent-hover: #0b4f2f;
+  --accent-ink: #ffffff;
+  --ring: 0 0 0 3px rgb(14 98 58 / 0.2);
+  --cta: #a8d47d;
+  --cta-ink: #1e293b;
+  --auth-card: #f1f5f9;
   min-height: 100vh;
   min-height: 100dvh;
   display: grid;
+  /* Cột co được để ô chọn dài không đẩy thẻ tràn ra ngoài trên điện thoại */
+  grid-template-columns: minmax(0, 1fr);
   place-items: center;
   padding: 32px 16px;
-  background: var(--surface);
+  background: #ffffff;
+  color: var(--ink);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .auth-page {
+    --ink: #e5efef;
+    --mut: #91a7aa;
+    --accent: #6fd39b;
+    --accent-hover: #93e0b5;
+    --accent-ink: #06210f;
+    --ring: 0 0 0 3px rgb(111 211 155 / 0.25);
+    --cta: #4d7c2f;
+    --cta-ink: #ffffff;
+    --auth-card: #142326;
+    background: var(--bg);
+  }
+}
+:root[data-theme='dark'] .auth-page {
+  --ink: #e5efef;
+  --mut: #91a7aa;
+  --accent: #6fd39b;
+  --accent-hover: #93e0b5;
+  --accent-ink: #06210f;
+  --ring: 0 0 0 3px rgb(111 211 155 / 0.25);
+  --cta: #4d7c2f;
+  --cta-ink: #ffffff;
+  --auth-card: #142326;
+  background: var(--bg);
 }
 .auth-card {
   width: 100%;
-  max-width: 440px;
-  background: color-mix(in srgb, var(--band) 70%, var(--surface));
-  border: 1px solid var(--line);
-  border-radius: 16px;
-  padding: 36px 40px 30px;
+  max-width: 480px;
+  background: var(--auth-card);
+  border-radius: 12px;
+  padding: 48px;
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 20px;
 }
 .auth-card.wide {
   max-width: 680px;
@@ -1630,46 +1751,84 @@ details summary {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 14px;
+  gap: 24px;
   text-align: center;
+  margin-bottom: 12px;
 }
-.brand-mark {
-  width: 52px;
-  height: 52px;
-  border-radius: 14px;
-  background: var(--accent);
-  color: var(--accent-ink);
-  display: grid;
-  place-items: center;
-  font-size: 28px;
-  font-weight: 800;
+.auth-logo {
+  width: 96px;
+  height: 96px;
+  object-fit: contain;
 }
 .auth-title {
-  font-size: 26px;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  line-height: 1.25;
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+.auth-title .up {
+  text-transform: uppercase;
 }
 .auth-sub {
   color: var(--mut);
-  font-size: 13.5px;
+  font-size: 14px;
 }
 .auth-card label.f {
-  font-size: 13.5px;
-  gap: 7px;
+  font-size: 18px;
+  font-weight: 600;
+  gap: 8px;
+  color: var(--ink);
 }
+/* Form đăng nhập: các ô cách nhau 32 px như mẫu */
+.auth-form {
+  gap: 28px;
+}
+/* Ô nhập nền trắng không viền, cao 48 px, bo 10 px */
 .auth-card input,
 .auth-card select {
-  min-height: 44px;
-  padding-inline: 14px;
+  min-height: 48px;
+  padding: 12px 16px;
+  border-color: transparent;
+  border-radius: 10px;
+  font-size: 16px;
+  background: var(--surface);
+}
+.auth-card input::placeholder {
+  color: #9ca3af;
+}
+.auth-card input:focus-visible,
+.auth-card select:focus-visible {
+  border-color: var(--accent);
+}
+/* Nút "Đăng nhập": nền xanh lá nhạt chữ tối, rê chuột chuyển màu chính chữ trắng */
+.btn.cta {
+  min-height: 48px;
+  background: var(--cta);
+  color: var(--cta-ink);
+  border-color: var(--cta);
+  font-size: 16px;
+}
+.auth-card .btn.lg {
+  min-height: 48px;
+}
+.btn.cta:not([disabled]):hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
 }
 .auth-foot {
   text-align: center;
-  font-size: 13.5px;
+  font-size: 14px;
   color: var(--mut);
 }
 .auth-foot a {
+  font-size: 16px;
   font-weight: 600;
+  color: var(--ink);
+  text-decoration: underline;
+}
+.auth-foot a:hover {
+  color: var(--accent);
 }
 /* Đường kẻ "hoặc" giữa đăng nhập thường và đăng nhập nhanh */
 .or {
@@ -1733,46 +1892,6 @@ details summary {
   align-items: flex-end;
   gap: 4px;
   flex: none;
-}
-
-/* ---------- Quản trị: cột menu dọc bên trái ---------- */
-.admin {
-  display: grid;
-  grid-template-columns: 220px minmax(0, 1fr);
-  gap: 20px;
-  align-items: start;
-}
-.side-nav {
-  position: sticky;
-  top: calc(var(--top-h) + 16px);
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: 6px;
-}
-.side-nav a {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 9px 12px;
-  border-radius: var(--radius-sm);
-  color: var(--ink);
-  font-weight: 600;
-  text-decoration: none;
-}
-.side-nav a:hover {
-  background: var(--surface2);
-}
-.side-nav a[aria-current='page'] {
-  background: var(--soft);
-  color: var(--accent);
-}
-.side-nav a:focus-visible {
-  outline-offset: -2px;
-}
-.side-nav .n {
-  margin-left: 0;
 }
 
 .payload {
@@ -2239,33 +2358,10 @@ table.te td:has(> input[type='checkbox']) {
 }
 
 /* ---------- Màn hẹp ---------- */
-@media (max-width: 1180px) {
-  :root {
-    --top-h: 105px;
-  }
-  .top-row {
-    grid-template-columns: minmax(0, 1fr) auto;
-    grid-template-areas:
-      'brand end'
-      'nav nav';
-    min-height: 0;
-    padding-top: 8px;
-  }
-  .nav {
-    min-height: 44px;
-    margin-inline: -10px;
-  }
-  .nav a {
-    padding: 0 10px;
-  }
-}
-@media (max-width: 960px) {
-  .designer,
-  .admin {
+/* Trình soạn phiên bản: cột phiên bản thành dải cuộn ngang khi cột chính hẹp (thanh bên đã chiếm 248 px) */
+@media (max-width: 1200px) {
+  .designer {
     grid-template-columns: 1fr;
-  }
-  .goal {
-    flex-wrap: wrap;
   }
   .dz-list {
     position: static;
@@ -2283,14 +2379,47 @@ table.te td:has(> input[type='checkbox']) {
   .ie-cols {
     grid-template-columns: 1fr;
   }
-  .side-nav {
-    position: static;
-    flex-direction: row;
-    overflow-x: auto;
-    scrollbar-width: none;
+}
+/* Thanh bên thành ngăn kéo, mở bằng nút ☰ trên thanh trên */
+@media (max-width: 1024px) {
+  .shell {
+    grid-template-columns: minmax(0, 1fr);
   }
-  .side-nav a {
-    white-space: nowrap;
+  .side {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: min(288px, 86vw);
+    transform: translateX(-100%);
+    visibility: hidden;
+    box-shadow: var(--shadow-2);
+  }
+  .nav-open .side {
+    transform: none;
+    visibility: visible;
+  }
+  .side-close,
+  .menu-btn {
+    display: inline-grid;
+  }
+  .top-brand {
+    display: flex;
+  }
+  .top-row {
+    padding: 0 12px 0 8px;
+  }
+}
+@media (max-width: 1024px) and (prefers-reduced-motion: no-preference) {
+  .side {
+    transition:
+      transform 0.2s ease,
+      visibility 0.2s;
+  }
+}
+@media (max-width: 960px) {
+  .goal {
+    flex-wrap: wrap;
   }
   .vhead {
     position: static;
@@ -2345,8 +2474,8 @@ table.te td:has(> input[type='checkbox']) {
   .um-pop {
     width: min(300px, calc(100vw - 24px));
   }
-  .brand span {
-    display: none;
+  .top-brand span {
+    font-size: 15px;
   }
   .phead-in {
     padding-block: 14px;

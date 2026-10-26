@@ -43,7 +43,7 @@ async function submit() {
   <div class="auth-page">
     <form class="auth-card wide" @submit.prevent="submit">
       <div class="auth-head">
-        <div class="brand-mark" aria-hidden="true">U</div>
+        <img class="auth-logo" src="/upharma.png" alt="UPharma" width="96" height="96" />
         <h1 class="auth-title">Đăng ký tài khoản</h1>
         <p class="auth-sub">Sau khi gửi, tài khoản ở trạng thái <b>Chờ duyệt</b>. BP Đào tạo kiểm tra và chốt vai trò, phạm vi trước khi bạn dùng được hệ thống.</p>
       </div>
@@ -80,7 +80,7 @@ async function submit() {
           </select>
         </label>
       </div>
-      <button class="btn pri lg round wide" type="submit" :disabled="busy">Gửi đăng ký</button>
+      <button class="btn cta lg round wide" type="submit" :disabled="busy">Gửi đăng ký</button>
       <div class="auth-foot">Đã có tài khoản? <RouterLink to="/dang-nhap">Đăng nhập</RouterLink></div>
     </form>
   </div>

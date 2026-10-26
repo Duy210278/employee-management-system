@@ -51,13 +51,13 @@ function quick() {
   <div class="auth-page">
     <div class="auth-card">
       <div class="auth-head">
-        <div class="brand-mark" aria-hidden="true">U</div>
-        <h1 class="auth-title">Chào mừng đến với<br />Lộ trình Upharma</h1>
+        <img class="auth-logo" src="/upharma.png" alt="UPharma" width="96" height="96" />
+        <h1 class="auth-title">Chào mừng đến với<br /><span class="up">Lộ trình Upharma</span></h1>
       </div>
-      <form class="stack" @submit.prevent="submit">
-        <label class="f">Email công ty<input v-model="email" type="email" autocomplete="username" required /></label>
-        <label class="f">Mật khẩu<input v-model="password" type="password" autocomplete="current-password" required /></label>
-        <button class="btn pri lg round wide" type="submit" :disabled="busy">Đăng nhập</button>
+      <form class="stack auth-form" @submit.prevent="submit">
+        <label class="f">Email công ty<input v-model="email" type="email" autocomplete="username" placeholder="Nhập email" required /></label>
+        <label class="f">Mật khẩu<input v-model="password" type="password" autocomplete="current-password" placeholder="Nhập mật khẩu" required /></label>
+        <button class="btn cta lg round wide" type="submit" :disabled="busy">Đăng nhập</button>
         <div class="auth-foot">Chưa có tài khoản? <RouterLink to="/dang-ky">Đăng ký</RouterLink></div>
       </form>
 

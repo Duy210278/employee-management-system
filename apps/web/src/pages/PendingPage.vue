@@ -11,7 +11,7 @@ const name = typeof route.query.name === 'string' ? route.query.name : '';
   <div class="auth-page">
     <div class="auth-card mid">
       <div class="auth-head">
-        <div class="brand-mark" aria-hidden="true">U</div>
+        <img class="auth-logo" src="/upharma.png" alt="UPharma" width="96" height="96" />
         <h1 class="auth-title">Đang chờ duyệt</h1>
         <p class="auth-sub">
           <template v-if="name">Cảm ơn <b>{{ name }}</b>, đăng ký</template><template v-else>Tài khoản</template>
@@ -21,7 +21,7 @@ const name = typeof route.query.name === 'string' ? route.query.name : '';
       <div class="alert info">
         <div>BP Đào tạo sẽ kiểm tra thông tin, chốt vai trò và nhà thuốc/khu vực của bạn. Khi được duyệt, đăng nhập bằng email và mật khẩu vừa tạo.</div>
       </div>
-      <RouterLink class="btn pri lg round wide" to="/dang-nhap">Về trang đăng nhập</RouterLink>
+      <RouterLink class="btn cta lg round wide" to="/dang-nhap">Về trang đăng nhập</RouterLink>
       <div class="auth-foot">Nếu chờ quá lâu, liên hệ BP Đào tạo hoặc Cửa hàng trưởng của bạn.</div>
     </div>
   </div>
