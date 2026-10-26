@@ -6,3 +6,4 @@ coverage/
 .env
 storage/
 .DS_Store
+.corepack-bin/

@@ -10,8 +10,11 @@ services:
     region: singapore
     branch: main
     autoDeploy: true
-    buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm build
-    startCommand: pnpm start
+    # /usr/bin trên Render chỉ đọc (EROFS) nên corepack đặt lệnh pnpm vào thư mục trong dự án rồi thêm vào PATH;
+    # pnpm lấy đúng bản theo "packageManager" của package.json
+    buildCommand: mkdir -p .corepack-bin && corepack enable --install-directory .corepack-bin pnpm && export PATH="$PWD/.corepack-bin:$PATH" && pnpm install --frozen-lockfile && pnpm build
+    # Giống "pnpm start" (pnpm -F @lotrinh/api start) nhưng không cần pnpm lúc chạy
+    startCommand: cd apps/api && node dist/main.js
     envVars:
       # Node 25 trở đi không còn kèm corepack; giữ đúng bản đã chạy test
       - key: NODE_VERSION

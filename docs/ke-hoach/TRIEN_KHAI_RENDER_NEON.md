@@ -43,7 +43,7 @@ Render lấy code từ GitHub, nên mọi thay đổi (kể cả `render.yaml`) 
 
 | Hiện tượng trong Logs | Cách xử lý |
 |---|---|
-| Lỗi ở bước `corepack enable` hoặc sai phiên bản pnpm | Settings → Build Command, đổi thành `npm install -g pnpm@9.15.9 && pnpm install --frozen-lockfile && pnpm build` |
+| `EROFS: read-only file system, unlink '/usr/bin/pnpm'` ở bước `corepack enable` (ảnh Node của Render để `/usr` chỉ đọc; `npm install -g` cũng hỏng vì lý do này) | Dùng lệnh trong `render.yaml`: corepack đặt `pnpm` vào `.corepack-bin` trong dự án rồi thêm vào PATH; Start Command là `cd apps/api && node dist/main.js`. Dịch vụ tạo tay (không qua Blueprint) thì chép hai lệnh này vào Settings → Build & Deploy |
 | `Cấu hình .env không hợp lệ: DATABASE_URL…` | Chưa nhập biến DATABASE_URL: Environment → thêm rồi Manual Deploy |
 | `Không kết nối được PostgreSQL` hoặc hết thời gian chờ | Kiểm tra lại chuỗi Neon (Direct connection, còn `sslmode=require`); xem project Neon có đang bị tạm ngưng do hết CU-giờ không |
 | `SECURITY WARNING: The SSL modes 'prefer', 'require'…` | Vô hại (thư viện vẫn kiểm tra chứng chỉ đầy đủ). Muốn tắt thì đổi `sslmode=require` thành `sslmode=verify-full` trong DATABASE_URL |
