@@ -44,6 +44,8 @@ const tabs = computed<Tab[]>(() => {
       { to: '/lo-trinh', label: 'Lộ trình của tôi', icon: 'route' },
     ];
     if (m.isBuddyNow) t.push({ to: '/viec-kem-cap', label: 'Việc kèm cặp', icon: 'mentor', badge: badge.value });
+    // Khung năng lực chỉ xem: mọi vai trò đều xem được (mục 4.3)
+    t.push({ to: '/khung-nang-luc', label: 'Khung năng lực', icon: 'book' });
     return t;
   }
   const t: Tab[] = [
