@@ -834,6 +834,9 @@ a:focus-visible {
 .ok-text {
   color: var(--ok);
 }
+.warn-text {
+  color: var(--warn);
+}
 .self-start {
   align-self: flex-start;
 }
@@ -1162,11 +1165,13 @@ label.f.w-md {
 details[open] > summary .caret {
   transform: rotate(90deg);
 }
-.item .more {
-  margin: 12px 0 2px 32px;
+.more {
   display: flex;
   flex-direction: column;
   gap: 10px;
+}
+.item .more {
+  margin: 12px 0 2px 32px;
 }
 .more-grid {
   display: grid;
@@ -1326,6 +1331,44 @@ details:not([open]) > summary.stg {
   align-items: center;
   gap: 6px;
   font-size: 12.5px;
+}
+
+/* Bảng đầu việc trong thẻ giai đoạn: bấm một dòng để mở dòng chi tiết ngay dưới */
+table.ck .ck-name {
+  min-width: 240px;
+}
+table.ck .chips {
+  display: inline-flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+/* Đầu việc GPP: viền trái đỏ như dòng đầu việc */
+table.ck tr.gpp td:first-child {
+  box-shadow: inset 3px 0 0 var(--bad);
+}
+table.ck tr.on td {
+  background: var(--surface2);
+}
+table.ck .ck-tog {
+  width: 1%;
+  padding: 6px 8px;
+}
+table.ck .ck-tog .btn {
+  padding: 4px 6px;
+}
+table.ck .caret {
+  margin: 0;
+}
+table.ck tr.on .caret {
+  transform: rotate(90deg);
+}
+table.ck tbody tr.ck-more {
+  cursor: auto;
+}
+table.ck tbody tr.ck-more td {
+  border-top: 0;
+  background: var(--surface2);
+  padding: 2px 14px 14px;
 }
 
 /* Thẻ "Cần chú ý": mỗi dòng một việc kèm liên kết */
@@ -2554,5 +2597,34 @@ table.te td:has(> input[type='checkbox']) {
   }
   table.click tbody tr:hover td {
     background: none;
+  }
+  /* Bảng checklist: tên đầu việc chiếm cả dòng, dòng chi tiết liền với dòng đang mở; bấm cả thẻ để mở */
+  table.ck .ck-name {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    min-width: 0;
+    padding: 4px 0;
+  }
+  table.ck .ck-tog {
+    display: none;
+  }
+  table.ck tr.gpp {
+    box-shadow: inset 3px 0 0 var(--bad);
+  }
+  table.ck tr.gpp td:first-child {
+    box-shadow: none;
+  }
+  table.ck tr.on,
+  table.ck tbody tr.ck-more {
+    background: var(--surface2);
+  }
+  table.ck tbody tr.ck-more {
+    border-top: 0;
+    padding-top: 4px;
+  }
+  table.ck tbody tr.ck-more td {
+    display: block;
+    padding: 0;
   }
 }

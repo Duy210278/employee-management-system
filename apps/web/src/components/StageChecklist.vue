@@ -4,10 +4,10 @@ import { computed, reactive, ref, toRef, watch } from 'vue';
 import { runApi, useMutate, useRunTasks } from '@/api/queries';
 import { fmtDate, fmtDateTime } from '@/format';
 import Icon from './Icon.vue';
-import ItemRow from './ItemRow.vue';
 import RoleChip from './RoleChip.vue';
+import TaskTableRow from './TaskTableRow.vue';
 
-/** Tab Checklist của hồ sơ NV: mỗi giai đoạn là một thẻ (mục 11.5, theo stageBlock của N3), cuối thẻ là chữ ký giai đoạn (mục 10.2) */
+/** Tab Checklist của hồ sơ NV: mỗi giai đoạn là một thẻ có bảng đầu việc (mục 11.5, theo stageBlock của N3), cuối thẻ là chữ ký giai đoạn (mục 10.2) */
 const props = defineProps<{ runId: number; refYear: number }>();
 const { data, isLoading, error } = useRunTasks(toRef(() => props.runId));
 const mutate = useMutate();
@@ -82,7 +82,21 @@ async function sign(stageKey: string, step: StageSignStepView) {
           <Icon class="caret" name="chevron" />
         </div>
       </summary>
-      <ItemRow v-for="t in s.tasks" :key="t.id" :task="t" :ref-year="refYear" />
+      <table v-if="s.tasks.length" class="rt click ck">
+        <thead>
+          <tr>
+            <th>Mã</th>
+            <th>Đầu việc</th>
+            <th>Hạn</th>
+            <th>Xác nhận</th>
+            <th>Trạng thái</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <TaskTableRow v-for="t in s.tasks" :key="t.id" :task="t" :ref-year="refYear" />
+        </tbody>
+      </table>
       <div v-if="s.sign" class="signbar">
         <span class="sm"><b>Ký cuối giai đoạn</b></span>
         <span v-for="st in s.sign.steps" :key="st.step" class="step">
