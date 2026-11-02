@@ -383,6 +383,8 @@ Phiên bản
              └─ Phụ thuộc: chỉ xác nhận được sau mã X, Y
 ```
 
+Trình soạn hiện ẩn các trường Bắt buộc, Nguồn xác nhận, Bằng chứng yêu cầu và Phụ thuộc. Dữ liệu vẫn giữ trong phiên bản: mọi mục mặc định bắt buộc, xác nhận tay, chưa mục nào có phụ thuộc.
+
 Mốc thời gian lưu bằng **số ngày tính từ ngày bắt đầu Level**, theo mô hình của N3 (giai đoạn có `a`, `b`; đầu việc có `d`). Nhãn "Tuần / Tháng / Quý" chỉ để hiển thị. Cách này tránh sai lệch khi cộng tháng và để BP ĐT kiểm soát chính xác hạn từng mục.
 
 Khi tạo đầu việc mới, hệ thống gợi ý hạn bằng cách **chia đều trong giai đoạn** theo thứ tự (cách N3 đang làm): `d_i = a + round((b − a) × i / n)`. BP ĐT có thể sửa tay.
@@ -432,7 +434,7 @@ Thao tác cần hỗ trợ:
 | Thêm, sửa, xóa giai đoạn | Không cho xóa giai đoạn còn đầu việc |
 | Thêm, sửa, xóa đầu việc | Khi xóa, tự gỡ các phụ thuộc trỏ tới mã đó và thông báo |
 | Sắp xếp lại | Kéo thả hoặc nút lên/xuống trong cùng giai đoạn |
-| Chuyển giai đoạn | Chọn giai đoạn đích trong cùng Level |
+| Chuyển giai đoạn | Đã bỏ khỏi trình soạn: muốn chuyển thì xóa mục ở giai đoạn cũ, thêm mục ở giai đoạn mới |
 | Đổi mã đầu việc | Cảnh báo: đổi mã sẽ tính là "bỏ mục cũ + thêm mục mới" khi phân loại thay đổi và khi chuyển phiên bản. Tự cập nhật phụ thuộc |
 | Bật cờ GPP | Tự bật "Bắt buộc", tắt "Cho phép N/A" |
 | Nhập từ Excel | Theo mẫu cột của N2: #, Nhóm nội dung, Nội dung, Hướng dẫn, Người xác nhận. Tạo thành bản nháp mới |

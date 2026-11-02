@@ -95,19 +95,6 @@ export function moveWithin(stage: Stage, index: number, delta: -1 | 1): void {
   renumber(stage);
 }
 
-/** Chuyển đầu việc sang giai đoạn khác trong cùng Level; hạn được kéo vào trong khoảng của giai đoạn đích */
-export function moveToStage(level: StageOwner, key: string, targetKey: string): void {
-  const from = level.stages.find((s) => s.items.some((i) => i.key === key));
-  const to = level.stages.find((s) => s.key === targetKey);
-  if (!from || !to || from === to) return;
-  const idx = from.items.findIndex((i) => i.key === key);
-  const [it] = from.items.splice(idx, 1);
-  it.dueOffset = Math.min(Math.max(it.dueOffset, to.offsetStart), to.offsetEnd);
-  to.items.push(it);
-  renumber(from);
-  renumber(to);
-}
-
 /** Đổi mã: tính là bỏ mục cũ + thêm mục mới khi phân loại thay đổi; phụ thuộc trỏ tới mã cũ được cập nhật */
 export function renameKey(level: StageOwner, oldKey: string, newKey: string): void {
   for (const it of allItems(level)) {

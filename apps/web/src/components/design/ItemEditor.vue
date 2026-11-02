@@ -3,7 +3,7 @@ import { addDays, roleShortFor, SESSION_LABEL, VERIFIER_ROLES, type Item, type S
 import { computed, ref, watch } from 'vue';
 import { useToast } from '@/composables/toast';
 import { useDesigner } from '@/designer/editor';
-import { intOf, isChtOwner, moveToStage, moveWithin, removeItem, renameKey, setGpp, type StageOwner } from '@/designer/ops';
+import { intOf, isChtOwner, moveWithin, removeItem, renameKey, setGpp, type StageOwner } from '@/designer/ops';
 
 /** Một đầu việc trong trình soạn checklist (mục 7.1, 7.3); checklist CHT có thêm buổi, người hỗ trợ, tài liệu hướng dẫn */
 const props = defineProps<{ item: Item; index: number; stage: Stage; level: StageOwner }>();
@@ -21,7 +21,6 @@ watch(
   () => props.item.key,
   (k) => (keyDraft.value = k),
 );
-const depsText = computed(() => props.item.dependsOn.join(', '));
 
 function toggleVerifier(role: (typeof VERIFIER_ROLES)[number]) {
   const has = props.item.verifiers.includes(role);
@@ -37,13 +36,6 @@ function commitKey() {
   }
   renameKey(props.level, props.item.key, next);
   toast.show('Đã đổi mã. Khi gửi duyệt, đổi mã được tính là bỏ mục cũ và thêm mục mới');
-}
-
-function setDeps(value: string) {
-  props.item.dependsOn = value
-    .split(/[,\s]+/)
-    .map((s) => s.trim())
-    .filter(Boolean);
 }
 
 function remove() {
@@ -129,19 +121,11 @@ const exampleDate = computed(() => {
           <span class="sm mut" :title="'Nếu NV bắt đầu Level hôm nay'">({{ exampleDate }})</span>
         </label>
         <label v-if="!cht" class="p cb" data-field="gpp"><input :checked="item.gpp" type="checkbox" :disabled="ro" @change="setGpp(item, ($event.target as HTMLInputElement).checked)" /> GPP</label>
-        <label class="p cb"><input v-model="item.required" type="checkbox" :disabled="ro || item.gpp" /> Bắt buộc</label>
         <label class="p cb"><input v-model="item.allowNa" type="checkbox" :disabled="ro || item.gpp" /> Cho phép N/A</label>
-        <!-- Nguồn (LMS/POS) và Bằng chứng đã ẩn: chưa có tích hợp và đính kèm, mọi mục xác nhận tay. Dữ liệu vẫn giữ trong phiên bản -->
-        <label class="p">
-          Phụ thuộc
-          <input :value="depsText" data-field="dependsOn" class="mono" size="12" :placeholder="cht ? `vd. ${(level as { code: string }).code}-1-2` : 'vd. L1-2-9'" :disabled="ro" @change="setDeps(($event.target as HTMLInputElement).value)" />
-        </label>
-        <label v-if="!ro && level.stages.length > 1" class="p">
-          Chuyển tới
-          <select :value="stage.key" @change="moveToStage(level, item.key, ($event.target as HTMLSelectElement).value)">
-            <option v-for="s in level.stages" :key="s.key" :value="s.key">{{ s.label }}</option>
-          </select>
-        </label>
+        <!--
+          Đã ẩn, dữ liệu vẫn giữ trong phiên bản: Nguồn (LMS/POS) và Bằng chứng (chưa có tích hợp và đính kèm, mọi mục xác nhận tay);
+          Bắt buộc (mọi mục mặc định bắt buộc), Phụ thuộc (chưa mục nào dùng). Không còn chuyển đầu việc sang giai đoạn khác.
+        -->
       </div>
       <ul v-if="issues.length" class="ie-issues">
         <li v-for="(i, n) in issues" :key="n" :class="i.level">{{ i.code }} · {{ i.message }}</li>
