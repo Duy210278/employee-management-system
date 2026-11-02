@@ -3,6 +3,7 @@ import { kpiRule, reviewFormOf, ROLE_SHORT } from '@lotrinh/shared';
 import { computed, ref } from 'vue';
 import { useFramework, useMe } from '@/api/queries';
 import { usePageHeader } from '@/composables/pageHeader';
+import GppModules from '@/components/GppModules.vue';
 import { fmtDate } from '@/format';
 
 /**
@@ -154,8 +155,10 @@ usePageHeader(() =>
       </div>
     </template>
 
+    <GppModules />
+
     <div class="card pad stack">
-      <div class="h2">Rubric quan sát tư vấn (dùng chung mọi Level)</div>
+      <div class="h2">Phụ lục C. Rubric quan sát tư vấn (dùng chung mọi Level)</div>
       <div class="sm mut">
         Ca đạt khi tổng ≥ {{ fw.rubric.passTotal }}/{{ fw.rubric.criteria.length * fw.rubric.scaleMax }}<template v-if="fw.rubric.forbidOne"> và không tiêu chí nào 1 điểm</template>.
         Tối thiểu {{ fw.rubric.minObsPerMonth }} ca/tháng, mục tiêu {{ fw.rubric.targetRate }}% ca đạt.

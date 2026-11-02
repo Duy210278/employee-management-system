@@ -2,6 +2,7 @@
 import { computed, toRef } from 'vue';
 import { sessionApi, useMutate, useOverview } from '@/api/queries';
 import { fmtDate, fmtDateTime } from '@/format';
+import GppModules from './GppModules.vue';
 import RoleChip from './RoleChip.vue';
 
 /** Tổng quan Level (mục 9.4): NV đọc và xác nhận trước khi checklist được mở */
@@ -116,6 +117,8 @@ function ack() {
         <ul class="ul chk-ul"><li v-for="(x, i) in ov.overview.counter" :key="i">{{ x }}</li></ul>
       </div>
     </div>
+
+    <GppModules :current-level="ov.level.key" />
 
     <div v-if="ov.overview.note" class="alert"><div><b>Lưu ý:</b> {{ ov.overview.note }}</div></div>
 

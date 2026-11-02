@@ -1919,6 +1919,14 @@ th.num {
 table.sales tr.cur td {
   background: var(--soft);
 }
+/* Phụ lục B (module GPP): dòng của Level đang học tô nổi */
+table.gpp tr.cur td {
+  background: var(--soft);
+  font-weight: 600;
+}
+table.gpp td:first-child {
+  width: 1%;
+}
 table.sales tfoot th {
   border-top: 1px solid var(--line);
   border-bottom: 0;
