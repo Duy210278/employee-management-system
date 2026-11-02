@@ -1,5 +1,6 @@
 import type { AccountRole, TaskRole } from '../roles';
 import type { TaskStatus } from '../schedule/state';
+import { isChtTrack, type Track } from '../schemas/version';
 
 /**
  * Quy tắc xác nhận đầu việc (mục 3.3, 7.2, 12: R04–R10).
@@ -30,9 +31,20 @@ export interface Slot {
   proxyRole: TaskRole | null;
 }
 
+/** Không chọn người xác nhận thì chỉ còn phần NV: NV tự đánh giá, báo hoàn thành là xong (mục 7.2) */
 export function requiredRoles(item: { verifiers: readonly TaskRole[]; requireNvFirst: boolean }): TaskRole[] {
   const roles: TaskRole[] = item.requireNvFirst ? ['nv', ...item.verifiers] : [...item.verifiers];
   return [...new Set(roles)];
+}
+
+/**
+ * Vai trò nhận báo "Cần hỗ trợ": người xác nhận của đầu việc.
+ * Đầu việc NV tự đánh giá không có người xác nhận nên về người kèm cặp: Buddy (chưa có Buddy thì CHT), lượt CHT về Đào tạo.
+ */
+export function helpRoles(required: readonly TaskRole[], track: Track): TaskRole[] {
+  const verifiers = required.filter((r) => r !== 'nv');
+  if (verifiers.length) return verifiers;
+  return [isChtTrack(track) ? 'bp' : 'buddy'];
 }
 
 export function missingRoles(required: readonly TaskRole[], confirmed: readonly TaskRole[]): TaskRole[] {

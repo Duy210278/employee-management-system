@@ -2,6 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import {
   decideActions,
   fillableSlots,
+  helpRoles,
   isRunManager,
   levelItems,
   requiredRoles,
@@ -101,7 +102,9 @@ export class TasksService {
       .select({ role: taskConfirmations.role })
       .from(taskConfirmations)
       .where(and(eq(taskConfirmations.taskId, taskId), isNull(taskConfirmations.revokedAt)));
-    const missing = requiredRoles(item).filter((r) => r !== 'nv' && !confirmed.some((c) => c.role === r));
+    // Đầu việc NV tự đánh giá: báo xong không cần ai xác nhận, cần hỗ trợ thì về người kèm cặp
+    const roles = kind === 'help' ? helpRoles(requiredRoles(item), ctx.track) : requiredRoles(item);
+    const missing = roles.filter((r) => r !== 'nv' && !confirmed.some((c) => c.role === r));
     await this.notifications.notify(await this.notifications.recipientsOf(missing.slice(0, 1), ctx.people), {
       type: kind,
       title: kind === 'help' ? `${ctx.staff.fullName} cần hỗ trợ: ${short}` : `${ctx.staff.fullName} đã báo xong, chờ bạn xác nhận: ${short}`,

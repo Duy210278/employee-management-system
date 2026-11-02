@@ -521,8 +521,8 @@ content
 │     └─ items[]                  đầu việc
 │        ├─ key                   mã cố định qua các phiên bản: L{level}-{giai đoạn}-{thứ tự}
 │        ├─ order, category, content, guidance
-│        ├─ verifiers[]           vai trò xác nhận ngoài NV: buddy, cht, qlkv, bp
-│        ├─ requireNvFirst        NV phải báo xong trước (mặc định true)
+│        ├─ verifiers[]           vai trò xác nhận ngoài NV: buddy, cht, qlkv, bp; rỗng = NV tự đánh giá
+│        ├─ requireNvFirst        có phần NV xác nhận, NV báo xong trước (mặc định true)
 │        ├─ dueOffset             hạn = ngày bắt đầu Level + dueOffset
 │        ├─ gpp, required, allowNa
 │        ├─ dataSource            manual | lms | pos   (đang ẩn trên giao diện, giữ trong dữ liệu)

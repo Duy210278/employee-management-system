@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { inboxPriority, isAssignee } from './assignee';
 import {
   decideActions,
+  helpRoles,
   requiredRoles,
   statusAfterConfirmations,
   type Actor,
@@ -43,6 +44,18 @@ describe('người xác nhận (mục 7.2, R04–R10)', () => {
 
   it('T-X02: Buddy xác nhận → đủ xác nhận, đầu việc hoàn thành', () => {
     expect(statusAfterConfirmations(['nv', 'buddy'], ['nv', 'buddy'], 'doing')).toBe('done');
+  });
+
+  it('NV tự đánh giá: chỉ phần NV, báo xong là hoàn thành; cần hỗ trợ thì về Buddy (lượt CHT về Đào tạo)', () => {
+    const required = requiredRoles({ verifiers: [], requireNvFirst: true });
+    expect(required).toEqual(['nv']);
+    const item = buddyItem({ required });
+    expect(decideActions(lan, people, item).confirmAs).toEqual({ role: 'nv', proxyRole: null });
+    expect(statusAfterConfirmations(required, ['nv'], 'todo')).toBe('done');
+    expect(decideActions(ha, people, buddyItem({ required, status: 'done', confirmations: [{ role: 'nv', userId: 10 }] })).canRework).toBe(true);
+    expect(helpRoles(required, 'nvbh')).toEqual(['buddy']);
+    expect(helpRoles(required, 'cht_moi_tuyen')).toEqual(['bp']);
+    expect(helpRoles(['nv', 'cht', 'qlkv'], 'nvbh')).toEqual(['cht', 'qlkv']);
   });
 
   it('T-X05 / R05: NV đã có tài khoản thì Buddy không có nút xác nhận phần NV', () => {

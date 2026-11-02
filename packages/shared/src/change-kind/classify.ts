@@ -29,7 +29,7 @@ const sameSet = (a: readonly string[], b: readonly string[]) => same([...a].sort
 
 const ITEM_TEXT: (keyof Item)[] = ['content', 'guidance', 'category', 'session', 'supporter', 'link'];
 const ITEM_CRITERIA: [keyof Item, string][] = [
-  ['requireNvFirst', 'yêu cầu NV báo trước'],
+  ['requireNvFirst', 'có phần NV xác nhận'],
   ['dueOffset', 'hạn'],
   ['gpp', 'cờ GPP'],
   ['required', 'cờ bắt buộc'],

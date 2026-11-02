@@ -399,9 +399,13 @@ Mỗi đầu việc có danh sách vai trò cần xác nhận. Đầu việc ch�
 | QLKV | Phần NV + QLKV | |
 | BP Đào tạo / BP ĐT (GPP) | Phần NV + BP ĐT | |
 | Phối hợp | Phần NV + nhiều vai trò | Mặc định L1: Buddy + CHT; L2–L4: CHT + QLKV (theo N3). BP ĐT chọn được |
+| NV tự đánh giá | Chỉ phần NV, không chọn người xác nhận | NV báo hoàn thành là xong. Không dùng cho mục GPP (CK-07). Báo "Cần hỗ trợ" gửi Buddy (chưa có Buddy thì CHT); lượt CHT gửi Đào tạo |
+| Người khác làm cho NV | Tắt phần NV + người xác nhận | Chỉ người xác nhận đánh dấu, NV không cần bấm (ví dụ check-in cuối ngày của lượt CHT do Đào tạo xác nhận) |
 | (đầu việc POS) | Hệ thống tính + CHT xác nhận số liệu | Mở khi đã có số liệu tháng |
 
-Trong trình soạn, trường "Người xác nhận" là ô chọn nhiều giá trị, kèm công tắc "Yêu cầu NV báo hoàn thành trước" (mặc định bật, theo N3). Việc lưu danh sách vai trò tường minh thay vì dùng giá trị "Phối hợp" giúp tránh hiểu sai giữa các Level.
+Trong trình soạn, trường "Người xác nhận" là ô chọn nhiều giá trị, kèm công tắc "Có phần NV xác nhận" (mặc định bật, theo N3). Bật: NV tự báo hoàn thành, người xác nhận chỉ xác nhận sau NV. Tắt: NV không cần bấm. Không chọn người xác nhận và tắt luôn phần NV thì đầu việc không có ai xác nhận, bị chặn (CK-06). Việc lưu danh sách vai trò tường minh thay vì dùng giá trị "Phối hợp" giúp tránh hiểu sai giữa các Level.
+
+Đầu việc NV tự đánh giá vẫn có kiểm soát: CHT, QLKV, BP ĐT yêu cầu làm lại được sau khi NV báo xong (R07), và chuỗi ký cuối giai đoạn rà lại cả giai đoạn.
 
 ### 7.3 Màn hình soạn checklist
 
@@ -464,8 +468,8 @@ Mô phỏng màn hình điện thoại của NV và của Buddy/CHT cho Level đ
 | CK-03 | Lưu ý | Giai đoạn kế tiếp không liền mạch (hở ngày) |
 | CK-04 | Lỗi | Ngày kết thúc giai đoạn cuối vượt thời gian Level trong Khung năng lực |
 | CK-05 | Lỗi | Hạn đầu việc d nằm ngoài [a, b] của giai đoạn |
-| CK-06 | Lỗi | Đầu việc thiếu nội dung, thiếu người xác nhận, mã trùng |
-| CK-07 | Lỗi | Mục GPP được phép N/A hoặc không bắt buộc |
+| CK-06 | Lỗi | Đầu việc thiếu nội dung, không có ai xác nhận (không chọn người xác nhận và tắt phần NV), mã trùng |
+| CK-07 | Lỗi | Mục GPP được phép N/A, không bắt buộc, hoặc để NV tự xác nhận (không có người kiểm tra) |
 | CK-08 | Lỗi | Phụ thuộc trỏ tới mã không tồn tại, hoặc tới mục ở giai đoạn sau |
 | CK-09 | Lưu ý | Nội dung nhắc "Tháng N" hoặc "N tháng" ngoài thời gian Level |
 | CK-10 | Lưu ý | Nội dung nhắc "bài thu hoạch Level N" khác Level đang chứa |
@@ -474,6 +478,7 @@ Mô phỏng màn hình điện thoại của NV và của Buddy/CHT cho Level đ
 | CK-13 | Lưu ý | Phiếu cho phép gia hạn nhưng chưa có thời gian / số lần tối đa |
 | CK-14 | Lưu ý | Ngưỡng LMS không thống nhất giữa các phiếu |
 | CK-15 | Lỗi | Vai trò được dùng nhưng không có trong danh sách vai trò |
+| CK-18 | Lưu ý | Đầu việc NV tự xác nhận, không có người kiểm tra (để người duyệt thấy rõ) |
 
 Các quy tắc CK-04, CK-06, CK-09, CK-10 đã bắt được lỗi thật trong N2 (xem mục 16).
 

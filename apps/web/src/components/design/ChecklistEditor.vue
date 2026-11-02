@@ -26,7 +26,7 @@ const visible = computed(() => {
   const text = q.value.trim().toLowerCase();
   return (it: Item) =>
     (!text || `${it.key} ${it.content} ${it.guidance} ${it.category}`.toLowerCase().includes(text)) &&
-    (!role.value || it.verifiers.includes(role.value as Item['verifiers'][number])) &&
+    (!role.value || (role.value === 'self' ? !it.verifiers.length : it.verifiers.includes(role.value as Item['verifiers'][number]))) &&
     (!gppOnly.value || it.gpp);
 });
 const filtering = computed(() => !!q.value.trim() || !!role.value || gppOnly.value);
@@ -68,6 +68,7 @@ function newStage() {
         <select v-model="role" aria-label="Lọc theo người xác nhận">
           <option value="">Mọi người xác nhận</option>
           <option v-for="r in VERIFIER_ROLES" :key="r" :value="r">{{ ROLE_SHORT[r] }}</option>
+          <option value="self">Chỉ NV tự xác nhận</option>
         </select>
         <label class="rowf sm tight"><input v-model="gppOnly" type="checkbox" /> Chỉ mục GPP</label>
       </div>

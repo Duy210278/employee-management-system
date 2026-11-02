@@ -1,6 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import {
   fmtDate,
+  helpRoles,
   inboxPriority,
   isAssignee,
   pauseLength,
@@ -192,7 +193,10 @@ export class MeService {
       const items: InboxItem[] = [];
       for (const v of views) {
         if (!started && v.stageKey !== firstStage) continue;
-        const myMissing = v.actions.missing.filter((r) => isAssignee(actor, r, ctx.people));
+        // Đầu việc NV tự đánh giá đang cần hỗ trợ: vào hàng đợi người kèm cặp dù họ không có phần xác nhận
+        const selfHelp = v.status === 'help' && v.requiredRoles.every((r) => r === 'nv');
+        const roles = selfHelp ? [...v.actions.missing, ...helpRoles(v.requiredRoles, v.track)] : v.actions.missing;
+        const myMissing = roles.filter((r) => isAssignee(actor, r, ctx.people));
         const priority = inboxPriority(
           { myMissing, confirmed: v.confirmations.map((c) => c.role), status: v.status, dueDate: v.dueDate, runStarted: started },
           today,

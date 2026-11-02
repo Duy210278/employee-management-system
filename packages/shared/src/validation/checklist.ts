@@ -36,6 +36,8 @@ interface Owner {
   /** Ngày ký cuối giai đoạn bắt buộc (NVBH); checklist CHT ký ở đánh giá tổng kết tuần */
   needSigners: boolean;
   level: Level | null;
+  /** Tên phần người học trong thông báo: "NV", checklist CHT là "CHT" */
+  nv: string;
 }
 
 function checkOwner(o: Owner, keyCount: Map<string, number>, add: (code: string, level: IssueLevel, message: string, at: ValidationIssue['at']) => void) {
@@ -71,7 +73,12 @@ function checkOwner(o: Owner, keyCount: Map<string, number>, add: (code: string,
       if ((keyCount.get(it.key) ?? 0) > 1) add('CK-06', 'error', `Mã đầu việc ${it.key} bị trùng`, { ...iat, field: 'key' });
       if (!it.content.trim()) add('CK-06', 'error', `${it.key} thiếu nội dung`, { ...iat, field: 'content' });
       if (!it.category.trim()) add('CK-06', 'error', `${it.key} thiếu nhóm nội dung`, { ...iat, field: 'category' });
-      if (it.verifiers.length === 0) add('CK-06', 'error', `${it.key} chưa chọn người xác nhận`, { ...iat, field: 'verifiers' });
+      // Không chọn người xác nhận = NV tự đánh giá (mục 7.2): cần có phần NV, mục GPP vẫn phải có người kiểm tra
+      if (it.verifiers.length === 0) {
+        if (!it.requireNvFirst) add('CK-06', 'error', `${it.key} không có ai xác nhận: chọn người xác nhận hoặc bật "Có phần ${o.nv} xác nhận"`, { ...iat, field: 'verifiers' });
+        else if (it.gpp) add('CK-07', 'error', `${it.key} là mục GPP nên phải có người kiểm tra, không để ${o.nv} tự xác nhận`, { ...iat, field: 'verifiers' });
+        else add('CK-18', 'warning', `${it.key}: ${o.nv} tự xác nhận, không có người kiểm tra`, { ...iat, field: 'verifiers' });
+      }
       if (it.dueOffset < s.offsetStart || it.dueOffset > s.offsetEnd) {
         add('CK-05', 'error', `${it.key}: hạn ngày ${it.dueOffset} nằm ngoài giai đoạn (ngày ${s.offsetStart}–${s.offsetEnd})`, { ...iat, field: 'dueOffset' });
       }
@@ -112,6 +119,7 @@ const chtOwner = (t: ChtTrack): Owner => ({
   stages: t.stages,
   needSigners: false,
   level: null,
+  nv: 'CHT',
 });
 
 export function validateChecklist(content: VersionContent): ValidationIssue[] {
@@ -128,6 +136,7 @@ export function validateChecklist(content: VersionContent): ValidationIssue[] {
       stages: level.stages,
       needSigners: true,
       level,
+      nv: 'NV',
     })),
     ...(content.chtTracks ?? []).map(chtOwner),
   ];

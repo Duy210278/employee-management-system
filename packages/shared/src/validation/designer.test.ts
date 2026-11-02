@@ -46,9 +46,10 @@ describe('kiểm tra hợp lệ checklist (mục 7.7)', () => {
     });
   });
 
-  it('CK-06: thiếu nội dung, thiếu người xác nhận, trùng mã, sai dạng mã', () => {
+  it('CK-06: thiếu nội dung, không có ai xác nhận, trùng mã, sai dạng mã', () => {
     item('L1-1-2').content = ' ';
     item('L1-1-3').verifiers = [];
+    item('L1-1-3').requireNvFirst = false;
     item('L1-1-4').key = 'L1-1-1';
     l1().stages[0].items.push({ ...item('L1-1-5'), key: 'L2-1-99' });
     const ck06 = validateChecklist(draft).filter((i) => i.code === 'CK-06');
@@ -59,6 +60,17 @@ describe('kiểm tra hợp lệ checklist (mục 7.7)', () => {
   it('CK-07: mục GPP được phép N/A', () => {
     item('L1-1-5').allowNa = true;
     expect(codes(draft)).toContain('CK-07');
+  });
+
+  it('NV tự đánh giá: không chọn người xác nhận chỉ là lưu ý (CK-18), mục GPP thì là lỗi CK-07', () => {
+    item('L1-1-3').verifiers = [];
+    const issues = validateChecklist(draft);
+    expect(issues.filter((i) => i.at.itemKey === 'L1-1-3')).toEqual([
+      expect.objectContaining({ code: 'CK-18', level: 'warning', at: expect.objectContaining({ field: 'verifiers' }) }),
+    ]);
+    expect(countIssues(issues).errors).toBe(0);
+    item('L1-1-5').verifiers = [];
+    expect(validateChecklist(draft).find((i) => i.at.itemKey === 'L1-1-5')).toMatchObject({ code: 'CK-07', level: 'error', at: { field: 'verifiers' } });
   });
 
   it('CK-08: phụ thuộc mã không tồn tại hoặc mục ở giai đoạn sau', () => {

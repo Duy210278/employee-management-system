@@ -84,7 +84,7 @@ const exampleDate = computed(() => {
         <span class="p" data-field="verifiers" tabindex="-1">
           Xác nhận
           <span class="rowf tight">
-            <span class="rl nv" :title="cht ? 'Phần của CHT' : 'Phần nhân viên'">{{ short('nv') }}</span>
+            <span class="rl nv" :class="{ off: !item.requireNvFirst }" :title="cht ? 'Phần của CHT' : 'Phần nhân viên'">{{ short('nv') }}</span>
             <button
               v-for="r in verifierRoles"
               :key="r"
@@ -97,9 +97,15 @@ const exampleDate = computed(() => {
             >
               {{ item.verifiers.includes(r) ? '✓ ' : '' }}{{ short(r) }}
             </button>
+            <span v-if="!item.verifiers.length && item.requireNvFirst" class="sm mut">Chỉ {{ short('nv') }} tự xác nhận</span>
           </span>
         </span>
-        <label class="p cb"><input v-model="item.requireNvFirst" type="checkbox" :disabled="ro" /> {{ short('nv') }} báo trước</label>
+        <label
+          class="p cb"
+          :title="`Bật: ${short('nv')} tự báo hoàn thành, người xác nhận chỉ xác nhận sau ${short('nv')}. Tắt: ${short('nv')} không cần bấm, chỉ người xác nhận đánh dấu.`"
+        >
+          <input v-model="item.requireNvFirst" type="checkbox" :disabled="ro" /> Có phần {{ short('nv') }} xác nhận
+        </label>
         <template v-if="cht">
           <label class="p">
             Buổi

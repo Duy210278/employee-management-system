@@ -76,10 +76,11 @@ describe('sửa diễn đạt (T-V01)', () => {
   });
 
   it('T-V03: gửi duyệt khi còn lỗi bị chặn; thiếu ghi chú bị chặn', async () => {
-    await save(draftId, (c) => (itemIn(c, 'L1-1-1').verifiers = []));
+    // Không chọn người xác nhận và tắt phần NV: đầu việc không có ai xác nhận
+    await save(draftId, (c) => Object.assign(itemIn(c, 'L1-1-1'), { verifiers: [], requireNvFirst: false }));
     const blocked = await admin.post(`${API}/versions/${draftId}/submit`).send({}).expect(400);
     expect(blocked.body.code).toBe('VALIDATION_FAILED');
-    await save(draftId, (c) => (itemIn(c, 'L1-1-1').verifiers = ['buddy']), '');
+    await save(draftId, (c) => Object.assign(itemIn(c, 'L1-1-1'), { verifiers: ['buddy'], requireNvFirst: true }), '');
     const noNote = await admin.post(`${API}/versions/${draftId}/submit`).send({}).expect(400);
     expect(noNote.body.code).toBe('CHANGE_NOTE_REQUIRED');
   });
