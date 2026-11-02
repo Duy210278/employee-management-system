@@ -42,7 +42,7 @@ const metaText = computed(() => [t.value.category, t.value.session ? SESSION_LAB
   <tr :class="{ on: open, gpp: t.gpp }" @click="open = !open">
     <td data-l="Mã" class="mono sm mut nowrap">{{ t.itemKey }}</td>
     <td class="ck-name">
-      <div :class="{ b: t.actions.confirmAs }">{{ t.content }}</div>
+      <div class="pre">{{ t.content }}</div>
       <div v-if="metaText || t.gpp" class="sm mut">
         {{ metaText }}<template v-if="metaText && t.gpp"> · </template><span v-if="t.gpp" class="gpp-tag">GPP bắt buộc</span>
       </div>

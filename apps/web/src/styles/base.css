@@ -1119,14 +1119,11 @@ label.f.w-md {
   align-items: flex-start;
   justify-content: space-between;
 }
+/* Nội dung đầu việc: chữ thường, không in đậm */
 .t-title {
   margin: 0;
   white-space: pre-line;
-  font-weight: 500;
   min-width: 0;
-}
-.t-title.strong {
-  font-weight: 600;
 }
 .t-state {
   display: flex;

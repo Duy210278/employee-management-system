@@ -54,7 +54,7 @@ const metaText = computed(() =>
       <span class="chk" :class="chk.cls" aria-hidden="true">{{ chk.mark }}</span>
       <div class="t">
         <div class="t-top">
-          <p class="t-title" :class="{ strong: a.confirmAs }">{{ t.content }}</p>
+          <p class="t-title">{{ t.content }}</p>
           <span class="t-state">
             <StatePill :state="t.state" />
             <span v-if="extraOverdue" class="pill bad">Trễ {{ t.state.overdueDays }} ngày</span>
