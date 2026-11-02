@@ -20,7 +20,7 @@ export interface ReviewDraft {
 export function reviewFormOf(level: Pick<Level, 'key' | 'review'>): ReviewForm {
   if (level.review) return level.review;
   return {
-    flow: 'Buddy hoặc CHT điền. CHT ký đề xuất, QLKV phê duyệt, BP Đào tạo xác nhận và lưu hồ sơ, nhân viên ký đã nhận kết quả.',
+    flow: 'Buddy hoặc CHT điền. CHT ký đề xuất, QLKV phê duyệt, BP Đào tạo xác nhận và lưu hồ sơ.',
     when: 'Từ khi mở giai đoạn cuối của Level',
     prompts: [
       { key: 'strengths', text: 'Điểm mạnh nổi bật (≥ 2 điểm cụ thể, kèm ví dụ)', minPoints: 2 },
@@ -34,7 +34,7 @@ export function reviewFormOf(level: Pick<Level, 'key' | 'review'>): ReviewForm {
     passLabel: level.key < 4 ? `Đủ điều kiện lên Level ${level.key + 1}` : 'Đạt chuẩn Level 4',
     allowFail: true,
     extension: { enabled: true, months: 1, maxTimes: 2, maxGoals: 3 },
-    signers: ['cht', 'qlkv', 'bp', 'nv'],
+    signers: ['cht', 'qlkv', 'bp'],
   };
 }
 

@@ -158,7 +158,7 @@
         }
       ],
       "review": {
-        "flow": "Buddy hoặc CHT điền. CHT ký đề xuất, QLKV phê duyệt, BP Đào tạo xác nhận và lưu hồ sơ, nhân viên ký đã nhận kết quả.",
+        "flow": "Buddy hoặc CHT điền. CHT ký đề xuất, QLKV phê duyệt, BP Đào tạo xác nhận và lưu hồ sơ.",
         "when": "Từ khi mở giai đoạn cuối của Level",
         "prompts": [
           {
@@ -188,8 +188,7 @@
         "signers": [
           "cht",
           "qlkv",
-          "bp",
-          "nv"
+          "bp"
         ]
       },
       "stages": [
@@ -1542,7 +1541,7 @@
         }
       ],
       "review": {
-        "flow": "Buddy hoặc CHT điền. CHT ký đề xuất, QLKV phê duyệt, BP Đào tạo xác nhận và lưu hồ sơ, nhân viên ký đã nhận kết quả.",
+        "flow": "Buddy hoặc CHT điền. CHT ký đề xuất, QLKV phê duyệt, BP Đào tạo xác nhận và lưu hồ sơ.",
         "when": "Từ khi mở giai đoạn cuối của Level",
         "prompts": [
           {
@@ -1572,8 +1571,7 @@
         "signers": [
           "cht",
           "qlkv",
-          "bp",
-          "nv"
+          "bp"
         ]
       },
       "stages": [
@@ -2327,7 +2325,7 @@
         }
       ],
       "review": {
-        "flow": "Buddy hoặc CHT điền. CHT ký đề xuất, QLKV phê duyệt, BP Đào tạo xác nhận và lưu hồ sơ, nhân viên ký đã nhận kết quả.",
+        "flow": "Buddy hoặc CHT điền. CHT ký đề xuất, QLKV phê duyệt, BP Đào tạo xác nhận và lưu hồ sơ.",
         "when": "Từ khi mở giai đoạn cuối của Level",
         "prompts": [
           {
@@ -2357,8 +2355,7 @@
         "signers": [
           "cht",
           "qlkv",
-          "bp",
-          "nv"
+          "bp"
         ]
       },
       "stages": [
@@ -2993,7 +2990,7 @@
         }
       ],
       "review": {
-        "flow": "Buddy hoặc CHT điền. CHT ký đề xuất, QLKV phê duyệt, BP Đào tạo xác nhận và lưu hồ sơ, nhân viên ký đã nhận kết quả.",
+        "flow": "Buddy hoặc CHT điền. CHT ký đề xuất, QLKV phê duyệt, BP Đào tạo xác nhận và lưu hồ sơ.",
         "when": "Từ khi mở giai đoạn cuối của Level",
         "prompts": [
           {
@@ -3023,8 +3020,7 @@
         "signers": [
           "cht",
           "qlkv",
-          "bp",
-          "nv"
+          "bp"
         ]
       },
       "stages": [

@@ -62,7 +62,7 @@ describe('phiếu đánh giá và chuỗi ký (R12–R14)', () => {
   const notes = { strengths: '- Tư vấn đúng SKU\n- Thái độ tốt', improve: '1. Hỏi sâu hơn\n2. Nắm thêm CTKM' };
 
   it('mặc định theo N3: chuỗi ký CHT → QLKV → BP ĐT → NV, gia hạn tối đa 2 lần', () => {
-    expect(form).toMatchObject({ passLabel: 'Đủ điều kiện lên Level 2', signers: ['cht', 'qlkv', 'bp', 'nv'], extension: { maxTimes: 2, months: 1, maxGoals: 3 } });
+    expect(form).toMatchObject({ passLabel: 'Đủ điều kiện lên Level 2', signers: ['cht', 'qlkv', 'bp'], extension: { maxTimes: 2, months: 1, maxGoals: 3 } });
     expect(reviewFormOf({ key: 4 }).passLabel).toBe('Đạt chuẩn Level 4');
   });
 
@@ -90,7 +90,7 @@ describe('phiếu đánh giá và chuỗi ký (R12–R14)', () => {
     const admin: Actor = { userId: 1, role: 'bp' };
     expect(nextSignStep(form.signers, [])).toBe(0);
     expect(nextSignStep(form.signers, [0, 1])).toBe(2);
-    expect(nextSignStep(form.signers, [0, 1, 2, 3])).toBeNull();
+    expect(nextSignStep(form.signers, [0, 1, 2])).toBeNull();
     expect(canSignAs(ha, people, 'cht')).toBe(true);
     expect(canSignAs(huy, people, 'cht')).toBe(false);
     expect(canSignAs(admin, people, 'bp')).toBe(true);

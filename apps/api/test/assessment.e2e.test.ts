@@ -120,7 +120,7 @@ describe('phiếu đánh giá, chuỗi ký và lên Level (mục 7.4, 9.3, R12�
     expect(r).toMatchObject({ isOpen: true, canEdit: true, round: 0, auto: { kpi: { state: 'pass' }, rubric: { rate: 100, meetsTarget: true } } });
     expect(r.auto.checklist).toMatchObject({ done: 60, total: 60 });
     expect(r.suggestions.some((s) => s?.value === 'pass' && s.reason.startsWith('Rubric'))).toBe(true);
-    expect(r.steps.map((s) => s.role)).toEqual(['cht', 'qlkv', 'bp', 'nv']);
+    expect(r.steps.map((s) => s.role)).toEqual(['cht', 'qlkv', 'bp']);
     await saveReview(thao, linhRun, { criteria: r.criteria.map(() => 'pass') });
   });
 
@@ -145,20 +145,18 @@ describe('phiếu đánh giá, chuỗi ký và lên Level (mục 7.4, 9.3, R12�
     await huy.post(`${API}/runs/${linhRun}/review/sign`).send({ step: 1 }).expect(200);
   });
 
-  it('BP ĐT ký → Linh tự lên Level 2 từ hôm nay (V9), giữ Buddy; Linh ký nhận kết quả của Level 1', async () => {
+  it('BP ĐT ký (bước cuối) → phiếu xong, Linh tự lên Level 2 từ hôm nay (V9), giữ Buddy; không còn bước NV ký nhận', async () => {
     const [admin, linh] = await Promise.all([as('admin'), as('linh')]);
     const done = (await admin.post(`${API}/runs/${linhRun}/review/sign`).send({ step: 2 }).expect(200)).body as ReviewResponse;
     expect(done.outcome).toMatch(/^Đã chuyển lên Level 2 từ /);
     expect(done.run.status).toBe('passed');
+    expect(done.review.status).toBe('done');
 
     const today = await todayOf(linh);
     expect(today.run).toMatchObject({ levelKey: 2, dayIndex: 0, acknowledged: false, startDate: harness.today, versionCode: '2.1' });
-    expect(today.reviewToSign).toEqual({ runId: linhRun, levelKey: 1 });
+    expect(today.reviewToSign).toBeNull();
     expect(today.tasks).toHaveLength(31);
-
-    const final = (await linh.post(`${API}/runs/${linhRun}/review/sign`).send({ step: 3 }).expect(200)).body as ReviewResponse;
-    expect(final.review.status).toBe('done');
-    expect((await todayOf(linh)).reviewToSign).toBeNull();
+    await linh.post(`${API}/runs/${linhRun}/review/sign`).send({ step: 3 }).expect(409);
 
     const profile = (await (await as('binh')).get(`${API}/staff/${today.staff!.id}`).expect(200)).body as StaffProfileResponse;
     expect(profile).toMatchObject({ staff: { currentLevel: 2 }, people: { buddy: 'Đỗ Thị Thảo', cht: 'Lê Văn Bình' } });
