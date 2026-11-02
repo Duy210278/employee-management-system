@@ -35,7 +35,6 @@ import type {
   ObservationBodyT,
   ObservationsResponse,
   OverviewResponse,
-  PublishingSettings,
   ReviewResponse,
   RunTasksResponse,
   SalesResponse,
@@ -110,8 +109,6 @@ export const useVersion = (id: Ref<number | null>) =>
     refetchOnWindowFocus: false,
   });
 export const useFramework = () => useQuery({ queryKey: ['framework'], queryFn: () => api.get<FrameworkResponse>('/framework') });
-export const usePublishing = (enabled: Ref<boolean>) =>
-  useQuery({ queryKey: ['settings', 'publishing'], queryFn: () => api.get<PublishingSettings>('/settings/publishing'), enabled });
 export const useAlerts = (enabled: Ref<boolean>) => useQuery({ queryKey: ['alerts'], queryFn: () => api.get<AlertsResponse>('/alerts'), enabled });
 /** Chuông thông báo: tự làm mới mỗi phút */
 export const useNotifications = (enabled: Ref<boolean>) =>
@@ -208,12 +205,10 @@ export const versionApi = {
     api.put<VersionDetailResponse>(`/versions/${id}/content`, { content, changeNote, rowVersion }),
   submit: (id: number, changeNote: string) => api.post<VersionDetailResponse>(`/versions/${id}/submit`, { changeNote }),
   withdraw: (id: number) => api.post<VersionDetailResponse>(`/versions/${id}/withdraw`),
-  reject: (id: number, note: string) => api.post<VersionDetailResponse>(`/versions/${id}/reject`, { note }),
   approve: (id: number, effectiveFrom: string) => api.post<VersionDetailResponse>(`/versions/${id}/approve`, { effectiveFrom }),
   reschedule: (id: number, effectiveFrom: string) => api.put<VersionDetailResponse>(`/versions/${id}/effective`, { effectiveFrom }),
   remove: (id: number) => api.del<{ ok: true }>(`/versions/${id}`),
   exportUrl: (id: number) => `/api/v1/versions/${id}/export`,
-  setPublishing: (body: PublishingSettings) => api.put<PublishingSettings>('/settings/publishing', body),
 };
 
 export const assessmentApi = {

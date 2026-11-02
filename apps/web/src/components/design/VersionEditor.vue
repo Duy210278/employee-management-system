@@ -28,7 +28,6 @@ const busy = ref(false);
 const showChanges = ref(false);
 const showIssues = ref(true);
 const effectiveFrom = ref(addDays(props.detail.today, 1));
-const rejectNote = ref('');
 
 const d = createDesigner(toRef(props, 'detail'), content);
 const tab = d.tab;
@@ -125,13 +124,6 @@ const reschedule = () => {
   if (!confirm(`Đổi ngày hiệu lực v${v.value.code} từ ${fmtDate(from)} sang ${fmtDate(newEffective.value)}?`)) return;
   void act(() => versionApi.reschedule(v.value.id, newEffective.value), `Đã đổi ngày hiệu lực sang ${fmtDate(newEffective.value)}`);
 };
-const reject = () => {
-  if (!rejectNote.value.trim()) {
-    toast.show('Nhập lý do trả về để BP Đào tạo biết cần sửa gì');
-    return;
-  }
-  void act(() => versionApi.reject(v.value.id, rejectNote.value.trim()), 'Đã trả về nháp');
-};
 async function remove() {
   if (!confirm('Xóa bản nháp này? Mọi chỉnh sửa trong bản nháp sẽ mất.')) return;
   const res = await run(() => versionApi.remove(v.value.id), 'Đã xóa bản nháp');
@@ -203,7 +195,7 @@ onBeforeUnmount(() => {
     </div>
 
     <div v-if="hasBody" class="card pad stack">
-      <div v-if="v.state === 'draft' && v.reviewNote" class="alert bad"><div><b>Người duyệt trả về:</b> {{ v.reviewNote }}</div></div>
+      <div v-if="v.state === 'draft' && v.reviewNote" class="alert bad"><div><b>Lý do trả về:</b> {{ v.reviewNote }}</div></div>
 
       <label v-if="perm.edit" class="f">
         Ghi chú thay đổi (bắt buộc khi gửi duyệt)
@@ -257,24 +249,18 @@ onBeforeUnmount(() => {
         </div>
       </template>
 
-      <!-- Người duyệt phiên bản -->
-      <div v-if="perm.approve" class="grid g2">
-        <div class="card pad stack hl">
-          <div class="h2">Duyệt và ban hành</div>
-          <label class="f w-sm">
-            Ngày hiệu lực
-            <input v-model="effectiveFrom" type="date" :min="detail.today" />
-          </label>
-          <div class="sm mut">
-            Số phiên bản sẽ là <b>v{{ d.proposedCode.value }}</b>. Bản đang hiệu lực kết thúc ngày {{ fmtDate(addDays(effectiveFrom, -1)) }}.
-          </div>
-          <div><button class="btn pri" type="button" :disabled="busy || d.counts.value.errors > 0" @click="approve">Duyệt và ban hành</button></div>
+      <!-- BP Đào tạo duyệt và ban hành bản chờ duyệt; cần sửa thì "Rút về nháp" -->
+      <div v-if="perm.approve" class="card pad stack hl">
+        <div class="h2">Duyệt và ban hành</div>
+        <label class="f w-sm">
+          Ngày hiệu lực
+          <input v-model="effectiveFrom" type="date" :min="detail.today" />
+        </label>
+        <div class="sm mut">
+          Số phiên bản sẽ là <b>v{{ d.proposedCode.value }}</b>. Bản đang hiệu lực kết thúc ngày {{ fmtDate(addDays(effectiveFrom, -1)) }}. Cần sửa thêm thì bấm
+          "Rút về nháp".
         </div>
-        <div class="card pad stack">
-          <div class="h2">Trả về nháp</div>
-          <textarea v-model="rejectNote" rows="3" placeholder="Lý do trả về (bắt buộc)" aria-label="Lý do trả về"></textarea>
-          <div><button class="btn bad" type="button" :disabled="busy" @click="reject">Trả về nháp</button></div>
-        </div>
+        <div><button class="btn pri" type="button" :disabled="busy || d.counts.value.errors > 0" @click="approve">Duyệt và ban hành</button></div>
       </div>
 
       <!-- Bản đã duyệt mà chưa tới ngày: còn đổi được ngày hiệu lực -->
@@ -295,7 +281,7 @@ onBeforeUnmount(() => {
           </div>
         </template>
         <div v-else class="sm mut">
-          Hiệu lực từ <b>{{ fmtDate(v.effectiveFrom) }}</b>. Trước ngày này, người duyệt phiên bản còn đổi được ngày hiệu lực.
+          Hiệu lực từ <b>{{ fmtDate(v.effectiveFrom) }}</b>. Trước ngày này, BP Đào tạo còn đổi được ngày hiệu lực.
         </div>
       </div>
     </div>

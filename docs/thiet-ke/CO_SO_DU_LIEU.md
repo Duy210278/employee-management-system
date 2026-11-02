@@ -5,7 +5,7 @@ Mô tả cơ sở dữ liệu theo mã nguồn hiện tại (commit `596e088`, n
 | Nội dung | File |
 |---|---|
 | Định nghĩa bảng (Drizzle ORM) | [apps/api/src/db/schema.ts](../../apps/api/src/db/schema.ts) |
-| Migration SQL (chạy theo thứ tự 0000 → 0005) | [apps/api/src/db/migrations/](../../apps/api/src/db/migrations/) |
+| Migration SQL (chạy theo thứ tự 0000 → 0006) | [apps/api/src/db/migrations/](../../apps/api/src/db/migrations/) |
 | Cấu trúc JSONB nội dung phiên bản (Zod) | [packages/shared/src/schemas/version.ts](../../packages/shared/src/schemas/version.ts) |
 | Các giá trị liệt kê (vai trò, trạng thái) | [packages/shared/src/roles.ts](../../packages/shared/src/roles.ts), [schedule/state.ts](../../packages/shared/src/schedule/state.ts) |
 | Kết nối, chạy migration | [apps/api/src/db/client.ts](../../apps/api/src/db/client.ts) |
@@ -115,7 +115,6 @@ Ký hiệu: **PK** khóa chính, **FK** khóa ngoại, **UQ** duy nhất. "Bắt
 | role | text | ✓ | | Vai trò tài khoản: `nv`, `cht`, `qlkv`, `bp` |
 | status | text | ✓ | `'pending'` | `pending`, `active`, `locked`, `left`, `rejected` |
 | can_buddy | boolean | ✓ | `false` | Quyền bổ sung: được làm Buddy |
-| can_approve_versions | boolean | ✓ | `false` | Quyền bổ sung: người duyệt phiên bản |
 | requested_role | text | | | Vai trò người đăng ký đề nghị (mục 5.1) |
 | requested_store_id | integer | | | FK → `stores.id`, nhà thuốc đề nghị |
 | requested_area_id | integer | | | FK → `areas.id`, khu vực đề nghị (QLKV) |
@@ -189,7 +188,6 @@ Các khóa đang dùng:
 | key | value | Ý nghĩa |
 |---|---|---|
 | `fake_today` | chuỗi `"YYYY-MM-DD"` | Ngày giả lập (bản demo). Không có dòng này là dùng ngày thật |
-| `bp_self_publish` | `true` / `false` | Công tắc V20: BP ĐT tự duyệt và ban hành phiên bản (mặc định tắt) |
 
 ### 3.2 Phiên bản Bộ lộ trình
 
@@ -206,7 +204,7 @@ Các khóa đang dùng:
 | parent_id | integer | | | Bản gốc tạo ra bản nháp này (không khai báo FK) |
 | change_note | text | | | Ghi chú thay đổi (bắt buộc khi gửi duyệt) |
 | change_kind | text | | | `text` (chỉ sửa diễn đạt) hoặc `criteria` (đổi tiêu chí) |
-| review_note | text | | | Lý do người duyệt trả về nháp |
+| review_note | text | | | Lý do trả về nháp (chỉ còn ở dữ liệu cũ, khi QLKV còn quyền duyệt) |
 | content | jsonb | ✓ | | Toàn bộ nội dung (mục 4) |
 | row_version | integer | ✓ | `0` | Chống ghi đè |
 | created_by, updated_by, submitted_by, approved_by | integer | | | FK → `users.id` |
@@ -626,7 +624,7 @@ NV báo xong → thêm `task_confirmations` (role `nv`) và `task_events` (`repo
 
 ### 7.4 Phiên bản
 
-Tạo nháp (sao `content` từ bản gốc, `parent_id`) → sửa nháp → gửi duyệt (`pending`, trigger khóa `content`) → duyệt và ban hành (`active`, cấp `code`, `criteria_line`, `effective_from`; bản cũ được đặt `effective_to`) hoặc trả về nháp (`review_note`).
+Tạo nháp (sao `content` từ bản gốc, `parent_id`) → sửa nháp → gửi duyệt (`pending`, trigger khóa `content`) → BP ĐT duyệt và ban hành (`active`, cấp `code`, `criteria_line`, `effective_from`; bản cũ được đặt `effective_to`) hoặc rút về nháp.
 
 ---
 

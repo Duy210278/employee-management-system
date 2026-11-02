@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
-import { useAlerts, useInbox, useMe, useNotifications, useUsers, useVersions } from '@/api/queries';
+import { useAlerts, useInbox, useMe, useNotifications, useUsers } from '@/api/queries';
 import Icon, { type IconName } from './Icon.vue';
 import PageHeader from './PageHeader.vue';
 import SimDateBar from './SimDateBar.vue';
@@ -12,9 +12,6 @@ const { data: me } = useMe();
 const hasInbox = computed(() => !!me.value && (me.value.user.role !== 'nv' || me.value.isBuddyNow));
 const { data: inbox } = useInbox(hasInbox);
 const badge = computed(() => (inbox.value ? inbox.value.stats.waiting + inbox.value.stats.overdue : 0));
-// Người duyệt phiên bản (quyền bổ sung, mục 3.2) có tab riêng với số bản chờ duyệt
-const { data: versions } = useVersions(computed(() => !!me.value?.user.canApproveVersions && me.value.user.role !== 'bp'));
-const pendingVersions = computed(() => versions.value?.items.filter((i) => i.state === 'pending').length ?? 0);
 // Huy hiệu đỏ: số nhân sự có cảnh báo đỏ (mục 4.1), số đăng ký chờ duyệt (BP ĐT), thông báo chưa đọc
 const isManager = computed(() => !!me.value && me.value.user.role !== 'nv');
 const { data: alerts } = useAlerts(isManager);
@@ -69,15 +66,14 @@ const tabs = computed<Tab[]>(() => {
           { to: '/quan-tri/danh-muc', label: 'Cửa hàng, khu vực' },
           { to: '/quan-tri/nhap-csv', label: 'Nhập tài khoản' },
           { to: '/quan-tri/nhat-ky', label: 'Nhật ký hệ thống' },
-          { to: '/quan-tri/he-thong', label: m.demoMode ? 'Cấu hình, công cụ demo' : 'Cấu hình' },
+          ...(m.demoMode ? [{ to: '/quan-tri/he-thong', label: 'Công cụ demo' }] : []),
         ],
       },
     );
-  else if (m.user.canApproveVersions) t.push({ to: '/thiet-ke', label: 'Duyệt phiên bản', icon: 'approve', badge: pendingVersions.value });
   return t;
 });
 const isOn = (to: string) => route.path === to || route.path.startsWith(to + '/');
-/** Tiêu đề dự phòng: nhãn menu đang chọn (vd. "Duyệt phiên bản" với người duyệt) */
+/** Tiêu đề dự phòng: nhãn menu đang chọn */
 const activeLabel = computed(() => tabs.value.find((t) => isOn(t.to))?.label);
 const showHeader = computed(() => route.meta.header !== false);
 

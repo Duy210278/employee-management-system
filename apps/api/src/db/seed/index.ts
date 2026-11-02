@@ -85,7 +85,6 @@ export async function seedDatabase(db: Db, today: IsoDate): Promise<void> {
           role: u.role,
           status: u.status,
           canBuddy: !!u.canBuddy,
-          canApproveVersions: !!u.canApproveVersions,
           requestedRole: u.status === 'pending' ? u.role : null,
           // Lần vào cuối: mặc định hôm qua; một số người để trống hoặc lâu ngày để có cảnh báo "không đăng nhập" (mục 11.6)
           lastSeenAt: u.status === 'active' && LAST_SEEN_DAYS_AGO[u.key] !== null ? at(addDays(today, -(LAST_SEEN_DAYS_AGO[u.key] ?? 1)), '20:00') : null,

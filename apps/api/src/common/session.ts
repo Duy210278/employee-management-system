@@ -12,7 +12,6 @@ export interface SessionUser {
   fullName: string;
   email: string;
   canBuddy: boolean;
-  canApproveVersions: boolean;
   lastSeenAt: Date | null;
 }
 

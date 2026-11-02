@@ -53,7 +53,6 @@ export const users = pgTable('users', {
   role: text('role').$type<AccountRole>().notNull(),
   status: text('status').$type<UserStatus>().notNull().default('pending'),
   canBuddy: boolean('can_buddy').notNull().default(false),
-  canApproveVersions: boolean('can_approve_versions').notNull().default(false),
   /** Thông tin người đăng ký đề nghị (mục 5.1); BP ĐT chốt vai trò, phạm vi khi duyệt */
   requestedRole: text('requested_role').$type<AccountRole>(),
   requestedStoreId: integer('requested_store_id').references(() => stores.id),
@@ -166,7 +165,7 @@ export const versions = pgTable('versions', {
   parentId: integer('parent_id'),
   changeNote: text('change_note'),
   changeKind: text('change_kind').$type<'text' | 'criteria'>(),
-  /** Lý do người duyệt trả về nháp */
+  /** Lý do trả về nháp: chỉ còn ở dữ liệu cũ, khi QLKV còn quyền duyệt phiên bản */
   reviewNote: text('review_note'),
   content: jsonb('content').$type<VersionContent>().notNull(),
   rowVersion: integer('row_version').notNull().default(0),

@@ -9,12 +9,6 @@ export type Action = 'read' | 'create' | 'update' | 'approve' | 'manage';
 /** User: tài khoản · Org: danh mục cửa hàng, khu vực · AuditLog: nhật ký hệ thống · Report: xuất CSV */
 export type SubjectName = 'Staff' | 'StaffList' | 'Clock' | 'DemoData' | 'Version' | 'Settings' | 'User' | 'Org' | 'AuditLog' | 'Report' | 'all';
 
-/** Cấu hình hệ thống ảnh hưởng tới quyền */
-export interface AbilityFlags {
-  /** V20: BP Đào tạo tự duyệt và ban hành phiên bản */
-  bpSelfPublish: boolean;
-}
-
 /** Bản ghi dùng để xét quyền trên một hồ sơ NV / lượt Level */
 export interface StaffRecord {
   userId: number | null;
@@ -32,15 +26,13 @@ export interface UserScopes {
   areaIds: number[];
 }
 
-export function defineAbilityFor(user: SessionUser, scopes: UserScopes, flags: AbilityFlags = { bpSelfPublish: false }): AppAbility {
-  const { can, cannot, build } = new AbilityBuilder<AppAbility>(createMongoAbility);
+export function defineAbilityFor(user: SessionUser, scopes: UserScopes): AppAbility {
+  const { can, build } = new AbilityBuilder<AppAbility>(createMongoAbility);
 
   switch (user.role) {
     case 'bp':
-      // BP Đào tạo là quản trị viên: toàn chuỗi; chỉ BP ĐT soạn, sửa Khung năng lực và Checklist, gửi duyệt, rút về
+      // BP Đào tạo là quản trị viên: toàn chuỗi; chỉ BP ĐT soạn, sửa, duyệt và ban hành Khung năng lực và Checklist
       can('manage', 'all');
-      // Duyệt và ban hành mặc định tách khỏi người soạn; bật "BP ĐT tự ban hành" (V20) thì BP ĐT tự duyệt được
-      if (!user.canApproveVersions && !flags.bpSelfPublish) cannot('approve', 'Version');
       break;
     case 'qlkv':
       can(['read'], ['StaffList', 'Report']);
@@ -61,10 +53,5 @@ export function defineAbilityFor(user: SessionUser, scopes: UserScopes, flags: A
   can('read', 'Staff', { chtId: user.id });
   can('read', 'Staff', { qlkvId: user.id });
   can('read', 'Clock');
-  // Quyền bổ sung "Người duyệt phiên bản" (mục 3.2): xem và duyệt bản chờ duyệt
-  if (user.canApproveVersions) {
-    can('read', 'Version');
-    can('approve', 'Version');
-  }
   return build();
 }

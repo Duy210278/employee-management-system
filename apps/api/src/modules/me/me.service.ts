@@ -103,7 +103,6 @@ export class MeService {
         role: user.role,
         status: user.status,
         canBuddy: user.canBuddy,
-        canApproveVersions: user.canApproveVersions,
       },
       staffId: own?.id ?? null,
       isBuddyNow: buddyOf.length > 0,

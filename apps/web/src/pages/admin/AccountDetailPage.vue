@@ -32,7 +32,7 @@ const { data: d, isLoading, error } = useUser(id);
 const busy = ref(false);
 
 const info = reactive({ fullName: '', employeeCode: '', phone: '', status: 'active' as 'active' | 'locked' | 'left' });
-const scope = ref({ role: 'nv' as AccountRole, storeIds: [] as number[], areaIds: [] as number[], canBuddy: false, canApproveVersions: false });
+const scope = ref({ role: 'nv' as AccountRole, storeIds: [] as number[], areaIds: [] as number[], canBuddy: false });
 const handover = reactive<Record<string, number>>({});
 const rejectNote = ref('');
 usePageHeader(() => (d.value ? { title: d.value.user.fullName, crumbs: [{ label: 'Quản trị', to: '/quan-tri' }, { label: 'Tài khoản và vai trò', to: '/quan-tri/tai-khoan' }] } : null));
@@ -47,7 +47,6 @@ function load(v: UserDetailResponse) {
     storeIds: r ? (r.role === 'cht' && r.storeId ? [r.storeId] : []) : u.stores.map((s) => s.id),
     areaIds: r ? (r.role === 'qlkv' && r.areaId ? [r.areaId] : []) : u.areas.map((a) => a.id),
     canBuddy: u.canBuddy,
-    canApproveVersions: u.canApproveVersions,
   };
   for (const k of Object.keys(handover)) delete handover[k];
 }

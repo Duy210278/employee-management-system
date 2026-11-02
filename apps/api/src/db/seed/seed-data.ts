@@ -20,7 +20,6 @@ export interface SeedUser {
   role: AccountRole;
   status: UserStatus;
   canBuddy?: boolean;
-  canApproveVersions?: boolean;
   stores?: string[];
   areas?: string[];
   /** Tình huống mẫu, hiện ở màn đăng nhập nhanh */
@@ -29,7 +28,7 @@ export interface SeedUser {
 
 export const SEED_USERS: SeedUser[] = [
   { key: 'admin', email: 'admin@upharma.local', fullName: 'Ngô Quốc Bảo', employeeCode: 'BP001', role: 'bp', status: 'active', note: 'Quản trị, soạn phiên bản, chỉnh ngày giả lập' },
-  { key: 'huy', email: 'huy@upharma.local', fullName: 'Ngô Quang Huy', employeeCode: 'QL001', role: 'qlkv', status: 'active', canApproveVersions: true, areas: ['HN1'], note: 'QLKV Hà Nội 1, người duyệt phiên bản, nhận cảnh báo leo thang' },
+  { key: 'huy', email: 'huy@upharma.local', fullName: 'Ngô Quang Huy', employeeCode: 'QL001', role: 'qlkv', status: 'active', areas: ['HN1'], note: 'QLKV Hà Nội 1, duyệt đề xuất tạm dừng, nhận cảnh báo leo thang' },
   { key: 'ha', email: 'ha@upharma.local', fullName: 'Phạm Thu Hà', employeeCode: 'CH001', role: 'cht', status: 'active', stores: ['NTA'], note: 'CHT Nhà thuốc A' },
   { key: 'binh', email: 'binh@upharma.local', fullName: 'Lê Văn Bình', employeeCode: 'CH002', role: 'cht', status: 'active', stores: ['NTB'], note: 'CHT Nhà thuốc B' },
   { key: 'phuong', email: 'phuong@upharma.local', fullName: 'Trịnh Thu Phương', employeeCode: 'CH003', role: 'cht', status: 'active', stores: ['NTC'], note: 'CHT mới tuyển Nhà thuốc C, đang onboarding tuần đầu (ngày D+2)' },

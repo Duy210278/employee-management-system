@@ -73,7 +73,7 @@ export const router = createRouter({
         {
           path: 'quan-tri',
           component: AdminLayout,
-          meta: { title: 'Quản trị', desc: 'Tài khoản và vai trò, cửa hàng, khu vực, nhập liệu, nhật ký và cấu hình hệ thống' },
+          meta: { title: 'Quản trị', desc: 'Tài khoản và vai trò, cửa hàng, khu vực, nhập liệu, nhật ký hệ thống' },
           children: [
             { path: '', redirect: { name: 'accounts' } },
             { path: 'tai-khoan', name: 'accounts', component: AccountsPage, meta: { title: 'Tài khoản và vai trò', desc: 'Duyệt đăng ký, tạo tài khoản, gán vai trò, phạm vi và quyền bổ sung' } },
@@ -81,7 +81,7 @@ export const router = createRouter({
             { path: 'danh-muc', name: 'org', component: OrgPage, meta: { title: 'Cửa hàng, khu vực', desc: 'Danh mục cửa hàng, khu vực dùng cho hồ sơ nhân viên và tài khoản' } },
             { path: 'nhap-csv', name: 'import', component: ImportPage, meta: { title: 'Nhập tài khoản', desc: 'Nhập nhiều tài khoản cùng lúc từ tệp CSV' } },
             { path: 'nhat-ky', name: 'audit', component: AuditPage, meta: { title: 'Nhật ký hệ thống', desc: 'Mọi thao tác ghi dữ liệu, theo người thao tác và thời điểm' } },
-            { path: 'he-thong', name: 'admin', component: SystemPage, meta: { title: 'Cấu hình', desc: 'Ai ban hành phiên bản; công cụ demo: ngày giả lập, khôi phục dữ liệu mẫu' } },
+            { path: 'he-thong', name: 'admin', component: SystemPage, meta: { title: 'Công cụ demo', desc: 'Ngày giả lập, chạy job ngay, khôi phục dữ liệu mẫu' } },
           ],
         },
       ],

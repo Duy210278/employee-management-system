@@ -121,7 +121,7 @@ Bản đầu tiên là **bản demo chạy trên một máy tính (localhost)**,
 1. **Vai trò tài khoản** xác định chức năng được dùng: NV, CHT, QLKV, BP Đào tạo.
 2. **Vai trò phân công** xác định quan hệ với một lượt Level cụ thể: Buddy. Một tài khoản NV (ví dụ đang ở L3) có thể vừa làm checklist của chính mình, vừa là Buddy của 3 NV mới.
 3. **Phạm vi dữ liệu** giới hạn dữ liệu được xem: bản thân, các NV được phân công, cửa hàng, khu vực, toàn chuỗi.
-4. **Quyền bổ sung** gắn thêm vào tài khoản bất kỳ: "Có thể làm Buddy", "Người duyệt phiên bản".
+4. **Quyền bổ sung** gắn thêm vào tài khoản bất kỳ: "Có thể làm Buddy".
 5. BP Đào tạo là quản trị viên: quản lý tài khoản, vai trò, phạm vi và quyền bổ sung.
 
 > Điểm khác với giao diện tham chiếu N3: N3 coi Buddy là một vai trò tài khoản riêng. Đặc tả này chuyển Buddy thành vai trò phân công. Lý do: thực tế Buddy là NV Level 3–4 đồng thời đang có checklist của riêng mình (N2, checklist L3 mục "Nhận phân công kèm cặp").
@@ -135,50 +135,49 @@ Bản đầu tiên là **bản demo chạy trên một máy tính (localhost)**,
 | Cửa hàng trưởng (CHT) | Tài khoản | Các cửa hàng được gán (1 hoặc nhiều) | Xanh dương `--r-cht` |
 | QLKV | Tài khoản | Các khu vực được gán, gồm mọi cửa hàng trong khu vực | Vàng hổ phách `--r-qlkv` |
 | BP Đào tạo (Quản trị) | Tài khoản | Toàn chuỗi | Đỏ cam `--r-bp` |
-| Người duyệt phiên bản | Quyền bổ sung | Chỉ màn hình duyệt phiên bản | Dùng màu vai trò gốc |
 
 ### 3.3 Ma trận phân quyền
 
 Ký hiệu: ✔ có quyền, ◐ có quyền trong phạm vi, ✖ không có quyền.
 
-| Chức năng | NV | Buddy | CHT | QLKV | BP ĐT | Người duyệt |
-|---|---|---|---|---|---|---|
-| **Quản trị người dùng** | | | | | | |
-| Xem danh sách tài khoản | ✖ | ✖ | ◐ (cửa hàng) | ◐ (khu vực) | ✔ | ✖ |
-| Duyệt / từ chối đăng ký | ✖ | ✖ | ✖ | ✖ | ✔ | ✖ |
-| Tạo tài khoản, nhập hàng loạt | ✖ | ✖ | ✖ | ✖ | ✔ | ✖ |
-| Phân vai trò, phạm vi, quyền bổ sung | ✖ | ✖ | ✖ | ✖ | ✔ | ✖ |
-| Khóa / mở khóa tài khoản | ✖ | ✖ | ✖ | ✖ | ✔ | ✖ |
-| Quản lý danh mục cửa hàng, khu vực | ✖ | ✖ | ✖ | ✖ | ✔ | ✖ |
-| **Khung năng lực và Checklist** | | | | | | |
-| Xem phiên bản đang hiệu lực | ✔ (phần tổng quan Level của mình) | ✔ | ✔ | ✔ | ✔ | ✔ |
-| Tạo bản nháp, chỉnh sửa | ✖ | ✖ | ✖ | ✖ | ✔ | ✖ |
-| Gửi duyệt, rút về nháp | ✖ | ✖ | ✖ | ✖ | ✔ | ✖ |
-| Duyệt và ban hành, trả về nháp | ✖ | ✖ | ✖ | ✖ | ✔ (nếu được bật cấu hình "BP ĐT tự ban hành") | ✔ |
-| Chạy chuyển phiên bản cho NV đang dở Level | ✖ | ✖ | ✖ | ✖ | ✔ | ✖ |
-| **Hồ sơ nhân viên và lượt Level** | | | | | | |
-| Tạo hồ sơ NV, bắt đầu lượt L1 | ✖ | ✖ | ◐ | ◐ | ✔ | ✖ |
-| Sửa hồ sơ, đổi Buddy / CHT / QLKV | ✖ | ✖ | ◐ | ◐ | ✔ | ✖ |
-| Tạm dừng lượt Level | ✖ | ✖ | ◐ (đề xuất) | ◐ (duyệt) | ✔ | ✖ |
-| Ngừng theo dõi (nghỉ việc) | ✖ | ✖ | ◐ | ◐ | ✔ | ✖ |
-| **Thực hiện checklist** | | | | | | |
-| Đọc tổng quan Level và xác nhận đã đọc | ✔ (của mình) | ◐ (thay NV chưa có tài khoản) | ◐ (thay NV chưa có tài khoản) | ✖ | ✖ | ✖ |
-| Báo hoàn thành phần NV | ✔ (của mình) | ◐ (thay NV chưa có tài khoản) | ◐ (thay NV chưa có tài khoản) | ✖ | ✖ | ✖ |
-| Xác nhận đạt với vai trò Buddy | ✖ | ◐ | ◐ (thay Buddy) | ✖ | ✖ | ✖ |
-| Xác nhận đạt với vai trò CHT / QLKV / BP ĐT | ✖ | ✖ | ◐ (CHT) | ◐ (QLKV) | ✔ (BP ĐT) | ✖ |
-| Yêu cầu làm lại | ✖ | ✖ | ◐ | ◐ | ✔ | ✖ |
-| Đánh dấu Bỏ qua / N-A | ✖ | ✖ | ◐ | ◐ | ✔ | ✖ |
-| Duyệt / ký cuối giai đoạn | Theo chuỗi ký cấu hình trong checklist | | | | | |
-| **Đánh giá** | | | | | | |
-| Nhập doanh số tháng | ✖ | ✖ | ◐ | ◐ | ✔ | ✖ |
-| Ghi ca quan sát Rubric | ✖ | ◐ | ◐ | ◐ | ✖ | ✖ |
-| Làm phiếu Buddy Performance Score | ✔ (đánh giá Buddy của mình) | ✖ | ✖ | ✖ | ✖ | ✖ |
-| Điền phiếu đánh giá tổng kết | ✖ | ◐ (L1) | ◐ | ✖ | ✔ | ✖ |
-| Ký phiếu đánh giá | Theo chuỗi ký cấu hình trong phiếu | | | | | |
-| **Báo cáo** | | | | | | |
-| Xem danh sách nhân sự, cảnh báo | ✖ | ◐ | ◐ | ◐ | ✔ | ✖ |
-| Xuất CSV | ✖ | ✖ | ◐ | ◐ | ✔ | ✖ |
-| Xem nhật ký hệ thống | ✖ | ✖ | ✖ | ✖ | ✔ | ✖ |
+| Chức năng | NV | Buddy | CHT | QLKV | BP ĐT |
+|---|---|---|---|---|---|
+| **Quản trị người dùng** | | | | | |
+| Xem danh sách tài khoản | ✖ | ✖ | ◐ (cửa hàng) | ◐ (khu vực) | ✔ |
+| Duyệt / từ chối đăng ký | ✖ | ✖ | ✖ | ✖ | ✔ |
+| Tạo tài khoản, nhập hàng loạt | ✖ | ✖ | ✖ | ✖ | ✔ |
+| Phân vai trò, phạm vi, quyền bổ sung | ✖ | ✖ | ✖ | ✖ | ✔ |
+| Khóa / mở khóa tài khoản | ✖ | ✖ | ✖ | ✖ | ✔ |
+| Quản lý danh mục cửa hàng, khu vực | ✖ | ✖ | ✖ | ✖ | ✔ |
+| **Khung năng lực và Checklist** | | | | | |
+| Xem phiên bản đang hiệu lực | ✔ (phần tổng quan Level của mình) | ✔ | ✔ | ✔ | ✔ |
+| Tạo bản nháp, chỉnh sửa | ✖ | ✖ | ✖ | ✖ | ✔ |
+| Gửi duyệt, rút về nháp | ✖ | ✖ | ✖ | ✖ | ✔ |
+| Duyệt và ban hành, đổi ngày hiệu lực | ✖ | ✖ | ✖ | ✖ | ✔ |
+| Chạy chuyển phiên bản cho NV đang dở Level | ✖ | ✖ | ✖ | ✖ | ✔ |
+| **Hồ sơ nhân viên và lượt Level** | | | | | |
+| Tạo hồ sơ NV, bắt đầu lượt L1 | ✖ | ✖ | ◐ | ◐ | ✔ |
+| Sửa hồ sơ, đổi Buddy / CHT / QLKV | ✖ | ✖ | ◐ | ◐ | ✔ |
+| Tạm dừng lượt Level | ✖ | ✖ | ◐ (đề xuất) | ◐ (duyệt) | ✔ |
+| Ngừng theo dõi (nghỉ việc) | ✖ | ✖ | ◐ | ◐ | ✔ |
+| **Thực hiện checklist** | | | | | |
+| Đọc tổng quan Level và xác nhận đã đọc | ✔ (của mình) | ◐ (thay NV chưa có tài khoản) | ◐ (thay NV chưa có tài khoản) | ✖ | ✖ |
+| Báo hoàn thành phần NV | ✔ (của mình) | ◐ (thay NV chưa có tài khoản) | ◐ (thay NV chưa có tài khoản) | ✖ | ✖ |
+| Xác nhận đạt với vai trò Buddy | ✖ | ◐ | ◐ (thay Buddy) | ✖ | ✖ |
+| Xác nhận đạt với vai trò CHT / QLKV / BP ĐT | ✖ | ✖ | ◐ (CHT) | ◐ (QLKV) | ✔ (BP ĐT) |
+| Yêu cầu làm lại | ✖ | ✖ | ◐ | ◐ | ✔ |
+| Đánh dấu Bỏ qua / N-A | ✖ | ✖ | ◐ | ◐ | ✔ |
+| Duyệt / ký cuối giai đoạn | Theo chuỗi ký cấu hình trong checklist | | | | |
+| **Đánh giá** | | | | | |
+| Nhập doanh số tháng | ✖ | ✖ | ◐ | ◐ | ✔ |
+| Ghi ca quan sát Rubric | ✖ | ◐ | ◐ | ◐ | ✖ |
+| Làm phiếu Buddy Performance Score | ✔ (đánh giá Buddy của mình) | ✖ | ✖ | ✖ | ✖ |
+| Điền phiếu đánh giá tổng kết | ✖ | ◐ (L1) | ◐ | ✖ | ✔ |
+| Ký phiếu đánh giá | Theo chuỗi ký cấu hình trong phiếu | | | | |
+| **Báo cáo** | | | | | |
+| Xem danh sách nhân sự, cảnh báo | ✖ | ◐ | ◐ | ◐ | ✔ |
+| Xuất CSV | ✖ | ✖ | ◐ | ◐ | ✔ |
+| Xem nhật ký hệ thống | ✖ | ✖ | ✖ | ✖ | ✔ |
 
 Quy tắc thay thế xác nhận (giữ như N3):
 
@@ -205,7 +204,6 @@ Quy tắc thay thế xác nhận (giữ như N3):
 | CHT | Việc cần xử lý (badge) · Nhân sự · Cảnh báo (badge) · Khung năng lực |
 | QLKV | Việc cần xử lý (badge) · Nhân sự · Cảnh báo (badge) · Khung năng lực |
 | BP Đào tạo | Việc cần xử lý · Nhân sự · Cảnh báo · Khung năng lực · **Thiết kế lộ trình** · **Quản trị** |
-| Người duyệt phiên bản | Thêm tab "Duyệt phiên bản" (badge số bản chờ duyệt) |
 
 ### 4.3 Sơ đồ trang
 
@@ -236,7 +234,6 @@ Quy tắc thay thế xác nhận (giữ như N3):
      │   ├─ Thiết lập chung (Level, trạng thái, tham số lịch, cảnh báo)
      │   ├─ Xem trước (giao diện điện thoại)
      │   └─ Chuyển phiên bản cho NV đang dở Level
-     ├─ Duyệt phiên bản (Người duyệt)
      └─ Quản trị (BP ĐT)
          ├─ Tài khoản và vai trò
          ├─ Hàng chờ duyệt đăng ký
@@ -273,7 +270,7 @@ Cột của bảng:
 | Họ tên | Tên + mã NV ở dòng phụ |
 | Vai trò | Nhãn màu theo vai trò |
 | Phạm vi | Cửa hàng hoặc khu vực được gán |
-| Quyền bổ sung | Nhãn "Buddy", "Duyệt phiên bản" |
+| Quyền bổ sung | Nhãn "Buddy" |
 | Hồ sơ NV | Liên kết tới hồ sơ NV nếu là NV |
 | Trạng thái | Chờ duyệt / Hoạt động / Tạm khóa / Đã nghỉ |
 | Lần vào cuối | Ngày giờ |
@@ -289,7 +286,6 @@ Hàng chờ duyệt hiển thị thành thẻ cảnh báo ở đầu trang: "3 t
 | Vai trò | Vai trò tài khoản (1 giá trị) | NV / CHT / QLKV / BP ĐT |
 | Phạm vi | Cửa hàng (nhiều), Khu vực (nhiều) | CHT bắt buộc ≥ 1 cửa hàng; QLKV bắt buộc ≥ 1 khu vực |
 | Quyền bổ sung | Có thể làm Buddy | Bật thủ công, hoặc tự gợi ý khi NV đạt L3 |
-| | Người duyệt phiên bản | Thường cấp cho QLKV hoặc BGĐ |
 | Liên kết | Hồ sơ nhân viên | Chỉ với vai trò NV; một tài khoản gắn tối đa một hồ sơ |
 | Trạng thái | Hoạt động / Tạm khóa / Đã nghỉ | |
 | Lịch sử | Mọi thay đổi vai trò, phạm vi, quyền, trạng thái | Ai đổi, lúc nào, giá trị cũ và mới |
@@ -480,7 +476,7 @@ Mô phỏng màn hình điện thoại của NV và của Buddy/CHT cho Level đ
 | CK-13 | Lưu ý | Phiếu cho phép gia hạn nhưng chưa có thời gian / số lần tối đa |
 | CK-14 | Lưu ý | Ngưỡng LMS không thống nhất giữa các phiếu |
 | CK-15 | Lỗi | Vai trò được dùng nhưng không có trong danh sách vai trò |
-| CK-18 | Lưu ý | Đầu việc NV tự xác nhận, không có người kiểm tra (để người duyệt thấy rõ) |
+| CK-18 | Lưu ý | Đầu việc NV tự xác nhận, không có người kiểm tra (để BP ĐT thấy rõ trước khi ban hành) |
 
 Các quy tắc CK-04, CK-06, CK-09, CK-10 đã bắt được lỗi thật trong N2 (xem mục 16).
 
@@ -497,17 +493,17 @@ Khung năng lực, Checklist và Phiếu đánh giá được phát hành chung 
 ```
  Nháp ──Gửi duyệt──▶ Chờ duyệt ──Duyệt và ban hành──▶ Đang hiệu lực ──(bản mới ban hành)──▶ Hết hiệu lực
    ▲                    │
-   └────Rút về / Trả về─┘
+   └──────Rút về────────┘
 ```
 
 | Trạng thái | Ai thao tác | Sửa nội dung |
 |---|---|---|
 | Nháp | BP ĐT | Được |
-| Chờ duyệt | Người duyệt: duyệt hoặc trả về; BP ĐT: rút về | Không |
+| Chờ duyệt | BP ĐT: duyệt và ban hành, hoặc rút về nháp để sửa | Không |
 | Đang hiệu lực | Chỉ xem; tạo bản nháp mới từ bản này | Không |
 | Hết hiệu lực | Chỉ xem; có thể tạo bản nháp từ bản này | Không |
 
-Khi duyệt: bắt buộc nhập **ngày hiệu lực** (được phép ở tương lai) và người duyệt. Bản đang hiệu lực trước đó tự chuyển "Hết hiệu lực" với ngày kết thúc = ngày hiệu lực mới − 1. Hệ thống chặn ban hành khi còn lỗi kiểm tra.
+BP Đào tạo vừa soạn vừa duyệt và ban hành; không có người duyệt riêng. "Gửi duyệt" chốt nội dung và chạy kiểm tra, sau đó BP ĐT duyệt và ban hành. Khi duyệt: bắt buộc nhập **ngày hiệu lực** (được phép ở tương lai); hệ thống ghi người duyệt. Bản đang hiệu lực trước đó tự chuyển "Hết hiệu lực" với ngày kết thúc = ngày hiệu lực mới − 1. Hệ thống chặn ban hành khi còn lỗi kiểm tra.
 
 ### 8.3 Đánh số và phân loại thay đổi
 
@@ -666,7 +662,6 @@ Hàng đợi "Việc cần xử lý" của một người gồm mọi đầu vi�
 | Yêu cầu làm lại | NV | Ngay lập tức |
 | Quá hạn > escalateDays | QLKV | Bản tin sáng |
 | Có phiếu chờ ký | Người ký kế tiếp | Ngay lập tức |
-| Bản nháp chờ duyệt | Người duyệt phiên bản | Ngay lập tức |
 | Đăng ký tài khoản mới | BP ĐT | Ngay lập tức |
 
 Job hằng ngày lúc 06:00 chạy trong backend (mục 14.11), có khóa chống trùng khi chạy lại. Bản demo chỉ gửi thông báo trong ứng dụng; nếu bật Mailpit thì xem được email bản tin.
@@ -786,7 +781,7 @@ PostgreSQL 16, quản lý migration bằng Drizzle (mục 14.2). Tên bảng và
 |---|---|
 | `areas` | id, code, name, active |
 | `stores` | id, code, name, address, area_id, active |
-| `users` | id, auth_id, employee_code, full_name, email, phone, role (`nv`/`cht`/`qlkv`/`bp`), status (`pending`/`active`/`locked`/`left`/`rejected`), can_buddy, can_approve_versions, last_seen_at, created_at |
+| `users` | id, auth_id, employee_code, full_name, email, phone, role (`nv`/`cht`/`qlkv`/`bp`), status (`pending`/`active`/`locked`/`left`/`rejected`), can_buddy, last_seen_at, created_at |
 | `user_store_scopes` | user_id, store_id |
 | `user_area_scopes` | user_id, area_id |
 | `user_changes` | id, user_id, changed_by, field, old_value, new_value, at |
@@ -1116,7 +1111,7 @@ Mật khẩu chung cho mọi tài khoản mẫu: `Demo@123`.
 | Tài khoản | Vai trò | Tình huống mẫu |
 |---|---|---|
 | `admin@upharma.local` | BP Đào tạo (quản trị) | Quản trị, soạn phiên bản |
-| `huy@upharma.local` | QLKV khu vực Hà Nội 1, có quyền Người duyệt phiên bản | Duyệt phiên bản, nhận cảnh báo leo thang |
+| `huy@upharma.local` | QLKV khu vực Hà Nội 1 | Duyệt đề xuất tạm dừng, nhận cảnh báo leo thang |
 | `ha@upharma.local` | CHT Nhà thuốc A | |
 | `binh@upharma.local` | CHT Nhà thuốc B | |
 | `hung@upharma.local` | NV Level 3 (bắt đầu L3 cách đây 229 ngày), có thể làm Buddy | Vừa làm checklist L3, vừa là Buddy của Lan, Tuấn, Mai |
@@ -1134,7 +1129,7 @@ Kèm theo: bộ lộ trình **v2.1 đang hiệu lực** (nạp từ N3, N4, N5 t
 
 1. **BP ĐT** đăng nhập: vào Quản trị, duyệt tài khoản đang chờ, gán vai trò và cửa hàng.
 2. **BP ĐT** vào Thiết kế lộ trình: mở v2.1 xem kết quả kiểm tra; mở bản nháp v2.2 xem dải tác động "có thay đổi tiêu chí"; gửi duyệt.
-3. **QLKV (Người duyệt)**: duyệt và ban hành v2.2 với ngày hiệu lực là ngày mai.
+3. **BP ĐT**: duyệt và ban hành v2.2 với ngày hiệu lực là ngày mai.
 4. **BP ĐT**: thêm một NV mới bắt đầu Level 1 ngày mai, rồi tua ngày +1. NV mới được gắn v2.2; việc tuần 1 mở; Buddy Hùng thấy việc của NV mới trong hàng đợi.
 5. **NV Lan** (bật chế độ điện thoại trong DevTools): báo hoàn thành một mục. **Buddy Hùng** xác nhận. **CHT Hà** yêu cầu làm lại một mục khác kèm lý do.
 6. Tua ngày +7: xuất hiện mục quá hạn; chạy bản tin sáng; **QLKV** thấy cảnh báo leo thang.
@@ -1379,7 +1374,7 @@ Các điểm dưới đây là mâu thuẫn giữa N1, N2 và N3. Đội phát t
 | V17 | Tuần theo ngày lịch hay theo ca thực tế | | Tuần 1 = Ca 1–6 | Theo ngày | Theo ngày; số ca chỉ để tham khảo |
 | V18 | Ngày lễ, Tết | | | | Không tự dời; dùng tạm dừng. Giai đoạn 2 xem xét lịch ngày nghỉ |
 | V19 | Hệ thống "web member" | | Checklist L3 nhắc đăng ký, xác nhận trên web member | | Cần xác nhận có tích hợp hay thay thế |
-| V20 | Ai được ban hành phiên bản | | | | Người có quyền "Người duyệt phiên bản"; cho phép cấu hình để BP ĐT tự ban hành |
+| V20 | Ai được ban hành phiên bản | | | | BP Đào tạo soạn, duyệt và ban hành; bỏ quyền "Người duyệt phiên bản" và công tắc cấu hình |
 
 ---
 

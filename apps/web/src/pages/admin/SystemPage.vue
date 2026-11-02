@@ -2,27 +2,18 @@
 import { addDays, ROLE_LABEL, type JobName, type JobResult } from '@lotrinh/shared';
 import { useQueryClient } from '@tanstack/vue-query';
 import { computed, ref } from 'vue';
-import { demoApi, sessionApi, useDemoAccounts, useMe, useMutate, usePublishing, versionApi } from '@/api/queries';
+import { demoApi, sessionApi, useDemoAccounts, useMe, useMutate } from '@/api/queries';
 import { useToast } from '@/composables/toast';
 import { diffDays, fmtDate } from '@/format';
 
-/** Cấu hình hệ thống (V20) và Công cụ demo (mục 14.7): ngày giả lập, chạy job ngay, khôi phục dữ liệu mẫu */
+/** Công cụ demo (mục 14.7): ngày giả lập, chạy job ngay, khôi phục dữ liệu mẫu */
 const { data: me } = useMe();
 const qc = useQueryClient();
 const toast = useToast();
 const mutate = useMutate();
 const { data: accounts } = useDemoAccounts(computed(() => !!me.value?.demoMode));
-const { data: publishing } = usePublishing(computed(() => me.value?.user.role === 'bp'));
 const armed = ref(false);
 const busy = ref(false);
-
-function setSelfPublish(e: Event) {
-  const on = (e.target as HTMLInputElement).checked;
-  void mutate(
-    () => versionApi.setPublishing({ bpSelfPublish: on }),
-    on ? 'BP Đào tạo tự duyệt và ban hành phiên bản' : 'Phiên bản cần người có quyền duyệt',
-  );
-}
 
 const JOBS: [JobName, string][] = [
   ['daily-digest', 'Bản tin sáng'],
@@ -67,21 +58,8 @@ async function reset() {
 <template>
   <div class="stack">
     <template v-if="me">
-      <div class="sec">Phiên bản Bộ lộ trình</div>
-      <div class="card pad stack">
-        <div class="h2">Ai ban hành Khung năng lực và checklist</div>
-        <label class="p cb">
-          <input type="checkbox" :checked="publishing?.bpSelfPublish ?? false" :disabled="!publishing" @change="setSelfPublish" />
-          BP Đào tạo tự duyệt và ban hành phiên bản
-        </label>
-        <div class="sm mut">
-          Tắt (mặc định): BP Đào tạo soạn và gửi duyệt; người được cấp quyền "Duyệt phiên bản" duyệt và ban hành. Bật: BP Đào tạo quản lý trọn vòng đời, tự
-          duyệt bản nháp của mình. Dù bật hay tắt, chỉ BP Đào tạo sửa được nội dung; người duyệt chỉ duyệt hoặc trả về.
-        </div>
-      </div>
-
-      <template v-if="me.demoMode && clock">
-        <div class="sec">Công cụ demo</div>
+      <div v-if="!me.demoMode" class="card empty">Công cụ demo chỉ có ở bản demo (DEMO_MODE).</div>
+      <template v-else-if="clock">
         <div class="grid g2">
           <div class="card pad stack">
             <div class="h2">Ngày giả lập</div>

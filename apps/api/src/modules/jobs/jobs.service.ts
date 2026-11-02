@@ -205,14 +205,14 @@ export class JobsService implements OnApplicationBootstrap, OnModuleDestroy {
 
   /**
    * Phiên bản có hiệu lực từ hôm nay. Trạng thái "Đang hiệu lực / Hết hiệu lực" tính theo ngày hiệu lực khi đọc,
-   * nên job chỉ báo cho BP ĐT và người duyệt.
+   * nên job chỉ báo cho BP ĐT.
    */
   private async versionActivate(today: IsoDate, done: (n: number, m: string) => JobResult): Promise<JobResult> {
     const rows = await this.db
       .select({ id: versions.id, code: versions.code })
       .from(versions)
       .where(and(PUBLISHED, eq(versions.effectiveFrom, today)));
-    const recipients = [...new Set([...(await this.notifications.activeIds({ role: 'bp' })), ...(await this.notifications.activeIds({ canApproveVersions: true }))])];
+    const recipients = await this.notifications.activeIds({ role: 'bp' });
     let created = 0;
     for (const v of rows) {
       created += await this.notifications.notify(recipients, {

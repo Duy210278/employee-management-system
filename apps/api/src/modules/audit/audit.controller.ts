@@ -44,6 +44,7 @@ const LABELS: [RegExp, string][] = [
   [/^POST \/versions\/:id\/submit$/, 'Gửi duyệt phiên bản'],
   [/^POST \/versions\/:id\/withdraw$/, 'Rút phiên bản về nháp'],
   [/^POST \/versions\/:id\/approve$/, 'Duyệt và ban hành phiên bản'],
+  // reject và settings/publishing đã bỏ, giữ nhãn để đọc nhật ký cũ
   [/^POST \/versions\/:id\/reject$/, 'Trả phiên bản về nháp'],
   [/^PUT \/versions\/:id\/effective$/, 'Đổi ngày hiệu lực phiên bản'],
   [/^DELETE \/versions\/:id$/, 'Xóa bản nháp'],

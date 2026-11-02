@@ -81,7 +81,6 @@ export const SubmitBody = z.object({ changeNote: z.string().trim().max(2000).opt
 export const ApproveBody = z.object({ effectiveFrom: isoDate });
 /** Đổi ngày hiệu lực của bản đã duyệt nhưng chưa tới ngày */
 export const RescheduleBody = ApproveBody;
-export const ReturnBody = z.object({ note: z.string().trim().min(1, 'Nhập lý do trả về để BP Đào tạo biết cần sửa gì').max(2000) });
 
 /**
  * Doanh số tháng, triệu đồng. Chỉ gửi ô vừa sửa (ô không gửi giữ nguyên) để hai lần lưu liên tiếp không ghi đè nhau;
@@ -147,7 +146,6 @@ const scopeFields = {
   storeIds: z.array(id).default([]),
   areaIds: z.array(id).default([]),
   canBuddy: z.boolean().default(false),
-  canApproveVersions: z.boolean().default(false),
 };
 
 /** Mục 5.3: CHT bắt buộc ≥ 1 cửa hàng; QLKV bắt buộc ≥ 1 khu vực */
@@ -267,7 +265,6 @@ export type DeleteStaffBodyT = z.infer<typeof DeleteStaffBody>;
 export type SalesBodyT = z.infer<typeof SalesBody>;
 export type ObservationBodyT = z.infer<typeof ObservationBody>;
 export type SaveReviewBodyT = z.infer<typeof SaveReviewBody>;
-export const PublishingBody = z.object({ bpSelfPublish: z.boolean() });
 export type SaveDraftBodyT = z.infer<typeof SaveDraftBody>;
 export type ApproveBodyT = z.infer<typeof ApproveBody>;
 export type LoginBodyT = z.infer<typeof LoginBody>;

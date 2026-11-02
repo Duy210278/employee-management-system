@@ -28,7 +28,6 @@ const bodyFrom = (d: UserDetailResponse, patch: Partial<UpdateUserBodyT> = {}): 
   storeIds: d.user.stores.map((s) => s.id),
   areaIds: d.user.areas.map((a) => a.id),
   canBuddy: d.user.canBuddy,
-  canApproveVersions: d.user.canApproveVersions,
   status: d.user.status as 'active',
   rowVersion: d.user.rowVersion,
   handover: [],

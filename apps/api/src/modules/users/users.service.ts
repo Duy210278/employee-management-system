@@ -46,6 +46,7 @@ const FIELD_LABEL: Record<string, string> = {
   role: 'Vai trò',
   status: 'Trạng thái',
   canBuddy: 'Có thể làm Buddy',
+  // Quyền cũ đã bỏ, giữ nhãn để đọc lịch sử thay đổi
   canApproveVersions: 'Người duyệt phiên bản',
   stores: 'Cửa hàng phụ trách',
   areas: 'Khu vực phụ trách',
@@ -119,7 +120,6 @@ export class UsersService {
       role: u.role,
       status: u.status,
       canBuddy: u.canBuddy,
-      canApproveVersions: u.canApproveVersions,
       stores: storeScopes.filter((s) => s.userId === u.id).map(({ id, name }) => ({ id, name })),
       areas: areaScopes.filter((a) => a.userId === u.id).map(({ id, name }) => ({ id, name })),
       staffId,
@@ -226,7 +226,6 @@ export class UsersService {
           role: body.role,
           status: 'active',
           canBuddy: body.canBuddy,
-          canApproveVersions: body.canApproveVersions,
           reviewedBy: user.id,
           reviewedAt: now,
           reviewNote: null,
@@ -309,7 +308,6 @@ export class UsersService {
           role: body.role,
           status: body.status,
           canBuddy: body.canBuddy,
-          canApproveVersions: body.canApproveVersions,
           rowVersion: sql`${users.rowVersion} + 1`,
         })
         .where(eq(users.id, id));
@@ -322,7 +320,6 @@ export class UsersService {
         ['role', ROLE_LABEL[row.role], ROLE_LABEL[body.role]],
         ['status', USER_STATUS_LABEL[row.status], USER_STATUS_LABEL[body.status]],
         ['canBuddy', yesNo(row.canBuddy), yesNo(body.canBuddy)],
-        ['canApproveVersions', yesNo(row.canApproveVersions), yesNo(body.canApproveVersions)],
         ['stores', old.stores || null, names.stores || null],
         ['areas', old.areas || null, names.areas || null],
       ];
@@ -362,7 +359,6 @@ export class UsersService {
           role: body.role,
           status: 'active',
           canBuddy: body.canBuddy,
-          canApproveVersions: body.canApproveVersions,
           reviewedBy: user.id,
           reviewedAt: now,
         })

@@ -56,23 +56,13 @@ describe('chỉ BP Đào tạo sửa Khung năng lực', () => {
   });
 });
 
-describe('BP Đào tạo tự ban hành (V20)', () => {
-  it('chỉ BP ĐT xem và đổi được cấu hình', async () => {
-    const ha = await as('ha');
-    await ha.get(`${API}/settings/publishing`).expect(403);
-    await ha.put(`${API}/settings/publishing`).send({ bpSelfPublish: true }).expect(403);
-    expect((await admin.get(`${API}/settings/publishing`).expect(200)).body).toEqual({ bpSelfPublish: false });
-  });
-
-  it('tắt: BP ĐT không tự duyệt được; bật: BP ĐT tự duyệt và ban hành', async () => {
+describe('BP Đào tạo duyệt và ban hành, không còn người duyệt riêng', () => {
+  it('BP ĐT gửi duyệt rồi tự duyệt và ban hành; cấu hình V20 đã bỏ', async () => {
+    await admin.get(`${API}/settings/publishing`).expect(404);
     await admin.post(`${API}/versions/${draftId}/submit`).send({}).expect(200);
-    await admin.post(`${API}/versions/${draftId}/approve`).send({ effectiveFrom: harness.today }).expect(403);
-
-    await admin.put(`${API}/settings/publishing`).send({ bpSelfPublish: true }).expect(200);
-    const list = (await (await as('admin')).get(`${API}/versions`).expect(200)).body as VersionListResponse;
+    const list = (await admin.get(`${API}/versions`).expect(200)).body as VersionListResponse;
     expect(list.canApprove).toBe(true);
     const approved = (await admin.post(`${API}/versions/${draftId}/approve`).send({ effectiveFrom: harness.today }).expect(200)).body as VersionDetailResponse;
     expect(approved.version).toMatchObject({ code: '2.2', state: 'current', approvedByName: 'Ngô Quốc Bảo' });
-    await admin.put(`${API}/settings/publishing`).send({ bpSelfPublish: false }).expect(200);
   });
 });

@@ -43,6 +43,13 @@
       "when": 1792396775079,
       "tag": "0005_cht_onboarding",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1793610361615,
+      "tag": "0006_drop_version_approver",
+      "breakpoints": true
     }
   ]
 }

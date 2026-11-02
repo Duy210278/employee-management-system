@@ -46,7 +46,6 @@ function quickApprove(u: UserListItem) {
     storeIds: r?.role === 'cht' && r.storeId ? [r.storeId] : [],
     areaIds: r?.role === 'qlkv' && r.areaId ? [r.areaId] : [],
     canBuddy: false,
-    canApproveVersions: false,
   };
   void mutate(() => userApi.approve(u.id, body), `Đã duyệt ${u.fullName} (${ROLE_LABEL[body.role]})`);
 }
@@ -62,7 +61,7 @@ async function reject(u: UserListItem) {
 // Tạo tài khoản trực tiếp (BP ĐT): tài khoản hoạt động ngay
 const creating = ref(false);
 const form = reactive({ fullName: '', employeeCode: '', email: '', phone: '', password: 'Upharma@123' });
-const scope = ref({ role: 'nv' as AccountRole, storeIds: [] as number[], areaIds: [] as number[], canBuddy: false, canApproveVersions: false });
+const scope = ref({ role: 'nv' as AccountRole, storeIds: [] as number[], areaIds: [] as number[], canBuddy: false });
 async function create() {
   const parsed = CreateUserBody.safeParse({ ...form, employeeCode: form.employeeCode || null, ...scope.value });
   if (!parsed.success) return toast.show(parsed.error.issues[0]?.message ?? 'Kiểm tra lại thông tin');
@@ -161,7 +160,6 @@ async function create() {
             <td data-l="Quyền bổ sung">
               <div class="rowf tight">
                 <span v-if="u.canBuddy" class="pill">Buddy</span>
-                <span v-if="u.canApproveVersions" class="pill info">Duyệt phiên bản</span>
               </div>
             </td>
             <td data-l="Hồ sơ NV">

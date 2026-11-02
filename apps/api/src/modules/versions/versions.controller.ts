@@ -3,7 +3,6 @@ import {
   ApproveBody,
   CreateDraftBody,
   RescheduleBody,
-  ReturnBody,
   SaveDraftBody,
   SubmitBody,
   type ApproveBodyT,
@@ -50,12 +49,6 @@ export class VersionsController {
   @HttpCode(200)
   withdraw(@Param('id', ParseIntPipe) id: number, @CurrentUser() user: SessionUser) {
     return this.versions.withdraw(user, id);
-  }
-
-  @Post(':id/reject')
-  @HttpCode(200)
-  reject(@Param('id', ParseIntPipe) id: number, @Body(new ZodPipe(ReturnBody)) body: { note: string }, @CurrentUser() user: SessionUser) {
-    return this.versions.reject(user, id, body.note);
   }
 
   @Post(':id/approve')

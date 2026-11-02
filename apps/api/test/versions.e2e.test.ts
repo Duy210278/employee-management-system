@@ -14,7 +14,6 @@ import { API, setupApp, todayOf, type Agent, type TestApp } from './helpers';
 
 let harness: TestApp;
 let admin: Agent;
-let huy: Agent;
 const as = (key: string) => harness.as(key);
 const list = async (agent: Agent) => (await agent.get(`${API}/versions`).expect(200)).body as VersionListResponse;
 const detail = async (agent: Agent, id: number) => (await agent.get(`${API}/versions/${id}`).expect(200)).body as VersionDetailResponse;
@@ -41,19 +40,19 @@ async function pgError(run: () => Promise<unknown>): Promise<string> {
 
 beforeAll(async () => {
   harness = await setupApp();
-  [admin, huy] = await Promise.all([as('admin'), as('huy')]);
+  admin = await as('admin');
 });
 afterAll(() => harness.close());
 
 describe('quyền và danh sách phiên bản', () => {
-  it('BP ĐT soạn được, không tự duyệt; QLKV có quyền "Người duyệt phiên bản" duyệt được; CHT, NV không xem được', async () => {
+  it('BP ĐT soạn và duyệt được; QLKV, CHT, NV không xem được', async () => {
     const forAdmin = await list(admin);
-    expect(forAdmin).toMatchObject({ canEdit: true, canApprove: false });
+    expect(forAdmin).toMatchObject({ canEdit: true, canApprove: true });
     expect(forAdmin.items.map((i) => [i.code, i.state])).toEqual([
       [null, 'draft'],
       ['2.1', 'current'],
     ]);
-    expect(await list(huy)).toMatchObject({ canEdit: false, canApprove: true });
+    await (await as('huy')).get(`${API}/versions`).expect(403);
     await (await as('ha')).get(`${API}/versions`).expect(403);
     await (await as('lan')).get(`${API}/versions`).expect(403);
   });
@@ -94,14 +93,14 @@ describe('sửa diễn đạt (T-V01)', () => {
     expect(res.body.code).toBe('STALE');
   });
 
-  it('gửi duyệt → không sửa được nữa; BP ĐT không duyệt được; người duyệt ban hành → số 2.1.1, NV đang chạy thấy câu mới ngay', async () => {
+  it('gửi duyệt → không sửa được nữa; QLKV không duyệt được; BP ĐT ban hành → số 2.1.1, NV đang chạy thấy câu mới ngay', async () => {
     const submitted = (await admin.post(`${API}/versions/${draftId}/submit`).send({ changeNote: 'Làm rõ hướng dẫn L1-4-6' }).expect(200)).body;
     expect(submitted.version).toMatchObject({ state: 'pending', changeKind: 'text' });
     await save(draftId, (c) => (itemIn(c, 'L1-4-6').guidance = 'sửa lén'), 'x', 409);
-    await admin.post(`${API}/versions/${draftId}/approve`).send({ effectiveFrom: harness.today }).expect(403);
+    await (await as('huy')).post(`${API}/versions/${draftId}/approve`).send({ effectiveFrom: harness.today }).expect(403);
 
-    const approved = (await huy.post(`${API}/versions/${draftId}/approve`).send({ effectiveFrom: harness.today }).expect(200)).body;
-    expect(approved.version).toMatchObject({ code: '2.1.1', criteriaLine: '2.1', state: 'current', approvedByName: 'Ngô Quang Huy' });
+    const approved = (await admin.post(`${API}/versions/${draftId}/approve`).send({ effectiveFrom: harness.today }).expect(200)).body;
+    expect(approved.version).toMatchObject({ code: '2.1.1', criteriaLine: '2.1', state: 'current', approvedByName: 'Ngô Quốc Bảo' });
 
     const lan = await todayOf(await as('lan'));
     expect(lan.tasks.find((t) => t.itemKey === 'L1-4-6')!.guidance).toBe('CHT lấy báo cáo POS ngày 5 hằng tháng.');
@@ -113,21 +112,21 @@ describe('thay đổi tiêu chí (T-V02, T-V04)', () => {
   let draftId: number;
   const tomorrow = () => addDays(harness.today, 1);
 
-  it('đổi hạn một mục → loại "tiêu chí"; người duyệt trả về kèm lý do; BP sửa và gửi lại', async () => {
+  it('đổi hạn một mục → loại "tiêu chí"; BP ĐT rút về nháp, sửa ghi chú rồi gửi lại', async () => {
     const current = (await list(admin)).items.find((i) => i.state === 'current')!;
     draftId = (await admin.post(`${API}/versions`).send({ fromId: current.id }).expect(201)).body.id;
     await save(draftId, (c) => (itemIn(c, 'L1-1-1').dueOffset = 2), 'Lùi hạn nhận việc');
     await admin.post(`${API}/versions/${draftId}/submit`).send({}).expect(200);
-    await huy.post(`${API}/versions/${draftId}/reject`).send({ note: '' }).expect(400);
-    const returned = (await huy.post(`${API}/versions/${draftId}/reject`).send({ note: 'Ghi rõ lý do lùi hạn' }).expect(200)).body;
-    expect(returned.version).toMatchObject({ state: 'draft', reviewNote: 'Ghi rõ lý do lùi hạn' });
+    const returned = (await admin.post(`${API}/versions/${draftId}/withdraw`).expect(200)).body;
+    expect(returned.version).toMatchObject({ state: 'draft' });
+    await admin.post(`${API}/versions/${draftId}/reject`).send({ note: 'x' }).expect(404);
     const again = (await admin.post(`${API}/versions/${draftId}/submit`).send({ changeNote: 'Lùi hạn nhận việc vì ca đầu là ca chiều' }).expect(200)).body;
     expect(again.version).toMatchObject({ state: 'pending', changeKind: 'criteria' });
   });
 
   it('ngày hiệu lực ở quá khứ bị chặn; duyệt hiệu lực từ ngày mai → số 2.2, bản cũ hết hiệu lực hôm nay', async () => {
-    await huy.post(`${API}/versions/${draftId}/approve`).send({ effectiveFrom: addDays(harness.today, -1) }).expect(400);
-    const approved = (await huy.post(`${API}/versions/${draftId}/approve`).send({ effectiveFrom: tomorrow() }).expect(200)).body as VersionDetailResponse;
+    await admin.post(`${API}/versions/${draftId}/approve`).send({ effectiveFrom: addDays(harness.today, -1) }).expect(400);
+    const approved = (await admin.post(`${API}/versions/${draftId}/approve`).send({ effectiveFrom: tomorrow() }).expect(200)).body as VersionDetailResponse;
     expect(approved.version).toMatchObject({ code: '2.2', criteriaLine: '2.2', state: 'scheduled', effectiveFrom: tomorrow() });
     const items = (await list(admin)).items;
     expect(items.find((i) => i.code === '2.1.1')).toMatchObject({ state: 'current', effectiveTo: harness.today });

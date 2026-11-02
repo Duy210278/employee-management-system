@@ -115,7 +115,7 @@ export class VersionLifecycleService {
   }
 
   async list(user: SessionUser): Promise<VersionListResponse> {
-    await this.assert(user, 'read', 'Chỉ BP Đào tạo và người duyệt phiên bản xem được danh sách phiên bản');
+    await this.assert(user, 'read', 'Chỉ BP Đào tạo xem được danh sách phiên bản');
     return {
       today: await this.clock.today(),
       items: await this.rows(),
@@ -125,7 +125,7 @@ export class VersionLifecycleService {
   }
 
   async detail(user: SessionUser, id: number): Promise<VersionDetailResponse> {
-    await this.assert(user, 'read', 'Chỉ BP Đào tạo và người duyệt phiên bản xem được phiên bản');
+    await this.assert(user, 'read', 'Chỉ BP Đào tạo xem được phiên bản');
     const row = await this.get(id);
     const parent = await this.parentOf(row);
     const all = await this.rows();
@@ -148,7 +148,6 @@ export class VersionLifecycleService {
         submit: canEdit && row.status === 'draft',
         withdraw: canEdit && row.status === 'pending',
         approve: canApprove && row.status === 'pending',
-        reject: canApprove && row.status === 'pending',
         remove: canEdit && row.status === 'draft',
         createDraft: canEdit && published && !hasOpen,
         reschedule: canApprove && effectiveRange !== null,
@@ -210,13 +209,6 @@ export class VersionLifecycleService {
       .update(versions)
       .set({ status: 'pending', changeKind: kind, changeNote: note, submittedBy: user.id, submittedAt: new Date(), reviewNote: null, updatedAt: new Date() })
       .where(and(eq(versions.id, id), eq(versions.status, 'draft')));
-    // Mục 10.6: bản nháp chờ duyệt → người duyệt phiên bản
-    await this.notifications.notify(await this.notifications.activeIds({ canApproveVersions: true }), {
-      type: 'version_pending',
-      title: 'Bản nháp Bộ lộ trình chờ duyệt',
-      body: note || null,
-      link: `/thiet-ke/${id}`,
-    }, user.id);
     return this.detail(user, id);
   }
 
@@ -228,21 +220,12 @@ export class VersionLifecycleService {
     return this.detail(user, id);
   }
 
-  async reject(user: SessionUser, id: number, note: string): Promise<VersionDetailResponse> {
-    await this.assert(user, 'approve', 'Chỉ người duyệt phiên bản được trả về nháp');
-    const row = await this.get(id);
-    if (row.status !== 'pending') throw conflict('NOT_PENDING', 'Chỉ trả về được bản đang chờ duyệt');
-    await this.db.update(versions).set({ status: 'draft', reviewNote: note, updatedAt: new Date() }).where(eq(versions.id, id));
-    await this.notifications.notify([row.submittedBy], { type: 'version_returned', title: 'Bản nháp Bộ lộ trình bị trả về', body: note, link: `/thiet-ke/${id}` }, user.id);
-    return this.detail(user, id);
-  }
-
   /**
    * Duyệt và ban hành (mục 8.2, 8.3): cấp số phiên bản theo loại thay đổi, đặt ngày hiệu lực (được phép ở tương lai);
    * bản bị thay thế có ngày kết thúc = ngày hiệu lực mới − 1.
    */
   async approve(user: SessionUser, id: number, body: ApproveBodyT): Promise<VersionDetailResponse> {
-    await this.assert(user, 'approve', 'Chỉ người duyệt phiên bản được duyệt và ban hành');
+    await this.assert(user, 'approve', 'Chỉ BP Đào tạo được duyệt và ban hành');
     const row = await this.get(id);
     if (row.status !== 'pending') throw conflict('NOT_PENDING', 'Chỉ duyệt được bản đang chờ duyệt');
     const today = await this.clock.today();
@@ -305,7 +288,7 @@ export class VersionLifecycleService {
    * Thay đổi tiêu chí: chặn nếu có lượt Level bắt đầu trong khoảng giữa ngày cũ và ngày mới, vì phiên bản gắn với lượt (R01) sẽ không còn đúng.
    */
   async reschedule(user: SessionUser, id: number, effectiveFrom: string): Promise<VersionDetailResponse> {
-    await this.assert(user, 'approve', 'Chỉ người duyệt phiên bản được đổi ngày hiệu lực');
+    await this.assert(user, 'approve', 'Chỉ BP Đào tạo được đổi ngày hiệu lực');
     const today = await this.clock.today();
     const row = await this.get(id);
     const old = row.effectiveFrom;
@@ -361,7 +344,7 @@ export class VersionLifecycleService {
         );
     });
 
-    const recipients = [...(await this.notifications.activeIds({ role: 'bp' })), ...(await this.notifications.activeIds({ canApproveVersions: true }))];
+    const recipients = await this.notifications.activeIds({ role: 'bp' });
     await this.notifications.notify(
       recipients,
       { type: 'version_rescheduled', title: `Bộ lộ trình v${row.code} đổi ngày hiệu lực: ${fmtDate(old)} → ${fmtDate(effectiveFrom)}`, link: `/thiet-ke/${id}` },
@@ -379,7 +362,7 @@ export class VersionLifecycleService {
   }
 
   async exportJson(user: SessionUser, id: number): Promise<{ filename: string; content: VersionContent }> {
-    await this.assert(user, 'read', 'Chỉ BP Đào tạo và người duyệt phiên bản xuất được phiên bản');
+    await this.assert(user, 'read', 'Chỉ BP Đào tạo xuất được phiên bản');
     const row = await this.get(id);
     return { filename: `lo-trinh-${row.code ? `v${row.code}` : `nhap-${row.id}`}.json`, content: VersionContentSchema.parse(row.content) };
   }

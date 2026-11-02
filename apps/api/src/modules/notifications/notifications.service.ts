@@ -71,10 +71,9 @@ export class NotificationsService {
   }
 
   /** Tài khoản đang hoạt động theo vai trò, ví dụ mọi BP ĐT */
-  async activeIds(where: { role?: 'bp'; canApproveVersions?: boolean }): Promise<number[]> {
+  async activeIds(where: { role?: 'bp' }): Promise<number[]> {
     const conds = [eq(users.status, 'active')];
     if (where.role) conds.push(eq(users.role, where.role));
-    if (where.canApproveVersions) conds.push(eq(users.canApproveVersions, true));
     return (await this.db.select({ id: users.id }).from(users).where(and(...conds))).map((u) => u.id);
   }
 

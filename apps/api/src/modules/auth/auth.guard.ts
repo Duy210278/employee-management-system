@@ -44,7 +44,6 @@ export class AuthGuard implements CanActivate {
         fullName: users.fullName,
         email: users.email,
         canBuddy: users.canBuddy,
-        canApproveVersions: users.canApproveVersions,
         lastSeenAt: users.lastSeenAt,
       })
       .from(users)

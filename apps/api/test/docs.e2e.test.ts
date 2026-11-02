@@ -12,7 +12,7 @@ describe('trang tài liệu API (/api/docs)', () => {
   it('liệt kê mọi API theo nhóm tiếng Việt; body lấy từ schema Zod; thao tác ghi có tên theo nhật ký hệ thống', () => {
     const doc = buildApiDocument(harness.app);
     const ops = Object.values(doc.paths).flatMap((p) => [p.get, p.post, p.put, p.delete].filter(Boolean));
-    expect(ops.length).toBeGreaterThanOrEqual(78);
+    expect(ops.length).toBeGreaterThanOrEqual(75);
     expect(ops.every((o) => o!.tags?.length === 1)).toBe(true);
 
     const assign = doc.paths['/api/v1/cht/runs'].post!;

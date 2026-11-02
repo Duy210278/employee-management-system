@@ -32,7 +32,6 @@ export interface MeResponse {
     role: AccountRole;
     status: UserStatus;
     canBuddy: boolean;
-    canApproveVersions: boolean;
   };
   /** Hồ sơ NV gắn với tài khoản (chỉ với vai trò NV) */
   staffId: number | null;
@@ -332,11 +331,6 @@ export interface FrameworkResponse {
   levels: (Omit<VersionContent['levels'][number], 'stages'> & { stageCount: number; itemCount: number })[];
 }
 
-export interface PublishingSettings {
-  /** V20: BP Đào tạo tự duyệt và ban hành phiên bản, không cần người duyệt riêng */
-  bpSelfPublish: boolean;
-}
-
 /** Trạng thái hiển thị của phiên bản (mục 8.2); "đang hiệu lực" tính theo ngày hiệu lực so với hôm nay */
 export type VersionState = 'draft' | 'pending' | 'current' | 'scheduled' | 'expired';
 
@@ -386,7 +380,6 @@ export interface VersionDetailResponse {
     submit: boolean;
     withdraw: boolean;
     approve: boolean;
-    reject: boolean;
     remove: boolean;
     createDraft: boolean;
     /** Đổi ngày hiệu lực của bản "Sắp hiệu lực" */
@@ -525,7 +518,6 @@ export interface UserListItem {
   role: AccountRole;
   status: UserStatus;
   canBuddy: boolean;
-  canApproveVersions: boolean;
   stores: { id: number; name: string }[];
   areas: { id: number; name: string }[];
   staffId: number | null;

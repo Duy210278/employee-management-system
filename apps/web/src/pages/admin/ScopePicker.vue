@@ -3,7 +3,7 @@ import { ACCOUNT_ROLES, ROLE_LABEL, type AccountRole, type OrgOptions } from '@l
 import { computed } from 'vue';
 
 /** Chọn vai trò, phạm vi (cửa hàng cho CHT, khu vực cho QLKV) và quyền bổ sung (mục 5.3) */
-const model = defineModel<{ role: AccountRole; storeIds: number[]; areaIds: number[]; canBuddy: boolean; canApproveVersions: boolean }>({ required: true });
+const model = defineModel<{ role: AccountRole; storeIds: number[]; areaIds: number[]; canBuddy: boolean }>({ required: true });
 const props = defineProps<{ options: OrgOptions; disabled?: boolean }>();
 // Danh mục đang hoạt động, cộng thêm mục đã gán dù đã ngừng để không mất khi lưu lại
 const stores = computed(() => props.options.stores.filter((x) => x.active || model.value.storeIds.includes(x.id)));
@@ -42,7 +42,6 @@ function toggle(list: 'storeIds' | 'areaIds', id: number) {
     </div>
     <div class="rowf">
       <label class="p cb"><input v-model="model.canBuddy" type="checkbox" :disabled="disabled" /> Có thể làm Buddy</label>
-      <label class="p cb"><input v-model="model.canApproveVersions" type="checkbox" :disabled="disabled" /> Người duyệt phiên bản</label>
     </div>
   </div>
 </template>
