@@ -3,6 +3,7 @@ import {
   diffDays,
   type AuditLogResponse,
   type CreateStaffBodyT,
+  type DemoAccount,
   type InboxResponse,
   type StaffFormOptions,
   type StaffListResponse,
@@ -154,6 +155,13 @@ describe('công cụ demo', () => {
     expect((await listOf(admin)).items).toHaveLength(9);
     await admin.post(`${API}/demo/reset`).expect(200);
     expect((await listOf(await as('admin'))).items).toHaveLength(8);
+  });
+
+  it('danh sách tài khoản mẫu kèm lộ trình đang học để đổi tài khoản cho nhanh', async () => {
+    const accounts = (await harness.anonymous().get(`${API}/demo/accounts`).expect(200)).body as DemoAccount[];
+    const labelOf = (key: string) => accounts.find((a) => a.email === `${key}@upharma.local`)?.runLabel;
+    expect([labelOf('lan'), labelOf('nam'), labelOf('hung'), labelOf('phuong')]).toEqual(['Level 1', 'Level 2', 'Level 3', 'CHT mới tuyển']);
+    expect([labelOf('admin'), labelOf('ha'), labelOf('hanh')]).toEqual([null, null, null]);
   });
 });
 

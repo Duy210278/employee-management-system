@@ -49,6 +49,8 @@ export interface DemoAccount {
   role: AccountRole;
   status: UserStatus;
   note: string;
+  /** Lộ trình đang học để chọn tài khoản cho nhanh: "Level 1", "CHT mới tuyển"; null khi không có lượt đang mở */
+  runLabel: string | null;
 }
 
 export interface StaffSummary {

@@ -14,7 +14,8 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { addDays, ClockBody, LoginAsBody, type ClockBodyT, type ClockView, type DemoAccount, type JobName, type JobResult } from '@lotrinh/shared';
+import { addDays, ClockBody, LoginAsBody, runTitle, type ClockBodyT, type ClockView, type DemoAccount, type JobName, type JobResult } from '@lotrinh/shared';
+import { and, desc, eq, inArray, isNotNull } from 'drizzle-orm';
 import type { Request, Response } from 'express';
 import { env } from '../../config';
 import { CurrentUser, Public, type SessionUser } from '../../common/session';
@@ -23,12 +24,13 @@ import { AuditService } from '../audit/audit.service';
 import { ClockService } from '../../adapters/clock/clock.service';
 import { DB } from '../../db/db.provider';
 import type { Db } from '../../db/client';
-import { users } from '../../db/schema';
+import { levelRuns, staff, users } from '../../db/schema';
 import { resetDatabase } from '../../db/seed';
 import { SEED_USERS } from '../../db/seed/seed-data';
 import { AccessService } from '../access/access.service';
 import { AuthService } from '../auth/auth.service';
 import { JOB_NAMES, JobsService } from '../jobs/jobs.service';
+import { OPEN_RUN_STATUSES } from '../runs/task-views';
 import { VersionsService } from '../versions/versions.service';
 import { badRequest } from '../../common/errors';
 
@@ -61,8 +63,25 @@ export class DemoController {
   async accounts(): Promise<DemoAccount[]> {
     const notes = new Map(SEED_USERS.map((u) => [u.email, u.note]));
     const rows = await this.db.select().from(users);
+    // Lượt đang mở mới nhất của từng tài khoản: Level của NV, checklist của CHT đang onboarding
+    const open = await this.db
+      .select({ userId: staff.userId, track: levelRuns.track, levelKey: levelRuns.levelKey })
+      .from(levelRuns)
+      .innerJoin(staff, eq(staff.id, levelRuns.staffId))
+      .where(and(isNotNull(staff.userId), inArray(levelRuns.status, [...OPEN_RUN_STATUSES])))
+      .orderBy(desc(levelRuns.id));
+    const runLabel = new Map<number, string>();
+    for (const r of open) if (r.userId !== null && !runLabel.has(r.userId)) runLabel.set(r.userId, runTitle(r));
     return rows
-      .map((u) => ({ id: u.id, email: u.email, fullName: u.fullName, role: u.role, status: u.status, note: notes.get(u.email) ?? '' }))
+      .map((u) => ({
+        id: u.id,
+        email: u.email,
+        fullName: u.fullName,
+        role: u.role,
+        status: u.status,
+        note: notes.get(u.email) ?? '',
+        runLabel: runLabel.get(u.id) ?? null,
+      }))
       .sort((a, b) => ROLE_ORDER[a.role] - ROLE_ORDER[b.role] || a.id - b.id);
   }
 

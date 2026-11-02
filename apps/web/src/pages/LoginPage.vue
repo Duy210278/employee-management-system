@@ -70,7 +70,7 @@ function quick() {
               <option :value="0" disabled>Chọn tài khoản mẫu…</option>
               <optgroup v-for="g in groups" :key="g.role" :label="g.label">
                 <option v-for="a in g.items" :key="a.id" :value="a.id" :disabled="a.status !== 'active'">
-                  {{ a.fullName }}{{ a.status !== 'active' ? ' (chờ duyệt)' : '' }}
+                  {{ a.fullName }}{{ a.runLabel ? ` · ${a.runLabel}` : '' }}{{ a.status !== 'active' ? ' (chờ duyệt)' : '' }}
                 </option>
               </optgroup>
             </select>

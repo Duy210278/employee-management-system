@@ -95,7 +95,7 @@ async function logout() {
       <div v-if="me.demoMode && activeAccounts.length" class="um-sec">
         <label class="sm mut b" for="acctSw">Đổi tài khoản (bản demo)</label>
         <select id="acctSw" :value="me.user.id" @change="switchAccount">
-          <option v-for="a in activeAccounts" :key="a.id" :value="a.id">{{ a.fullName }} · {{ ROLE_LABEL[a.role] }}</option>
+          <option v-for="a in activeAccounts" :key="a.id" :value="a.id">{{ [a.fullName, ROLE_LABEL[a.role], a.runLabel].filter(Boolean).join(' · ') }}</option>
         </select>
       </div>
       <div class="um-sec">
