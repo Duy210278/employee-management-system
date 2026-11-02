@@ -12,6 +12,10 @@ html,
 body {
   margin: 0;
 }
+/* Giữ sẵn chỗ thanh cuộn: trang ngắn hay dài thì bề rộng nội dung vẫn như nhau */
+html {
+  scrollbar-gutter: stable;
+}
 body {
   background: var(--bg);
   color: var(--ink);
@@ -41,7 +45,9 @@ p {
   margin: 0;
 }
 
+/* width 100%: trong cột flex của khung app, margin auto làm vùng nội dung co theo nội dung từng tab */
 .wrap {
+  width: 100%;
   max-width: 1240px;
   margin: 0 auto;
   padding-inline: 16px;
