@@ -155,7 +155,7 @@ const markNa = () => requireNote('Nhập lý do bỏ qua vào ô ghi chú') && r
       <div v-if="t.blockedBy.length" class="alert"><div>Chỉ xác nhận được sau khi xong: {{ t.blockedBy.join(', ') }}</div></div>
 
       <template v-if="!finished || a.canUndo || a.canRework">
-        <textarea v-model="note" rows="2" :aria-label="'Ghi chú cho ' + t.itemKey" placeholder="Ghi chú (bắt buộc khi yêu cầu làm lại, báo cần hỗ trợ, bỏ qua)"></textarea>
+        <textarea v-model="note" rows="2" :aria-label="'Ghi chú cho ' + t.itemKey" placeholder="Ghi chú (bắt buộc điền thông tin cụ thể đã làm gì, thực hiện được gì; bắt buộc khi yêu cầu làm lại, báo cần hỗ trợ, bỏ qua)"></textarea>
         <div class="actbar">
           <button v-if="a.confirmAs" class="btn pri" type="button" :disabled="busy" @click="confirm">{{ confirmLabel }}</button>
           <button v-if="a.canUndo" class="btn" type="button" :disabled="busy" @click="undo">Hủy xác nhận của tôi</button>
