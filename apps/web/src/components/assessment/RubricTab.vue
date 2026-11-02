@@ -102,5 +102,29 @@ async function submit() {
     <div v-if="data.summary.meetsTarget === null && data.summary.count" class="sm mut">
       Cần ít nhất {{ data.rubric.minObsPerMonth }} ca để kết luận tỉ lệ tư vấn đạt so với mục tiêu {{ data.rubric.targetRate }}%.
     </div>
+
+    <!-- Bảng Rubric như ở trang Khung năng lực, theo phiên bản của lượt Level này -->
+    <div class="card pad stack">
+      <div class="h2">Rubric quan sát tư vấn (dùng chung mọi Level)</div>
+      <div class="sm mut">
+        Ca đạt khi tổng ≥ {{ data.rubric.passTotal }}/{{ data.rubric.criteria.length * data.rubric.scaleMax }}<template v-if="data.rubric.forbidOne"> và không tiêu chí nào 1 điểm</template>.
+        Tối thiểu {{ data.rubric.minObsPerMonth }} ca/tháng, mục tiêu {{ data.rubric.targetRate }}% ca đạt.
+      </div>
+      <div class="tw">
+        <table>
+          <thead>
+            <tr><th>Tiêu chí</th><th>1 điểm</th><th>2 điểm</th><th>3 điểm</th></tr>
+          </thead>
+          <tbody>
+            <tr v-for="c in data.rubric.criteria" :key="c.key">
+              <td><b>{{ c.name }}</b> <span v-if="c.critical" class="pill bad">Trọng yếu</span></td>
+              <td class="sm">{{ c.d1 }}</td>
+              <td class="sm">{{ c.d2 }}</td>
+              <td class="sm">{{ c.d3 }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
   </div>
 </template>
