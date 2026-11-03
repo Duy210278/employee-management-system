@@ -4,6 +4,7 @@ import { sessionApi, useMutate, useOverview } from '@/api/queries';
 import { fmtDate, fmtDateTime } from '@/format';
 import GppModules from './GppModules.vue';
 import RoleChip from './RoleChip.vue';
+import SkuAppendix from './SkuAppendix.vue';
 
 /** Tổng quan Level (mục 9.4): NV đọc và xác nhận trước khi checklist được mở */
 const props = defineProps<{ runId: number; refYear: number }>();
@@ -118,6 +119,7 @@ function ack() {
       </div>
     </div>
 
+    <SkuAppendix :level="ov.level.key" />
     <GppModules :current-level="ov.level.key" />
 
     <div v-if="ov.overview.note" class="alert"><div><b>Lưu ý:</b> {{ ov.overview.note }}</div></div>
