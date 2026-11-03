@@ -3,7 +3,8 @@ import { scoreObservation } from '@lotrinh/shared';
 import { computed, reactive, ref, toRef, watch } from 'vue';
 import { assessmentApi, useMutate, useObservations } from '@/api/queries';
 import { useToast } from '@/composables/toast';
-import { fmtDate, yearOf } from '@/format';
+import { fmtDate } from '@/format';
+import Icon from '../Icon.vue';
 
 /** Tab Quan sát Rubric (mục 11.5, Phụ lục C, theo obsTab của N3) */
 const props = defineProps<{ runId: number }>();
@@ -23,7 +24,6 @@ watch(
   { immediate: true },
 );
 
-const refYear = computed(() => (data.value ? yearOf(data.value.today) : new Date().getFullYear()));
 const preview = computed(() => (data.value ? scoreObservation(data.value.rubric, form.scores) : null));
 const summaryTone = computed(() => {
   const s = data.value?.summary;
@@ -31,8 +31,12 @@ const summaryTone = computed(() => {
   return s.meetsTarget === null ? 'info' : s.meetsTarget ? 'ok' : 'warn';
 });
 const describe = (c: { d1: string; d2: string; d3: string }, v: number) => [c.d1, c.d2, c.d3][v - 1] ?? '';
-/** Tên ngắn của tiêu chí: hai chữ đầu ("Khai thác", "An toàn"; "Upsell / Cross-sell" → "Upsell") */
-const short = (name: string) => name.split(' / ')[0].split(/\s+/).slice(0, 2).join(' ');
+/** Màu điểm từng tiêu chí: điểm tối đa xanh, 1 điểm đỏ */
+const scoreTone = (v: number | undefined) => (v === undefined ? '' : v === 1 ? 'bad' : v >= (data.value?.rubric.scaleMax ?? 3) ? 'ok' : '');
+
+// Bảng các ca đã quan sát: bấm dòng hoặc mũi tên để xem điểm từng tiêu chí
+const opened = reactive(new Set<number>());
+const toggle = (id: number) => (opened.has(id) ? opened.delete(id) : opened.add(id));
 
 async function submit() {
   if (!form.date) return toast.show('Chọn ngày quan sát');
@@ -89,15 +93,60 @@ async function submit() {
           <span class="pill" :class="summaryTone">{{ data.summary.label }}</span>
         </div>
       </div>
-      <div v-for="o in data.items" :key="o.id" class="item">
-        <div class="rowf sp">
-          <span><b>{{ fmtDate(o.date, refYear) }}</b> · {{ o.observerName }}</span>
-          <span class="pill" :class="o.passed ? 'ok' : 'bad'">{{ o.total }}/{{ o.max }} · {{ o.passed ? 'Đạt' : 'Chưa đạt' }}</span>
-        </div>
-        <div class="sm mut mono">{{ data.rubric.criteria.map((c) => `${short(c.name)} ${o.scores[c.key] ?? '—'}`).join(' · ') }}</div>
-        <div v-if="o.note" class="sm">{{ o.note }}</div>
-      </div>
-      <div v-if="!data.items.length" class="empty">Chưa có ca quan sát nào.</div>
+      <table v-if="data.items.length" class="rt click ck obs">
+        <thead>
+          <tr>
+            <th>Ngày quan sát</th>
+            <th>Người đánh giá</th>
+            <th>Điểm</th>
+            <th>Trạng thái</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <template v-for="o in data.items" :key="o.id">
+            <tr :class="{ on: opened.has(o.id) }" @click="toggle(o.id)">
+              <td data-l="Ngày quan sát" class="nowrap b">{{ fmtDate(o.date) }}</td>
+              <td data-l="Người đánh giá">{{ o.observerName }}</td>
+              <td data-l="Điểm" class="nowrap">{{ o.total }}/{{ o.max }}</td>
+              <td data-l="Trạng thái">
+                <div><span class="pill" :class="o.passed ? 'ok' : 'bad'">{{ o.passed ? 'Đạt' : 'Chưa đạt' }}</span></div>
+                <div v-if="o.ones.length" class="sm bad-text">1 điểm: {{ o.ones.join(', ') }}</div>
+              </td>
+              <td class="ck-tog">
+                <button
+                  class="btn ghost sm"
+                  type="button"
+                  :aria-expanded="opened.has(o.id)"
+                  :aria-label="(opened.has(o.id) ? 'Thu gọn ca ' : 'Xem điểm ca ') + fmtDate(o.date)"
+                  @click.stop="toggle(o.id)"
+                >
+                  <Icon class="caret" name="chevron" />
+                </button>
+              </td>
+            </tr>
+            <tr v-if="opened.has(o.id)" class="ck-more">
+              <td colspan="5">
+                <div class="more">
+                  <section class="more-box">
+                    <h4>Điểm từng tiêu chí</h4>
+                    <div v-for="c in data.rubric.criteria" :key="c.key" class="obs-row">
+                      <span><b>{{ c.name }}</b> <span v-if="c.critical" class="pill bad">Trọng yếu</span></span>
+                      <span class="pill" :class="scoreTone(o.scores[c.key])">{{ o.scores[c.key] ?? '—' }}/{{ data.rubric.scaleMax }}</span>
+                      <span class="mut">{{ describe(c, o.scores[c.key] ?? 0) }}</span>
+                    </div>
+                  </section>
+                  <section v-if="o.note" class="more-box">
+                    <h4>Nhận xét</h4>
+                    <div>{{ o.note }}</div>
+                  </section>
+                </div>
+              </td>
+            </tr>
+          </template>
+        </tbody>
+      </table>
+      <div v-else class="empty">Chưa có ca quan sát nào.</div>
     </div>
     <div v-if="data.summary.meetsTarget === null && data.summary.count" class="sm mut">
       Cần ít nhất {{ data.rubric.minObsPerMonth }} ca để kết luận tỉ lệ tư vấn đạt so với mục tiêu {{ data.rubric.targetRate }}%.

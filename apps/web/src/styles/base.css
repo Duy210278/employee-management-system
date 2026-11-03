@@ -1373,6 +1373,26 @@ table.ck tbody tr.ck-more td {
   background: var(--surface2);
   padding: 2px 14px 14px;
 }
+/* Bảng ca quan sát Rubric dùng cùng kiểu dòng mở chi tiết; mũi tên trỏ xuống khi đóng, trỏ lên khi mở */
+table.obs .caret {
+  transform: rotate(90deg);
+}
+table.obs tr.on .caret {
+  transform: rotate(-90deg);
+}
+/* Điểm từng tiêu chí của một ca: tên tiêu chí · điểm · mô tả mức điểm */
+.obs-row {
+  display: grid;
+  grid-template-columns: minmax(140px, 220px) auto minmax(0, 1fr);
+  gap: 4px 12px;
+  align-items: baseline;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+}
+.more-box h4 + .obs-row {
+  padding-top: 0;
+  border-top: 0;
+}
 
 /* Thẻ "Cần chú ý": mỗi dòng một việc kèm liên kết */
 .attn-row {
@@ -2629,5 +2649,23 @@ table.te td:has(> input[type='checkbox']) {
   table.ck tbody tr.ck-more td {
     display: block;
     padding: 0;
+  }
+  /* Ca quan sát: giữ mũi tên ở góc phải mỗi thẻ */
+  table.obs tbody tr {
+    position: relative;
+  }
+  table.obs .ck-tog {
+    display: block;
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    padding: 0;
+    width: auto;
+  }
+  .obs-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .obs-row > :last-child {
+    grid-column: 1 / -1;
   }
 }
