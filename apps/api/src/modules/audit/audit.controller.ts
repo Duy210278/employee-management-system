@@ -18,6 +18,7 @@ const LABELS: [RegExp, string][] = [
   [/^PUT \/demo\/clock$/, 'Đặt ngày giả lập'],
   [/^POST \/demo\/jobs\/:name\/run$/, 'Chạy job'],
   [/^POST \/tasks\/:id\/confirm$/, 'Xác nhận đầu việc'],
+  [/^POST \/tasks\/confirm-many$/, 'Duyệt nhanh nhiều đầu việc'],
   [/^POST \/tasks\/:id\/undo$/, 'Hủy xác nhận'],
   [/^POST \/tasks\/:id\/rework$/, 'Yêu cầu làm lại'],
   [/^POST \/tasks\/:id\/status$/, 'Đổi trạng thái đầu việc'],

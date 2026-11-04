@@ -32,6 +32,15 @@ export const ConfirmBody = z.object({
   rowVersion,
 });
 
+/** Duyệt nhanh: xác nhận phần của người gọi ở nhiều đầu việc một lần, mục nào không xác nhận được thì báo lý do riêng */
+export const ConfirmManyBody = z.object({
+  tasks: z
+    .array(z.object({ id: z.number().int().positive(), rowVersion }))
+    .min(1, 'Chọn ít nhất một đầu việc')
+    .max(100, 'Mỗi lần duyệt tối đa 100 đầu việc'),
+  note: note.optional(),
+});
+
 export const UndoBody = z.object({ rowVersion });
 
 export const ReworkBody = z.object({
@@ -270,6 +279,7 @@ export type ApproveBodyT = z.infer<typeof ApproveBody>;
 export type LoginBodyT = z.infer<typeof LoginBody>;
 export type ClockBodyT = z.infer<typeof ClockBody>;
 export type ConfirmBodyT = z.infer<typeof ConfirmBody>;
+export type ConfirmManyBodyT = z.infer<typeof ConfirmManyBody>;
 export type UndoBodyT = z.infer<typeof UndoBody>;
 export type ReworkBodyT = z.infer<typeof ReworkBody>;
 export type StatusBodyT = z.infer<typeof StatusBody>;

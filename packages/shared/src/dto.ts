@@ -135,6 +135,12 @@ export interface TaskView {
   actions: TaskActions;
 }
 
+/** Kết quả duyệt nhanh nhiều đầu việc */
+export interface ConfirmManyResult {
+  confirmed: number;
+  failed: { id: number; itemKey: string | null; message: string }[];
+}
+
 export interface PathStep {
   levelKey: number;
   name: string;

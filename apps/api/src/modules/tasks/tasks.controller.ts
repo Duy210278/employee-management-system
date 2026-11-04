@@ -1,10 +1,13 @@
 import { Body, Controller, Get, HttpCode, Param, ParseIntPipe, Post } from '@nestjs/common';
 import {
   ConfirmBody,
+  ConfirmManyBody,
   ReworkBody,
   StatusBody,
   UndoBody,
   type ConfirmBodyT,
+  type ConfirmManyBodyT,
+  type ConfirmManyResult,
   type ReworkBodyT,
   type StatusBodyT,
   type TaskEventView,
@@ -18,6 +21,12 @@ import { TasksService } from './tasks.service';
 @Controller('tasks')
 export class TasksController {
   constructor(private readonly tasks: TasksService) {}
+
+  @Post('confirm-many')
+  @HttpCode(200)
+  confirmMany(@Body(new ZodPipe(ConfirmManyBody)) body: ConfirmManyBodyT, @CurrentUser() user: SessionUser): Promise<ConfirmManyResult> {
+    return this.tasks.confirmMany(user, body);
+  }
 
   @Post(':id/confirm')
   @HttpCode(200)

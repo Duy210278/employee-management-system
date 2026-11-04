@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { HttpException, Inject, Injectable } from '@nestjs/common';
 import {
   decideActions,
   fillableSlots,
@@ -9,6 +9,9 @@ import {
   ROLE_SHORT,
   statusAfterConfirmations,
   type ConfirmBodyT,
+  type ConfirmManyBodyT,
+  type ConfirmManyResult,
+  type Item,
   type ReworkBodyT,
   type StatusBodyT,
   type TaskActions,
@@ -40,6 +43,17 @@ interface Locked {
   gpp: boolean;
   blockedBy: string[];
   requireNvFirst: boolean;
+}
+
+const shortContent = (s: string) => (s.length > 80 ? `${s.slice(0, 77)}…` : s);
+
+/** Câu báo lỗi tiếng Việt của một mục trong lượt duyệt nhanh */
+function messageOf(err: unknown): string {
+  if (err instanceof HttpException) {
+    const res = err.getResponse();
+    if (typeof res === 'object' && res && 'message' in res && typeof res.message === 'string') return res.message;
+  }
+  return 'Không xác nhận được, thử lại sau';
 }
 
 /** Nhãn lịch sử thao tác hiển thị cho người dùng */
@@ -81,14 +95,32 @@ export class TasksService {
     private readonly notifications: NotificationsService,
   ) {}
 
-  /** Thông báo ngay (mục 10.6): NV báo xong / cần hỗ trợ → người xác nhận kế tiếp; yêu cầu làm lại → NV */
-  private async announce(user: SessionUser, taskId: number, kind: 'report_done' | 'help' | 'rework', note: string | null) {
+  /** Đầu việc kèm ngữ cảnh lượt để soạn thông báo */
+  private async target(taskId: number) {
     const [task] = await this.db.select().from(runTasks).where(eq(runTasks.id, taskId));
     const ctx = await this.runs.load(task.runId);
     const item = levelItems(ctx.level).find((x) => x.item.key === task.itemKey)?.item;
-    if (!item) return;
-    const link = `/nhan-su/${ctx.staff.id}?tab=check&run=${ctx.run.id}`;
-    const short = item.content.length > 80 ? `${item.content.slice(0, 77)}…` : item.content;
+    if (!item) return null;
+    return { ctx, item, link: `/nhan-su/${ctx.staff.id}?tab=check&run=${ctx.run.id}`, short: shortContent(item.content) };
+  }
+
+  /** Người nhận thông báo NV báo xong / cần hỗ trợ: người đầu tiên còn thiếu xác nhận */
+  private async nextConfirmers(taskId: number, ctx: RunContext, item: Item, kind: 'report_done' | 'help'): Promise<number[]> {
+    const confirmed = await this.db
+      .select({ role: taskConfirmations.role })
+      .from(taskConfirmations)
+      .where(and(eq(taskConfirmations.taskId, taskId), isNull(taskConfirmations.revokedAt)));
+    // Đầu việc NV tự đánh giá: báo xong không cần ai xác nhận, cần hỗ trợ thì về người kèm cặp
+    const roles = kind === 'help' ? helpRoles(requiredRoles(item), ctx.track) : requiredRoles(item);
+    const missing = roles.filter((r) => r !== 'nv' && !confirmed.some((c) => c.role === r));
+    return this.notifications.recipientsOf(missing.slice(0, 1), ctx.people);
+  }
+
+  /** Thông báo ngay (mục 10.6): NV báo xong / cần hỗ trợ → người xác nhận kế tiếp; yêu cầu làm lại → NV */
+  private async announce(user: SessionUser, taskId: number, kind: 'report_done' | 'help' | 'rework', note: string | null) {
+    const t = await this.target(taskId);
+    if (!t) return;
+    const { ctx, link, short } = t;
     if (kind === 'rework') {
       await this.notifications.notify(await this.notifications.recipientsOf(['nv'], ctx.people), {
         type: 'rework',
@@ -98,19 +130,34 @@ export class TasksService {
       }, user.id);
       return;
     }
-    const confirmed = await this.db
-      .select({ role: taskConfirmations.role })
-      .from(taskConfirmations)
-      .where(and(eq(taskConfirmations.taskId, taskId), isNull(taskConfirmations.revokedAt)));
-    // Đầu việc NV tự đánh giá: báo xong không cần ai xác nhận, cần hỗ trợ thì về người kèm cặp
-    const roles = kind === 'help' ? helpRoles(requiredRoles(item), ctx.track) : requiredRoles(item);
-    const missing = roles.filter((r) => r !== 'nv' && !confirmed.some((c) => c.role === r));
-    await this.notifications.notify(await this.notifications.recipientsOf(missing.slice(0, 1), ctx.people), {
+    await this.notifications.notify(await this.nextConfirmers(taskId, ctx, t.item, kind), {
       type: kind,
       title: kind === 'help' ? `${ctx.staff.fullName} cần hỗ trợ: ${short}` : `${ctx.staff.fullName} đã báo xong, chờ bạn xác nhận: ${short}`,
       body: note,
       link,
     }, user.id);
+  }
+
+  /** NV báo xong nhiều mục một lần: mỗi người xác nhận nhận một thông báo gom các mục của cùng nhân viên */
+  private async announceMany(user: SessionUser, taskIds: number[], note: string | null) {
+    const groups = new Map<number, { name: string; link: string; byUser: Map<number, string[]> }>();
+    for (const id of taskIds) {
+      const t = await this.target(id);
+      if (!t) continue;
+      const g = groups.get(t.ctx.run.id) ?? { name: t.ctx.staff.fullName, link: t.link, byUser: new Map() };
+      groups.set(t.ctx.run.id, g);
+      for (const uid of await this.nextConfirmers(id, t.ctx, t.item, 'report_done')) g.byUser.set(uid, [...(g.byUser.get(uid) ?? []), t.short]);
+    }
+    for (const g of groups.values()) {
+      for (const [uid, items] of g.byUser) {
+        await this.notifications.notify([uid], {
+          type: 'report_done',
+          title: items.length === 1 ? `${g.name} đã báo xong, chờ bạn xác nhận: ${items[0]}` : `${g.name} đã báo xong ${items.length} mục, chờ bạn xác nhận`,
+          body: [items.length > 1 ? items.map((x) => `• ${x}`).join('\n') : '', note ?? ''].filter(Boolean).join('\n') || null,
+          link: g.link,
+        }, user.id);
+      }
+    }
   }
 
   /** Khóa đầu việc, kiểm tra phạm vi và rowVersion, tính quyền của người gọi bằng cùng hàm với giao diện */
@@ -170,7 +217,31 @@ export class TasksService {
   }
 
   async confirm(user: SessionUser, taskId: number, body: ConfirmBodyT): Promise<TaskView> {
-    const reported = await this.db.transaction(async (tx) => {
+    if (await this.confirmOne(user, taskId, body)) await this.announce(user, taskId, 'report_done', body.note || null);
+    return this.view(user, taskId);
+  }
+
+  /** Duyệt nhanh: mỗi đầu việc một transaction riêng, mục lỗi không chặn các mục còn lại */
+  async confirmMany(user: SessionUser, body: ConfirmManyBodyT): Promise<ConfirmManyResult> {
+    const tasks = [...new Map(body.tasks.map((t) => [t.id, t])).values()];
+    const reported: number[] = [];
+    const failed: ConfirmManyResult['failed'] = [];
+    for (const t of tasks) {
+      try {
+        if (await this.confirmOne(user, t.id, { rowVersion: t.rowVersion, note: body.note })) reported.push(t.id);
+      } catch (err) {
+        const [row] = await this.db.select({ itemKey: runTasks.itemKey }).from(runTasks).where(eq(runTasks.id, t.id));
+        failed.push({ id: t.id, itemKey: row?.itemKey ?? null, message: messageOf(err) });
+      }
+    }
+    if (reported.length === 1) await this.announce(user, reported[0], 'report_done', body.note || null);
+    else if (reported.length > 1) await this.announceMany(user, reported, body.note || null);
+    return { confirmed: tasks.length - failed.length, failed };
+  }
+
+  /** Điền ô xác nhận của người gọi; trả về true khi đó là phần NV báo hoàn thành */
+  private confirmOne(user: SessionUser, taskId: number, body: ConfirmBodyT): Promise<boolean> {
+    return this.db.transaction(async (tx) => {
       const l = await this.lock(tx, user, taskId, body.rowVersion);
       const slot = l.actions.confirmAs;
       if (!slot) throw forbidden('CANNOT_CONFIRM', this.cannotConfirmReason(l, user));
@@ -198,8 +269,6 @@ export class TasksService {
       });
       return slot.role === 'nv';
     });
-    if (reported) await this.announce(user, taskId, 'report_done', body.note || null);
-    return this.view(user, taskId);
   }
 
   /** R08: mỗi người chỉ hủy được xác nhận của chính mình */

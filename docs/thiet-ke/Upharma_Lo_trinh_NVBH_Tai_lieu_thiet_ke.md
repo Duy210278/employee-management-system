@@ -1080,6 +1080,7 @@ REST, tiền tố `/api/v1`, JSON. Lỗi trả về dạng `{ code, message }` v
 | POST | `/runs/{id}/ack`, `/runs/{id}/pauses`, `/runs/{id}/assignments` | Xác nhận đã đọc, tạm dừng, đổi Buddy/CHT/QLKV |
 | GET | `/runs/{id}/tasks` | Checklist của lượt, kèm trạng thái tính sẵn |
 | POST | `/tasks/{id}/confirm`, `/undo`, `/rework`, `/status` | Xác nhận, hủy, yêu cầu làm lại, đổi trạng thái |
+| POST | `/tasks/confirm-many` | Duyệt nhanh: điền phần của người gọi ở tối đa 100 đầu việc; mỗi mục một transaction, mục lỗi trả lý do riêng. NV báo xong nhiều mục thì mỗi người xác nhận nhận một thông báo gom |
 | POST | `/runs/{id}/stages/{stageKey}/sign` | Ký cuối giai đoạn |
 | GET | `/me/today`, `/me/inbox`, `/me/notifications` | Hôm nay, Việc cần xử lý, Thông báo |
 | PUT | `/runs/{id}/sales/{month}` | Ghi doanh số tháng |
