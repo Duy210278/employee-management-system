@@ -219,13 +219,13 @@ export async function seedDatabase(db: Db, today: IsoDate): Promise<void> {
     // Bản nháp có sẵn 2 thay đổi để demo luồng phiên bản (mục 14.12)
     const draft = structuredClone(content);
     const items = draft.levels.flatMap((l) => l.stages.flatMap((s) => s.items));
-    items.find((i) => i.key === 'L1-1-1')!.verifiers = ['buddy', 'cht'];
+    items.find((i) => i.key === 'L1-1-4')!.verifiers = ['buddy', 'cht'];
     items.find((i) => i.key === 'L1-1-2')!.guidance += ' Chỉ rõ khu thuốc kê đơn và lối thoát hiểm.';
     await tx.insert(versions).values({
       status: 'draft',
       parentId: version.id,
       content: draft,
-      changeNote: 'Bổ sung CHT cùng xác nhận mục "Nhận việc"; làm rõ hướng dẫn tham quan mặt bằng',
+      changeNote: 'Bổ sung CHT cùng xác nhận mục "Nội quy ca"; làm rõ hướng dẫn tham quan mặt bằng',
       createdBy: adminId,
       updatedBy: adminId,
     });
@@ -260,9 +260,9 @@ async function seedProgress(tx: Tx, p: ProgressInput): Promise<void> {
   const leave = p.plan.overdue ? candidates.slice(-p.plan.overdue) : [];
   const leaveKeys = new Set(leave.map((i) => i.key));
   const future = ordered.filter((i) => i.dueOffset >= p.day);
-  const nWait = p.plan.waiting ?? 0;
-  const waiting = future.slice(0, nWait);
-  const help = future.slice(nWait, nWait + (p.plan.help ?? 0));
+  // Mục NV tự xác nhận báo xong là hoàn thành ngay, không có trạng thái chờ xác nhận
+  const waiting = future.filter((i) => i.requireNvFirst && i.verifiers.length).slice(0, p.plan.waiting ?? 0);
+  const help = future.filter((i) => !waiting.includes(i)).slice(0, p.plan.help ?? 0);
 
   const filler = (role: TaskRole): { userId: number; proxyRole: TaskRole | null } => {
     switch (role) {

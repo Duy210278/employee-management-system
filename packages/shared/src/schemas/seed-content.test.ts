@@ -38,6 +38,17 @@ describe('dữ liệu khởi tạo v2.1 (mục 22.4)', () => {
     for (const { item } of gpp) expect(item).toMatchObject({ required: true, allowNa: false });
   });
 
+  it('mục "NV tự làm" của N2 do NV tự xác nhận, không có người kiểm tra (mục 7.2)', () => {
+    const self = content.levels.flatMap((l) => levelItems(l)).filter(({ item }) => !item.verifiers.length);
+    expect(self.map(({ item }) => item.key)).toEqual([
+      'L1-1-1', 'L1-1-12', 'L1-1-13', 'L1-2-8', 'L1-2-9', 'L1-3-9', 'L1-3-10', 'L1-4-7', 'L1-5-8', 'L1-5-9', 'L1-6-7',
+      'L2-1-8', 'L2-1-9', 'L2-2-8', 'L2-2-9', 'L2-3-7',
+      'L3-1-6', 'L3-1-7', 'L3-2-6', 'L3-3-6',
+      'L4-1-7',
+    ]);
+    for (const { item } of self) expect(item).toMatchObject({ requireNvFirst: true, gpp: false });
+  });
+
   it('đã áp dụng giả định V1, V12 của mục 16', () => {
     const find = (key: string) => content.levels.flatMap((l) => levelItems(l)).find(({ item }) => item.key === key)!.item;
     expect(find('L1-6-3').content).not.toContain('Tháng 3');

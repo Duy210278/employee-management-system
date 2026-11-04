@@ -212,9 +212,7 @@
               "category": "Hành chính",
               "content": "Nhận việc tại nhà thuốc (có mặt tại nhà thuốc trong ngày nhận việc và đúng ca làm việc đã trao đổi)",
               "guidance": "Chuẩn bị trước ngày đầu. Kiểm tra đủ 3 mục.",
-              "verifiers": [
-                "buddy"
-              ],
+              "verifiers": [],
               "requireNvFirst": true,
               "dueOffset": 1,
               "gpp": false,
@@ -410,9 +408,7 @@
               "category": "LMS",
               "content": "Xem module \"Giới thiệu Công ty Cổ phần Upharma\" trên LMS. Nhân viên tự tổng kết ra các ý chính sau khi xem module",
               "guidance": "Nhân viên tự làm trong giờ thấp điểm hoặc sau ca. Buddy kiểm tra kết quả trước Ca 4.",
-              "verifiers": [
-                "buddy"
-              ],
+              "verifiers": [],
               "requireNvFirst": true,
               "dueOffset": 6,
               "gpp": false,
@@ -428,9 +424,7 @@
               "category": "LMS",
               "content": "Xem các modul hướng dẫn quy trình làm việc trên LMS",
               "guidance": "Xem xong trước khi thực hành tại quầy (Ca 3).",
-              "verifiers": [
-                "buddy"
-              ],
+              "verifiers": [],
               "requireNvFirst": true,
               "dueOffset": 7,
               "gpp": false,
@@ -588,9 +582,7 @@
               "category": "LMS",
               "content": "Hoàn thành tối thiểu 10 module SKU Level 1 và đạt quiz ≥ 60/100",
               "guidance": "Kiểm tra điểm trên LMS. Nếu < 60: ôn lại, làm lại trước Ca 12.",
-              "verifiers": [
-                "buddy"
-              ],
+              "verifiers": [],
               "requireNvFirst": true,
               "dueOffset": 13,
               "gpp": false,
@@ -606,9 +598,7 @@
               "category": "LMS",
               "content": "Xem modul về các nhóm thuốc cơ bản level 1. Nhân viên tự tổng hợp lại các ý chính sau khi xem modul",
               "guidance": "Đạt mới được tick mục an toàn thuốc tuần này.",
-              "verifiers": [
-                "buddy"
-              ],
+              "verifiers": [],
               "requireNvFirst": true,
               "dueOffset": 14,
               "gpp": false,
@@ -784,9 +774,7 @@
               "category": "LMS",
               "content": "Hoàn thành module \"Quy trình bán hàng 5 bước\" + xem video roleplay mẫu",
               "guidance": "Xem trước Ca 13 để có nền tảng lý thuyết trước khi thực hành.",
-              "verifiers": [
-                "buddy"
-              ],
+              "verifiers": [],
               "requireNvFirst": true,
               "dueOffset": 20,
               "gpp": false,
@@ -802,9 +790,7 @@
               "category": "LMS",
               "content": "Hoàn thành tối thiểu 30 module SKU Level 1 và đạt quiz ≥ 60/100",
               "guidance": "Kiểm tra điểm trên LMS. Nếu < 60: ôn lại, làm lại trước Ca 18.",
-              "verifiers": [
-                "buddy"
-              ],
+              "verifiers": [],
               "requireNvFirst": true,
               "dueOffset": 21,
               "gpp": false,
@@ -945,9 +931,7 @@
               "category": "LMS",
               "content": "Hoàn thành 55 bài thu hoạch SKU Level 1 — đạt ≥ 60/100",
               "guidance": "NV báo điểm cho Buddy. Nếu < 60: ôn 3 ngày, làm lại 1 lần.",
-              "verifiers": [
-                "buddy"
-              ],
+              "verifiers": [],
               "requireNvFirst": true,
               "dueOffset": 28,
               "gpp": false,
@@ -1141,9 +1125,7 @@
               "category": "LMS",
               "content": "Xem module \"Kỹ năng giao tiếp cơ bản của Dược sĩ\" trên LMS",
               "guidance": "Xem trước khi thực hành roleplay.",
-              "verifiers": [
-                "buddy"
-              ],
+              "verifiers": [],
               "requireNvFirst": true,
               "dueOffset": 43,
               "gpp": false,
@@ -1159,9 +1141,7 @@
               "category": "Đánh giá",
               "content": "Viết 3 điều muốn cải thiện → gửi Buddy đọc",
               "guidance": "Buddy cho phản hồi bằng lời trực tiếp đầu ca.",
-              "verifiers": [
-                "buddy"
-              ],
+              "verifiers": [],
               "requireNvFirst": true,
               "dueOffset": 45,
               "gpp": false,
@@ -1302,9 +1282,7 @@
               "category": "LMS",
               "content": "Rà soát và Hoàn thành toàn bộ bài thu hoạch Level 1 — đạt ≥ 60/100",
               "guidance": "Gửi kết quả cho Buddy và CHT.",
-              "verifiers": [
-                "buddy"
-              ],
+              "verifiers": [],
               "requireNvFirst": true,
               "dueOffset": 55,
               "gpp": false,
@@ -1719,9 +1697,7 @@
               "category": "LMS",
               "content": "Đọc trước module \"Kỹ năng bán hàng bán hàng tăng doanh số, bán kèm, bán chéo\" trên LMS\nĐọc tài liệu module \"Kỹ năng bán hàng chuẩn quy trình\" trên LMS",
               "guidance": "NV báo cho CHT sau khi đã đọc. CHT kiểm tra các kiến thức của module. Nếu chưa đạt: đọc lại trong 1 tuần.\nNV nộp nhật ký học cho CHT đọc trước buổi họp phản hồi tháng 4.",
-              "verifiers": [
-                "cht"
-              ],
+              "verifiers": [],
               "requireNvFirst": true,
               "dueOffset": 66,
               "gpp": false,
@@ -1737,9 +1713,7 @@
               "category": "LMS",
               "content": "Hoàn thành tối thiểu 35 bài thu hoạch SKU Level 2 — đạt ≥ 60/100",
               "guidance": "NV báo điểm cho Buddy. Nếu < 60: ôn 3 ngày, làm lại 1 lần.",
-              "verifiers": [
-                "cht"
-              ],
+              "verifiers": [],
               "requireNvFirst": true,
               "dueOffset": 74,
               "gpp": false,
@@ -1932,9 +1906,7 @@
               "category": "LMS",
               "content": "Xem các module cập nhật sản phẩm mới trên LMS",
               "guidance": "BP Đào tạo upload module. NV hoàn thành trước khi CHT test sản phẩm nhóm mới.",
-              "verifiers": [
-                "cht"
-              ],
+              "verifiers": [],
               "requireNvFirst": true,
               "dueOffset": 165,
               "gpp": false,
@@ -1950,9 +1922,7 @@
               "category": "LMS",
               "content": "Hoàn thành tối thiểu 70 bài thu hoạch SKU Level 2 — đạt ≥ 60/100",
               "guidance": "NV báo điểm cho Buddy. Nếu < 60: ôn 3 ngày, làm lại 1 lần.",
-              "verifiers": [
-                "cht"
-              ],
+              "verifiers": [],
               "requireNvFirst": true,
               "dueOffset": 174,
               "gpp": false,
@@ -2109,9 +2079,7 @@
               "category": "LMS",
               "content": "Rà soát và Hoàn thành toàn bộ bài thu hoạch Level 2 — đạt ≥ 60/100",
               "guidance": "NV gửi kết quả cho CHT.",
-              "verifiers": [
-                "cht"
-              ],
+              "verifiers": [],
               "requireNvFirst": true,
               "dueOffset": 247,
               "gpp": false,
@@ -2467,9 +2435,7 @@
               "category": "LMS",
               "content": "Xem trước module \"Kỹ năng xử lý khiếu nại khách hàng\"",
               "guidance": "—",
-              "verifiers": [
-                "cht"
-              ],
+              "verifiers": [],
               "requireNvFirst": true,
               "dueOffset": 68,
               "gpp": false,
@@ -2485,9 +2451,7 @@
               "category": "LMS",
               "content": "Hoàn thành tối thiểu 22 bài thu hoạch SKU Level 3 — đạt ≥ 60/100",
               "guidance": "NV báo điểm cho Buddy. Nếu < 60: ôn 3 ngày, làm lại 1 lần.",
-              "verifiers": [
-                "cht"
-              ],
+              "verifiers": [],
               "requireNvFirst": true,
               "dueOffset": 80,
               "gpp": false,
@@ -2625,9 +2589,7 @@
               "category": "LMS",
               "content": "Hoàn thành tối thiểu 44 bài thu hoạch SKU Level 3 — đạt ≥ 60/100",
               "guidance": "NV báo điểm cho Buddy. Nếu < 60: ôn 3 ngày, làm lại 1 lần.",
-              "verifiers": [
-                "cht"
-              ],
+              "verifiers": [],
               "requireNvFirst": true,
               "dueOffset": 248,
               "gpp": false,
@@ -2766,9 +2728,7 @@
               "category": "LMS",
               "content": "Rà soát và Hoàn thành toàn bộ các bài thu hoạch Level 3 — đạt ≥ 60/100",
               "guidance": "BP Đào tạo xác nhận kết quả.",
-              "verifiers": [
-                "cht"
-              ],
+              "verifiers": [],
               "requireNvFirst": true,
               "dueOffset": 335,
               "gpp": false,
@@ -3152,9 +3112,7 @@
               "category": "LMS",
               "content": "Hoàn thành tối thiểu 9 bài thu hoạch SKU Level 4 — đạt ≥ 60/100",
               "guidance": "NV báo điểm cho Buddy. Nếu < 60: ôn 3 ngày, làm lại 1 lần.",
-              "verifiers": [
-                "cht"
-              ],
+              "verifiers": [],
               "requireNvFirst": true,
               "dueOffset": 80,
               "gpp": false,

@@ -27,12 +27,17 @@ const CONTENT_FIXES = {
 const fixLog = [];
 
 // Người xác nhận theo hàm ver() của N3: "co" (phối hợp) L1 = Buddy + CHT, L2–L4 = CHT + QLKV;
-// "nv" (NV tự làm) = phần NV + 1 người kiểm tra: Buddy ở L1, CHT ở L2–L4 (mục 7.2)
+// "nv" (NV tự làm) = NV tự xác nhận, không có người kiểm tra (mục 7.2)
 function verifiersOf(w, lv) {
   if (w === 'co') return lv === 1 ? ['buddy', 'cht'] : ['cht', 'qlkv'];
-  if (w === 'nv') return [lv === 1 ? 'buddy' : 'cht'];
+  if (w === 'nv') return [];
   return [w];
 }
+
+// Người xác nhận theo Checklist Onboarding v2.1 (N2) ở những mục N3 ghi khác
+const VERIFIER_FIXES = {
+  'L1-1-1': [[], 'N2 để trống ô người xác nhận: NV tự xác nhận'],
+};
 
 function parseStageName(raw) {
   const m = raw.match(/^(.*?)\s+—\s+(.*)$/);
@@ -123,13 +128,15 @@ const levels = LEVELS.map((l) => {
             content = fixed;
           }
           const category = normalizeCategory(it.g);
+          const verifierFix = VERIFIER_FIXES[it.k];
+          if (verifierFix) fixLog.push(`${it.k}: ${verifierFix[1]}`);
           return {
             key: it.k,
             order: ii + 1,
             category,
             content,
             guidance: it.h ?? '',
-            verifiers: verifiersOf(it.w, l.lv),
+            verifiers: verifierFix ? verifierFix[0] : verifiersOf(it.w, l.lv),
             requireNvFirst: true,
             dueOffset: it.d,
             gpp: !!it.gpp,

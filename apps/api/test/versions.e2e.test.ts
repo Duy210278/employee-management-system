@@ -79,7 +79,8 @@ describe('sửa diễn đạt (T-V01)', () => {
     await save(draftId, (c) => Object.assign(itemIn(c, 'L1-1-1'), { verifiers: [], requireNvFirst: false }));
     const blocked = await admin.post(`${API}/versions/${draftId}/submit`).send({}).expect(400);
     expect(blocked.body.code).toBe('VALIDATION_FAILED');
-    await save(draftId, (c) => Object.assign(itemIn(c, 'L1-1-1'), { verifiers: ['buddy'], requireNvFirst: true }), '');
+    // Trả lại như v2.1: NV tự xác nhận
+    await save(draftId, (c) => Object.assign(itemIn(c, 'L1-1-1'), { verifiers: [], requireNvFirst: true }), '');
     const noNote = await admin.post(`${API}/versions/${draftId}/submit`).send({}).expect(400);
     expect(noNote.body.code).toBe('CHANGE_NOTE_REQUIRED');
   });

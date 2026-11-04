@@ -391,7 +391,7 @@ Mỗi đầu việc có danh sách vai trò cần xác nhận. Đầu việc ch�
 
 | Loại trong N2 | Cấu hình trong hệ thống | Ai phải xác nhận |
 |---|---|---|
-| NV tự làm | Phần NV + 1 người kiểm tra | NV báo hoàn thành, sau đó Buddy (L1) hoặc CHT (L2–L4) xác nhận |
+| NV tự làm | Chỉ phần NV, không chọn người xác nhận (như "NV tự đánh giá" bên dưới) | NV báo hoàn thành là xong. Ô người xác nhận để trống trong N2 (vd. L1-1-1 "Nhận việc") cũng hiểu là NV tự làm |
 | Buddy | Phần NV + Buddy | NV báo hoàn thành, Buddy xác nhận đạt |
 | CHT | Phần NV + CHT | |
 | QLKV | Phần NV + QLKV | |
@@ -1123,7 +1123,7 @@ Mật khẩu chung cho mọi tài khoản mẫu: `Demo@123`.
 | `nam@upharma.local` | NV Level 2, bắt đầu cách đây 138 ngày | Có doanh số và ca quan sát Rubric |
 | `moi@upharma.local` | Chưa duyệt | Demo BP ĐT duyệt đăng ký |
 
-Kèm theo: bộ lộ trình **v2.1 đang hiệu lực** (nạp từ N3, N4, N5 theo giả định mục 16) và một **bản nháp v2.2** có sẵn 2 thay đổi (bổ sung người xác nhận cho L1-1-1, sửa câu hướng dẫn một mục) để demo luồng phiên bản.
+Kèm theo: bộ lộ trình **v2.1 đang hiệu lực** (nạp từ N3, N4, N5 theo giả định mục 16) và một **bản nháp v2.2** có sẵn 2 thay đổi (bổ sung CHT cùng xác nhận L1-1-4, sửa câu hướng dẫn một mục) để demo luồng phiên bản.
 
 ### 14.13 Kịch bản trình diễn (khoảng 15 phút)
 
