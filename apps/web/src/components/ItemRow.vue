@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { roleShortFor, SESSION_LABEL, type TaskView } from '@lotrinh/shared';
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
+import { canBulk, useBulk } from '@/composables/bulkConfirm';
 import { fmtDate } from '@/format';
 import Icon from './Icon.vue';
 import ItemDetail from './ItemDetail.vue';
@@ -13,6 +14,10 @@ const props = withDefaults(defineProps<{ task: TaskView; refYear: number; showSt
 const open = ref(false);
 
 const t = computed(() => props.task);
+// Duyệt nhanh: màn hình có thanh duyệt và người xem xác nhận được mục này thì ô chọn thay cho ô trạng thái
+const bulk = useBulk();
+const selectable = computed(() => !!bulk && canBulk(t.value));
+watch(t, (v) => bulk?.sync(v));
 const a = computed(() => t.value.actions);
 const confirmedRoles = computed(() => t.value.confirmations.map((c) => c.role));
 const finished = computed(() => ['done', 'na', 'void'].includes(t.value.status));
@@ -51,7 +56,10 @@ const metaText = computed(() =>
       @keydown.enter.prevent="open = !open"
       @keydown.space.prevent="open = !open"
     >
-      <span class="chk" :class="chk.cls" aria-hidden="true">{{ chk.mark }}</span>
+      <label v-if="selectable && bulk" class="sel" @click.stop @keydown.stop>
+        <input type="checkbox" :checked="bulk.has(t.id)" :aria-label="`Chọn ${t.itemKey} để duyệt nhanh`" @change="bulk.toggle(t)" />
+      </label>
+      <span v-else class="chk" :class="chk.cls" aria-hidden="true">{{ chk.mark }}</span>
       <div class="t">
         <div class="t-top">
           <p class="t-title">{{ t.content }}</p>

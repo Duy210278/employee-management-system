@@ -10,6 +10,7 @@ import type {
   AssignmentRole,
   AuditLogResponse,
   ClockView,
+  ConfirmManyResult,
   CreateUserBodyT,
   ImportUsersResponse,
   JobName,
@@ -184,6 +185,7 @@ export function useMutate() {
 export const taskApi = {
   confirm: (t: TaskView, note: string) =>
     api.post<TaskView>(`/tasks/${t.id}/confirm`, { rowVersion: t.rowVersion, role: t.actions.confirmAs?.role, note: note || undefined }),
+  confirmMany: (tasks: TaskView[]) => api.post<ConfirmManyResult>('/tasks/confirm-many', { tasks: tasks.map((t) => ({ id: t.id, rowVersion: t.rowVersion })) }),
   undo: (t: TaskView) => api.post<TaskView>(`/tasks/${t.id}/undo`, { rowVersion: t.rowVersion }),
   rework: (t: TaskView, note: string) => api.post<TaskView>(`/tasks/${t.id}/rework`, { rowVersion: t.rowVersion, note }),
   status: (t: TaskView, status: Exclude<TaskStatus, 'done' | 'void'>, note: string) =>

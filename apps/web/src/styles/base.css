@@ -1112,6 +1112,44 @@ label.f.w-md {
 .chk.late {
   border-color: var(--bad);
 }
+/* Duyệt nhanh: ô chọn đầu việc người xem xác nhận được, thay cho ô trạng thái */
+.sel {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  margin-top: 1px;
+  cursor: pointer;
+}
+.sel input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+table.ck .ck-sel {
+  width: 1%;
+  padding-right: 0;
+}
+/* Thanh duyệt nhanh dính đáy màn hình, kèm danh sách mục chưa duyệt được */
+.bulk {
+  position: sticky;
+  bottom: 12px;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.bulk .alert {
+  width: 100%;
+  box-shadow: var(--shadow-2);
+}
+.bulk .savebar {
+  position: static;
+}
 .item .t {
   flex: 1;
   min-width: 0;
@@ -2659,6 +2697,17 @@ table.te td:has(> input[type='checkbox']) {
     position: absolute;
     top: 6px;
     right: 6px;
+    padding: 0;
+    width: auto;
+  }
+  /* Ô chọn duyệt nhanh ở góc phải thẻ, ngang dòng mã đầu việc */
+  table.ck tbody tr {
+    position: relative;
+  }
+  table.ck td.ck-sel {
+    position: absolute;
+    top: 12px;
+    right: 14px;
     padding: 0;
     width: auto;
   }

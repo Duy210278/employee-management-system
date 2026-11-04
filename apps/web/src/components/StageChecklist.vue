@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import { diffDays, type StageSignStepView } from '@lotrinh/shared';
+import { diffDays, type StageSignStepView, type TaskView } from '@lotrinh/shared';
 import { computed, reactive, ref, toRef, watch } from 'vue';
 import { runApi, useMutate, useRunTasks } from '@/api/queries';
+import { canBulk, provideBulk } from '@/composables/bulkConfirm';
 import { fmtDate, fmtDateTime } from '@/format';
+import BulkBar from './BulkBar.vue';
 import Icon from './Icon.vue';
 import RoleChip from './RoleChip.vue';
 import TaskTableRow from './TaskTableRow.vue';
@@ -23,9 +25,14 @@ const stages = computed(() =>
     const canSign = !!s.sign?.steps.some((x) => x.canSign);
     // Mở sẵn giai đoạn hiện tại (hoặc giai đoạn đầu khi lượt chưa bắt đầu), giai đoạn đã qua còn việc dở và giai đoạn đang chờ bạn ký
     const open = isCurrent || canSign || (currentIndex.value === -1 && s.index === 0) || (s.index < currentIndex.value && finished < tasks.length);
-    return { ...s, tasks, finished, overdue, isCurrent, open, canSign };
+    // Duyệt nhanh: các mục bạn xác nhận được ngay; có mục thì bảng mới hiện cột chọn
+    const ready = tasks.filter(canBulk);
+    return { ...s, tasks, finished, overdue, isCurrent, open, canSign, ready };
   }),
 );
+
+const bulk = provideBulk();
+const pickedIn = (ready: TaskView[]) => ready.filter((t) => bulk.has(t.id)).length;
 
 // Giai đoạn mở sẵn chỉ tính ở lần tải đầu; sau đó người dùng tự mở/đóng, ký xong thẻ không tự gập lại
 const opened = reactive(new Set<string>());
@@ -85,6 +92,18 @@ async function sign(stageKey: string, step: StageSignStepView) {
       <table v-if="s.tasks.length" class="rt click ck">
         <thead>
           <tr>
+            <th v-if="s.ready.length" class="ck-sel">
+              <label class="sel">
+                <input
+                  type="checkbox"
+                  :checked="pickedIn(s.ready) === s.ready.length"
+                  :indeterminate="pickedIn(s.ready) > 0 && pickedIn(s.ready) < s.ready.length"
+                  :aria-label="`Chọn ${s.ready.length} mục bạn xác nhận được trong ${s.label}`"
+                  :title="`Chọn ${s.ready.length} mục bạn xác nhận được`"
+                  @change="bulk.setMany(s.ready, ($event.target as HTMLInputElement).checked)"
+                />
+              </label>
+            </th>
             <th>Mã</th>
             <th>Đầu việc</th>
             <th>Hạn</th>
@@ -94,7 +113,7 @@ async function sign(stageKey: string, step: StageSignStepView) {
           </tr>
         </thead>
         <tbody>
-          <TaskTableRow v-for="t in s.tasks" :key="t.id" :task="t" :ref-year="refYear" />
+          <TaskTableRow v-for="t in s.tasks" :key="t.id" :task="t" :ref-year="refYear" :sel="s.ready.length > 0" />
         </tbody>
       </table>
       <div v-if="s.sign" class="signbar">
@@ -110,5 +129,6 @@ async function sign(stageKey: string, step: StageSignStepView) {
         </span>
       </div>
     </details>
+    <BulkBar />
   </div>
 </template>

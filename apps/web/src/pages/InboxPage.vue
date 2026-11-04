@@ -1,10 +1,12 @@
 <script setup lang="ts">
-import { ROLE_SHORT, runTitle, type SignatureTodo, type TaskRole } from '@lotrinh/shared';
+import { ROLE_SHORT, runTitle, type SignatureTodo, type TaskRole, type TaskView } from '@lotrinh/shared';
 import { computed, ref } from 'vue';
 import { useInbox } from '@/api/queries';
 import Avatar from '@/components/Avatar.vue';
+import BulkBar from '@/components/BulkBar.vue';
 import Icon from '@/components/Icon.vue';
 import ItemRow from '@/components/ItemRow.vue';
+import { canBulk, provideBulk } from '@/composables/bulkConfirm';
 import { fmtDate, yearOf } from '@/format';
 
 /** "Việc cần xử lý" của Buddy, CHT, QLKV, BP ĐT (mục 11.3); với NV làm Buddy là tab "Việc kèm cặp" */
@@ -14,6 +16,12 @@ const empty = computed(() => !!data.value && !data.value.groups.length && !data.
 const KIND_LABEL: Record<SignatureTodo['kind'], string> = { review: 'Phiếu đánh giá', stage: 'Ký giai đoạn', pause: 'Tạm dừng' };
 const waiting = (roles: TaskRole[]) => roles.map((r) => ROLE_SHORT[r]).join(' + ');
 const ACTION_LABEL: Record<SignatureTodo['kind'], string> = { review: 'Mở phiếu', stage: 'Mở checklist', pause: 'Xem đề xuất' };
+
+// Duyệt nhanh: chọn từng mục, hoặc chọn hết các mục chờ bạn xác nhận của một nhân viên
+const bulk = provideBulk();
+const readyOf = (items: TaskView[]) => items.filter(canBulk);
+const allPicked = (items: TaskView[]) => readyOf(items).every((t) => bulk.has(t.id));
+const readyCount = computed(() => (data.value?.groups ?? []).reduce((n, g) => n + readyOf(g.items).length, 0));
 </script>
 
 <template>
@@ -70,6 +78,7 @@ const ACTION_LABEL: Record<SignatureTodo['kind'], string> = { review: 'Mở phi�
 
     <template v-if="data.groups.length">
       <div class="sec">Việc theo nhân viên · {{ data.groups.length }}</div>
+      <div v-if="readyCount > 1" class="sm mut">Đánh dấu ô vuông ở các mục để xác nhận đạt nhiều mục một lần.</div>
       <div v-for="g in data.groups" :key="g.run.id" class="card clip">
         <div class="grp-head">
           <div class="who">
@@ -86,11 +95,15 @@ const ACTION_LABEL: Record<SignatureTodo['kind'], string> = { review: 'Mở phi�
             <span class="bar"><i :style="{ width: Math.round(g.run.progress.pct * 100) + '%' }"></i></span>
             {{ g.run.progress.done }}/{{ g.run.progress.total }} · {{ Math.round(g.run.progress.pct * 100) }}%
           </span>
+          <button v-if="readyOf(g.items).length > 1" class="btn sm" type="button" @click="bulk.setMany(readyOf(g.items), !allPicked(g.items))">
+            {{ allPicked(g.items) ? 'Bỏ chọn' : `Chọn ${readyOf(g.items).length} mục chờ bạn` }}
+          </button>
           <RouterLink class="btn sm" :to="`/nhan-su/${g.staff.id}`">Mở hồ sơ</RouterLink>
         </div>
         <ItemRow v-for="t in g.items" :key="t.id" :task="t" :ref-year="refYear" />
       </div>
     </template>
+    <BulkBar />
 
     <template v-if="data.upcoming.length">
       <div class="sec">Lượt sắp bắt đầu</div>

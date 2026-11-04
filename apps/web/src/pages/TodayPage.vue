@@ -2,13 +2,17 @@
 import type { TaskView } from '@lotrinh/shared';
 import { computed } from 'vue';
 import { useToday } from '@/api/queries';
+import BulkBar from '@/components/BulkBar.vue';
 import ItemRow from '@/components/ItemRow.vue';
 import LevelOverview from '@/components/LevelOverview.vue';
 import PathBar from '@/components/PathBar.vue';
+import { provideBulk } from '@/composables/bulkConfirm';
 import { diffDays, fmtDate, givenName, yearOf } from '@/format';
 
 /** Màn "Hôm nay" của NV (mục 11.1) */
 const { data, isLoading, error } = useToday();
+// Duyệt nhanh: NV chọn nhiều mục đã làm xong rồi báo hoàn thành một lần
+provideBulk();
 
 const today = computed(() => data.value?.today ?? '');
 const refYear = computed(() => (today.value ? yearOf(today.value) : new Date().getFullYear()));
@@ -131,7 +135,9 @@ const needsAttention = computed(() => !!data.value?.reviewToSign || !!run.value?
       <div>Chờ phiếu đánh giá và quyết định chuyển Level.</div>
     </div>
     <div class="sm mut">
-      Bấm vào một mục để xem hướng dẫn và báo hoàn thành. Người xác nhận sẽ thấy mục đó trong "Việc cần xử lý" của họ. Phiên bản lộ trình: v{{ run.versionCode }}.
+      Bấm vào một mục để xem hướng dẫn và báo hoàn thành; làm xong nhiều mục thì đánh dấu ô vuông rồi báo hoàn thành một lần. Người xác nhận sẽ thấy mục
+      đó trong "Việc cần xử lý" của họ. Phiên bản lộ trình: v{{ run.versionCode }}.
     </div>
+    <BulkBar />
   </div>
 </template>
