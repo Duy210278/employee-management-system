@@ -3510,10 +3510,10 @@
   "framework": {
     "intro": [
       "Tài liệu này giải quyết bốn vấn đề cốt lõi của thực trạng hiện tại:",
-      "Nhân viên không biết mình cần làm gì — thiết lập mục tiêu hành vi cụ thể, đo lường được theo từng Level",
-      "Nhà thuốc đùn đẩy trách nhiệm đào tạo — phân công rõ 3 bên không thể đùn đẩy: Buddy/CHT – Khu vực – BP Đào tạo",
-      "Buddy hướng dẫn bằng bản năng — cung cấp checklist theo tuần/ca làm việc với hướng dẫn cụ thể",
-      "Thiếu tuân thủ GPP pháp lý — tích hợp module GPP bắt buộc và hồ sơ chứng minh đào tạo — xem Phụ lục B"
+      "- Nhân viên không biết mình cần làm gì — thiết lập mục tiêu hành vi cụ thể, đo lường được theo từng Level",
+      "- Nhà thuốc đùn đẩy trách nhiệm đào tạo — phân công rõ 3 bên không thể đùn đẩy: Buddy/CHT – Khu vực – BP Đào tạo",
+      "- Buddy hướng dẫn bằng bản năng — cung cấp checklist theo tuần/ca làm việc với hướng dẫn cụ thể",
+      "- Thiếu tuân thủ GPP pháp lý — tích hợp module GPP bắt buộc và hồ sơ chứng minh đào tạo — xem Phụ lục B"
     ],
     "levelTable": [
       [
@@ -3542,7 +3542,7 @@
       ],
       [
         "Level 4",
-        "",
+        "Trên 24 tháng",
         "Chuyên gia",
         "Trở thành chuẩn mực — truyền nghề có cấu trúc, quản lý ngành hàng, đóng góp tài liệu hệ thống"
       ]

@@ -280,6 +280,7 @@ const ensureFramework = () => (c.value.framework = { intro: [], levelTable: [['L
       <template v-if="c.framework">
         <b class="sm">Đoạn giới thiệu</b>
         <TextListEditor :items="c.framework.intro" :readonly="ro" add-label="+ Thêm đoạn" />
+        <div v-if="!ro" class="sm mut">Đoạn bắt đầu bằng "- " hiện thành gạch đầu dòng.</div>
         <b class="sm">Bảng định nghĩa Level</b>
         <TableEditor :rows="c.framework.levelTable" :readonly="ro" />
         <b class="sm">Bảng trách nhiệm ba bên</b>

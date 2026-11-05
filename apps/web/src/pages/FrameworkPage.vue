@@ -17,6 +17,18 @@ const level = computed(() => fw.value?.levels.find((l) => l.key === levelKey.val
 const rule = computed(() => (level.value ? kpiRule(level.value) : null));
 const form = computed(() => (level.value ? reviewFormOf(level.value) : null));
 const refYear = computed(() => Number(fw.value?.today.slice(0, 4) ?? 0));
+/** Đoạn giới thiệu: các đoạn liền nhau bắt đầu bằng "- " gộp thành một danh sách gạch đầu dòng */
+const introBlocks = computed(() => {
+  const out: { list: boolean; lines: string[] }[] = [];
+  for (const raw of fw.value?.framework?.intro ?? []) {
+    const m = /^\s*[-•]\s+/.exec(raw);
+    const line = m ? raw.slice(m[0].length) : raw;
+    const last = out[out.length - 1];
+    if (m && last?.list) last.lines.push(line);
+    else out.push({ list: !!m, lines: [line] });
+  }
+  return out;
+});
 usePageHeader(() =>
   fw.value ? { desc: `Bộ lộ trình v${fw.value.versionCode}${fw.value.effectiveFrom ? ` · hiệu lực từ ${fmtDate(fw.value.effectiveFrom, refYear.value)}` : ''}` } : null,
 );
@@ -35,7 +47,12 @@ usePageHeader(() =>
 
     <template v-if="fw.framework">
       <div class="card pad stack">
-        <p v-for="(p, i) in fw.framework.intro" :key="i">{{ p }}</p>
+        <template v-for="(b, i) in introBlocks" :key="i">
+          <ul v-if="b.list" class="ul">
+            <li v-for="(x, j) in b.lines" :key="j">{{ x }}</li>
+          </ul>
+          <p v-else>{{ b.lines[0] }}</p>
+        </template>
       </div>
       <div v-for="[t, rows] in ([['Định nghĩa Level', fw.framework.levelTable], ['Trách nhiệm ba bên', fw.framework.responsibilityTable], ['Chỉ tiêu doanh số theo Level', fw.framework.kpiTable]] as const)" :key="t" class="card pad stack">
         <div class="h2">{{ t }}</div>

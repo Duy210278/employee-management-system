@@ -181,7 +181,8 @@ const content = {
     ],
   },
   framework: {
-    intro: OV.sys.goals,
+    // Đoạn đầu là câu dẫn, các đoạn sau hiện thành gạch đầu dòng (tiền tố "- ")
+    intro: OV.sys.goals.map((g, i) => (i === 0 ? g : `- ${g}`)),
     levelTable: OV.sys.levels,
     responsibilityTable: OV.sys.resp,
     kpiTable: OV.sys.kpi,
