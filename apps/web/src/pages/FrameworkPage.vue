@@ -3,7 +3,7 @@ import { kpiRule, reviewFormOf, ROLE_SHORT } from '@lotrinh/shared';
 import { computed, ref } from 'vue';
 import { useFramework, useMe } from '@/api/queries';
 import { usePageHeader } from '@/composables/pageHeader';
-import GppModules from '@/components/GppModules.vue';
+import FrameworkAppendices from '@/components/FrameworkAppendices.vue';
 import { fmtDate } from '@/format';
 
 /**
@@ -172,29 +172,6 @@ usePageHeader(() =>
       </div>
     </template>
 
-    <GppModules />
-
-    <div class="card pad stack">
-      <div class="h2">Phụ lục C. Rubric quan sát tư vấn (dùng chung mọi Level)</div>
-      <div class="sm mut">
-        Ca đạt khi tổng ≥ {{ fw.rubric.passTotal }}/{{ fw.rubric.criteria.length * fw.rubric.scaleMax }}<template v-if="fw.rubric.forbidOne"> và không tiêu chí nào 1 điểm</template>.
-        Tối thiểu {{ fw.rubric.minObsPerMonth }} ca/tháng, mục tiêu {{ fw.rubric.targetRate }}% ca đạt.
-      </div>
-      <div class="tw">
-        <table>
-          <thead>
-            <tr><th>Tiêu chí</th><th>1 điểm</th><th>2 điểm</th><th>3 điểm</th></tr>
-          </thead>
-          <tbody>
-            <tr v-for="c in fw.rubric.criteria" :key="c.key">
-              <td><b>{{ c.name }}</b> <span v-if="c.critical" class="pill bad">Trọng yếu</span></td>
-              <td class="sm">{{ c.d1 }}</td>
-              <td class="sm">{{ c.d2 }}</td>
-              <td class="sm">{{ c.d3 }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
+    <FrameworkAppendices :rubric="fw.rubric" />
   </div>
 </template>

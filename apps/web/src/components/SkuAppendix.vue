@@ -3,9 +3,10 @@ import { computed } from 'vue';
 
 /**
  * Phụ lục A của Khung năng lực N1 (docs/nguon/Khung_Nang_Luc_Upharma_v2.1.docx): danh sách SKU theo Level.
- * Nội dung tĩnh chép nguyên văn từ N1; chỉ hiện phần của Level đang học. Danh sách SKU chi tiết nằm trên LMS.
+ * Nội dung tĩnh chép nguyên văn từ N1. Danh sách SKU chi tiết nằm trên LMS.
+ * level: chỉ hiện phần của Level đó, bỏ trống thì hiện đủ A.1–A.4. bare: không bọc thẻ, không tiêu đề (trong khối Phụ lục mở rộng).
  */
-const props = defineProps<{ level: number }>();
+const props = defineProps<{ level?: number; bare?: boolean }>();
 
 interface Part {
   title: string;
@@ -46,19 +47,21 @@ const PARTS: Record<number, Part> = {
   },
 };
 
-const part = computed(() => PARTS[props.level] ?? null);
+const parts = computed(() => (props.level ? (PARTS[props.level] ? [PARTS[props.level]] : []) : Object.values(PARTS)));
 </script>
 
 <template>
-  <div v-if="part" class="card pad stack">
-    <div class="h2">Phụ lục A. Danh sách SKU theo Level</div>
-    <div class="b">{{ part.title }}</div>
-    <div>{{ part.intro }}</div>
-    <ul class="ul">
-      <li v-for="(g, i) in part.groups" :key="g">Nhóm {{ i + 1 }} — {{ g }}</li>
-    </ul>
-    <div class="alert info">
-      <div><b>⚑ {{ part.noteTitle }}:</b> {{ part.note }}</div>
-    </div>
+  <div v-if="parts.length" :class="bare ? 'stack' : 'card pad stack'">
+    <div v-if="!bare" class="h2">Phụ lục A. Danh sách SKU theo Level</div>
+    <template v-for="part in parts" :key="part.title">
+      <div class="b">{{ part.title }}</div>
+      <div>{{ part.intro }}</div>
+      <ul class="ul">
+        <li v-for="(g, i) in part.groups" :key="g">Nhóm {{ i + 1 }} — {{ g }}</li>
+      </ul>
+      <div class="alert info">
+        <div><b>⚑ {{ part.noteTitle }}:</b> {{ part.note }}</div>
+      </div>
+    </template>
   </div>
 </template>

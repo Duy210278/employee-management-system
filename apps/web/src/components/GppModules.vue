@@ -2,8 +2,9 @@
 /**
  * Phụ lục B của Khung năng lực N1 (docs/nguon/Khung_Nang_Luc_Upharma_v2.1.docx): module GPP tối thiểu theo Level.
  * Nội dung tĩnh chép nguyên văn từ N1; currentLevel tô nổi các module của Level đang học.
+ * bare: không bọc thẻ, không tiêu đề (trong khối Phụ lục mở rộng).
  */
-defineProps<{ currentLevel?: number }>();
+defineProps<{ currentLevel?: number; bare?: boolean }>();
 
 const MODULES: { level: number; name: string }[] = [
   { level: 1, name: 'Nguyên tắc GPP cơ bản: Quy trình bán hàng' },
@@ -16,8 +17,8 @@ const MODULES: { level: number; name: string }[] = [
 </script>
 
 <template>
-  <div class="card pad stack">
-    <div class="h2">Phụ lục B. Module GPP tối thiểu (bắt buộc — Bộ Y tế)</div>
+  <div :class="bare ? 'stack' : 'card pad stack'">
+    <div v-if="!bare" class="h2">Phụ lục B. Module GPP tối thiểu (bắt buộc — Bộ Y tế)</div>
     <div class="sm mut">
       Module GPP tối thiểu bắt buộc từ Level 2.<template v-if="currentLevel"> Các module của Level {{ currentLevel }} được tô nổi.</template>
     </div>
