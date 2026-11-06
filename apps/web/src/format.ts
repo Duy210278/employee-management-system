@@ -2,6 +2,14 @@ import { DEFAULT_TZ } from '@lotrinh/shared';
 
 export { fmtDate, yearOf, diffDays } from '@lotrinh/shared';
 
+/** Chuẩn hóa để tìm kiếm không phân biệt hoa thường và dấu tiếng Việt: "Trần Văn Hùng" → "tran van hung" */
+export const fold = (s: string) =>
+  s
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/đ/g, 'd');
+
 const dtFormat = new Intl.DateTimeFormat('vi-VN', {
   timeZone: DEFAULT_TZ,
   day: '2-digit',
