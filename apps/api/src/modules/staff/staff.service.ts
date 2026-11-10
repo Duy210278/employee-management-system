@@ -225,7 +225,7 @@ export class StaffService {
         staffId: st.id,
         levelKey: body.levelKey,
         startDate,
-        version: { id: version.id, criteriaLine: version.criteriaLine, content: version.content },
+        version: { id: version.id, content: version.content },
         people: { buddy: body.buddyId ?? null, cht: cht.id, qlkv: qlkv.id },
         createdBy: user.id,
       });

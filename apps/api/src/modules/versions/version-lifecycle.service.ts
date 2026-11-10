@@ -66,10 +66,11 @@ export class VersionLifecycleService {
       .leftJoin(submitter, eq(submitter.id, versions.submittedBy))
       .leftJoin(approver, eq(approver.id, versions.approvedBy));
     const runs = await this.db
-      .select({ line: levelRuns.criteriaLine, n: sql<number>`count(*)::int` })
+      .select({ line: versions.criteriaLine, n: sql<number>`count(*)::int` })
       .from(levelRuns)
+      .innerJoin(versions, eq(versions.id, levelRuns.versionId))
       .where(eq(levelRuns.status, 'active'))
-      .groupBy(levelRuns.criteriaLine);
+      .groupBy(versions.criteriaLine);
     const today = await this.clock.today();
     const currentId = (await findVersionForDate(this.db, today).catch(() => null))?.id ?? null;
 

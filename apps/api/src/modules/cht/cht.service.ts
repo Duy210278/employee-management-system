@@ -203,7 +203,7 @@ export class ChtService {
         track: body.track,
         meta: { trainingMode: body.trainingMode, previousStoreName, seniorityMonths },
         startDate: body.startDate,
-        version: { id: version.id, criteriaLine: version.criteriaLine, content: version.content },
+        version: { id: version.id, content: version.content },
         people: { buddy: buddy?.id ?? null, qlkv: qlkv.id, trainer: trainer.id },
         createdBy: user.id,
       });

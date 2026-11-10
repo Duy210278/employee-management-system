@@ -195,7 +195,6 @@ export const levelRuns = pgTable(
     versionId: integer('version_id')
       .notNull()
       .references(() => versions.id),
-    criteriaLine: text('criteria_line').notNull(),
     startDate: day('start_date').notNull(),
     plannedEnd: day('planned_end').notNull(),
     status: text('status').$type<RunStatus>().notNull().default('active'),

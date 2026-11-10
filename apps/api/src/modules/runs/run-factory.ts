@@ -35,7 +35,7 @@ export interface CreateRunInput {
   track?: Track;
   meta?: RunMeta;
   startDate: IsoDate;
-  version: { id: number; criteriaLine: string; content: VersionContent };
+  version: { id: number; content: VersionContent };
   people: { buddy?: number | null; cht?: number | null; qlkv?: number | null; trainer?: number | null };
   createdBy: number | null;
 }
@@ -55,7 +55,6 @@ export async function createRun(tx: DbLike, input: CreateRunInput) {
       track,
       meta: input.meta ?? {},
       versionId: input.version.id,
-      criteriaLine: input.version.criteriaLine,
       startDate: input.startDate,
       plannedEnd: plannedEnd(level, input.startDate),
       status: 'active',

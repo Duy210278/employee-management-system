@@ -296,7 +296,7 @@ export class ReviewsService {
           staffId: ctx.staff.id,
           levelKey: L + 1,
           startDate: today,
-          version: { id: version.id, criteriaLine: version.criteriaLine, content: version.content },
+          version: { id: version.id, content: version.content },
           people: { buddy: L + 1 <= 2 ? ctx.people.buddyId : null, cht: ctx.people.chtId, qlkv: ctx.people.qlkvId },
           createdBy: userId,
         });

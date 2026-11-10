@@ -139,7 +139,7 @@ export async function seedDatabase(db: Db, today: IsoDate): Promise<void> {
         staffId: st.id,
         levelKey: s.level,
         startDate: start,
-        version: { id: version.id, criteriaLine: version.criteriaLine!, content },
+        version: { id: version.id, content },
         people,
         createdBy: adminId,
       });
@@ -165,7 +165,7 @@ export async function seedDatabase(db: Db, today: IsoDate): Promise<void> {
         track: SEED_CHT.track,
         meta: { trainingMode: SEED_CHT.trainingMode, previousStoreName: null, seniorityMonths: null },
         startDate: start,
-        version: { id: version.id, criteriaLine: version.criteriaLine!, content },
+        version: { id: version.id, content },
         people: { qlkv: people.qlkv, trainer: user(SEED_CHT.trainer).id },
         createdBy: adminId,
       });

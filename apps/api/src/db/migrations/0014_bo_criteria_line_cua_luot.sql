@@ -1,0 +1,1 @@
+ALTER TABLE "level_runs" DROP COLUMN "criteria_line";

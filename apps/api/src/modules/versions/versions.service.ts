@@ -38,15 +38,20 @@ export class VersionsService {
    * R02: lượt Level gắn với dòng tiêu chí; câu chữ hiển thị lấy từ bản mới nhất đã có hiệu lực trong dòng.
    * Lượt bắt đầu trước ngày hiệu lực của chính phiên bản mình (lượt tương lai) thì dùng phiên bản đã gắn.
    */
-  async contentForRun(run: { versionId: number; criteriaLine: string }, today: IsoDate): Promise<LoadedVersion> {
-    const [latest] = await this.db
-      .select({ id: versions.id, code: versions.code, content: versions.content })
-      .from(versions)
-      .where(and(PUBLISHED, eq(versions.criteriaLine, run.criteriaLine), lte(versions.effectiveFrom, today)))
-      .orderBy(desc(versions.effectiveFrom), desc(versions.id))
-      .limit(1);
-    const row = latest ?? (await this.db.select({ id: versions.id, code: versions.code, content: versions.content }).from(versions).where(eq(versions.id, run.versionId)))[0];
-    if (!row) throw new Error(`Không tìm thấy phiên bản của dòng tiêu chí ${run.criteriaLine}`);
+  async contentForRun(run: { versionId: number }, today: IsoDate): Promise<LoadedVersion> {
+    const pick = { id: versions.id, code: versions.code, content: versions.content };
+    const [own] = await this.db.select({ ...pick, line: versions.criteriaLine }).from(versions).where(eq(versions.id, run.versionId));
+    if (!own) throw new Error(`Không tìm thấy phiên bản ${run.versionId} của lượt`);
+    // Dòng tiêu chí của lượt là dòng của phiên bản đã gắn (lượt chỉ gắn với bản đã ban hành nên luôn có dòng)
+    const [latest] = own.line
+      ? await this.db
+          .select(pick)
+          .from(versions)
+          .where(and(PUBLISHED, eq(versions.criteriaLine, own.line), lte(versions.effectiveFrom, today)))
+          .orderBy(desc(versions.effectiveFrom), desc(versions.id))
+          .limit(1)
+      : [];
+    const row = latest ?? own;
     return { id: row.id, code: row.code, content: this.parse(row.id, row.content) };
   }
 }
