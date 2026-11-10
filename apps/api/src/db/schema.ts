@@ -1,5 +1,23 @@
-import type { AccountRole, AssignmentRole, AttritionRisk, CriterionResult, ReviewResult, TaskRole, TaskStatus, Track, UserStatus, VersionContent } from '@lotrinh/shared';
-import { sql } from 'drizzle-orm';
+import {
+  ACCOUNT_ROLES,
+  ASSIGNMENT_ROLES,
+  ATTRITION_RISKS,
+  CHT_TRACKS,
+  TASK_ROLES,
+  TASK_STATUSES,
+  USER_STATUSES,
+  type AccountRole,
+  type AssignmentRole,
+  type AttritionRisk,
+  type CriterionResult,
+  type ReviewResult,
+  type TaskRole,
+  type TaskStatus,
+  type Track,
+  type UserStatus,
+  type VersionContent,
+} from '@lotrinh/shared';
+import { sql, type Column } from 'drizzle-orm';
 import {
   bigserial,
   boolean,
@@ -23,6 +41,8 @@ import {
  */
 
 const ts = (name: string) => timestamp(name, { withTimezone: true });
+/** CHECK: cột chỉ nhận giá trị trong danh sách (danh sách là hằng trong code, không phải dữ liệu người dùng); NULL vẫn qua */
+const oneOf = (col: Column, values: readonly string[]) => sql`${col} in (${sql.raw(values.map((v) => `'${v}'`).join(', '))})`;
 const day = (name: string) => date(name, { mode: 'string' });
 
 // ---------- 13.1 Tổ chức và người dùng ----------
@@ -65,7 +85,11 @@ export const users = pgTable('users', {
   rowVersion: integer('row_version').notNull().default(0),
   lastSeenAt: ts('last_seen_at'),
   createdAt: ts('created_at').notNull().defaultNow(),
-});
+}, (t) => [
+  check('users_role_ck', oneOf(t.role, ACCOUNT_ROLES)),
+  check('users_status_ck', oneOf(t.status, USER_STATUSES)),
+  check('users_requested_role_ck', oneOf(t.requestedRole, ACCOUNT_ROLES)),
+]);
 
 /** Thông báo trong ứng dụng (mục 10.6); dedupe_key chống trùng khi job chạy lại (mục 14.9) */
 export const notifications = pgTable(
@@ -120,7 +144,8 @@ export const credentials = pgTable('credentials', {
  * draft: nháp · pending: chờ duyệt · active: đã ban hành (đang, sắp hoặc hết hiệu lực tính theo ngày hiệu lực).
  * expired giữ lại cho dữ liệu cũ; trạng thái hiển thị tính bằng versionState().
  */
-export type VersionStatus = 'draft' | 'pending' | 'active' | 'expired';
+export const VERSION_STATUSES = ['draft', 'pending', 'active', 'expired'] as const;
+export type VersionStatus = (typeof VERSION_STATUSES)[number];
 
 export const versions = pgTable('versions', {
   id: serial('id').primaryKey(),
@@ -146,7 +171,11 @@ export const versions = pgTable('versions', {
   approvedBy: integer('approved_by').references(() => users.id),
   approvedAt: ts('approved_at'),
   createdAt: ts('created_at').notNull().defaultNow(),
-});
+}, (t) => [
+  check('versions_status_ck', oneOf(t.status, VERSION_STATUSES)),
+  check('versions_change_kind_ck', oneOf(t.changeKind, ['text', 'criteria'])),
+  check('versions_effective_ck', sql`${t.effectiveTo} is null or ${t.effectiveFrom} is null or ${t.effectiveTo} >= ${t.effectiveFrom}`),
+]);
 
 // ---------- 13.3 Vận hành ----------
 
@@ -168,10 +197,14 @@ export const staff = pgTable('staff', {
   stoppedAt: ts('stopped_at'),
   stoppedBy: integer('stopped_by').references(() => users.id),
   createdAt: ts('created_at').notNull().defaultNow(),
-});
+}, (t) => [
+  check('staff_level_ck', sql`${t.currentLevel} between 1 and 4`),
+  uniqueIndex('staff_employee_code_uq').on(t.employeeCode).where(sql`${t.employeeCode} is not null`),
+]);
 
 /** promoted: NVBH thăng chức Cửa hàng trưởng, lượt NVBH đóng và chuyển sang lượt CHT */
-export type RunStatus = 'active' | 'paused' | 'review' | 'passed' | 'extended' | 'failed' | 'stopped' | 'promoted';
+export const RUN_STATUSES = ['active', 'paused', 'review', 'passed', 'extended', 'failed', 'stopped', 'promoted'] as const;
+export type RunStatus = (typeof RUN_STATUSES)[number];
 
 /** Thông tin riêng của lượt onboarding CHT (tab "Thông tin CHT" trong file Excel) */
 export interface RunMeta {
@@ -204,7 +237,15 @@ export const levelRuns = pgTable(
     createdBy: integer('created_by').references(() => users.id),
     createdAt: ts('created_at').notNull().defaultNow(),
   },
-  (t) => [index('level_runs_staff_idx').on(t.staffId)],
+  (t) => [
+    index('level_runs_staff_idx').on(t.staffId),
+    check('level_runs_level_ck', sql`${t.levelKey} between 1 and 4`),
+    check('level_runs_track_ck', oneOf(t.track, ['nvbh', ...CHT_TRACKS])),
+    check('level_runs_status_ck', oneOf(t.status, RUN_STATUSES)),
+    check('level_runs_dates_ck', sql`${t.plannedEnd} >= ${t.startDate}`),
+    // Mỗi nhân viên chỉ một lượt đang mở (cùng danh sách với OPEN_RUN_STATUSES ở runs/task-views.ts)
+    uniqueIndex('level_runs_one_open_uq').on(t.staffId).where(sql`${t.status} in ('active', 'paused', 'review')`),
+  ],
 );
 
 export const runAssignments = pgTable(
@@ -222,7 +263,14 @@ export const runAssignments = pgTable(
     /** null: phân công đang hiệu lực */
     toDate: day('to_date'),
   },
-  (t) => [index('run_assignments_run_idx').on(t.runId), index('run_assignments_user_idx').on(t.userId)],
+  (t) => [
+    index('run_assignments_run_idx').on(t.runId),
+    index('run_assignments_user_idx').on(t.userId),
+    check('run_assignments_role_ck', oneOf(t.role, ASSIGNMENT_ROLES)),
+    check('run_assignments_dates_ck', sql`${t.toDate} is null or ${t.toDate} >= ${t.fromDate}`),
+    // Mỗi vai trò chỉ một người đang hiệu lực
+    uniqueIndex('run_assignments_active_uq').on(t.runId, t.role).where(sql`${t.toDate} is null`),
+  ],
 );
 
 export const runTasks = pgTable(
@@ -245,7 +293,13 @@ export const runTasks = pgTable(
     rowVersion: integer('row_version').notNull().default(0),
     updatedAt: ts('updated_at').notNull().defaultNow(),
   },
-  (t) => [uniqueIndex('run_tasks_run_item_uq').on(t.runId, t.itemKey)],
+  (t) => [
+    uniqueIndex('run_tasks_run_item_uq').on(t.runId, t.itemKey),
+    check('run_tasks_status_ck', oneOf(t.status, TASK_STATUSES)),
+    check('run_tasks_dates_ck', sql`${t.dueDate} >= ${t.openDate}`),
+    check('run_tasks_done_ck', sql`${t.status} <> 'done' or ${t.doneDate} is not null`),
+    check('run_tasks_na_ck', sql`${t.status} <> 'na' or ${t.naReason} is not null`),
+  ],
 );
 
 export const taskConfirmations = pgTable(
@@ -270,6 +324,8 @@ export const taskConfirmations = pgTable(
   (t) => [
     uniqueIndex('task_confirmations_active_uq').on(t.taskId, t.role).where(sql`revoked_at is null`),
     index('task_confirmations_task_idx').on(t.taskId),
+    check('task_confirmations_role_ck', oneOf(t.role, TASK_ROLES)),
+    check('task_confirmations_proxy_ck', oneOf(t.proxyRole, TASK_ROLES)),
   ],
 );
 
@@ -302,10 +358,15 @@ export const taskEvents = pgTable(
     data: jsonb('data').$type<DateChangeData>(),
     at: ts('at').notNull(),
   },
-  (t) => [index('task_events_task_idx').on(t.taskId)],
+  (t) => [
+    index('task_events_task_idx').on(t.taskId),
+    check('task_events_role_ck', oneOf(t.role, TASK_ROLES)),
+    check('task_events_proxy_ck', oneOf(t.proxyRole, TASK_ROLES)),
+  ],
 );
 
-export type PauseStatus = 'pending' | 'approved' | 'rejected';
+export const PAUSE_STATUSES = ['pending', 'approved', 'rejected'] as const;
+export type PauseStatus = (typeof PAUSE_STATUSES)[number];
 
 /** Tạm dừng lượt Level (mục 9.3): CHT đề xuất, QLKV hoặc BP ĐT duyệt */
 export const runPauses = pgTable(
@@ -327,7 +388,11 @@ export const runPauses = pgTable(
     decidedAt: ts('decided_at'),
     decisionNote: text('decision_note'),
   },
-  (t) => [index('run_pauses_run_idx').on(t.runId)],
+  (t) => [
+    index('run_pauses_run_idx').on(t.runId),
+    check('run_pauses_status_ck', oneOf(t.status, PAUSE_STATUSES)),
+    check('run_pauses_dates_ck', sql`${t.toDate} >= ${t.fromDate}`),
+  ],
 );
 
 /** Nhật ký theo dõi hằng ngày của onboarding CHT: Đào tạo ghi sau mỗi lần check-in, quản lý ghi chú */
@@ -367,7 +432,7 @@ export const runEvaluations = pgTable('run_evaluations', {
   confirmedBy: integer('confirmed_by').references(() => users.id),
   confirmedAt: ts('confirmed_at'),
   confirmNote: text('confirm_note'),
-});
+}, (t) => [check('run_evaluations_risk_ck', oneOf(t.risk, ATTRITION_RISKS))]);
 
 // ---------- Đánh giá (mục 11.5) ----------
 
@@ -386,7 +451,10 @@ export const salesMonthly = pgTable(
     enteredBy: integer('entered_by').references(() => users.id),
     at: ts('at').notNull().defaultNow(),
   },
-  (t) => [uniqueIndex('sales_monthly_run_month_uq').on(t.runId, t.monthIndex)],
+  (t) => [
+    uniqueIndex('sales_monthly_run_month_uq').on(t.runId, t.monthIndex),
+    check('sales_monthly_source_ck', oneOf(t.source, ['manual', 'pos'])),
+  ],
 );
 
 /** Ca quan sát Rubric (Phụ lục C): điểm theo mã tiêu chí của phiên bản */
@@ -429,7 +497,11 @@ export const levelReviews = pgTable(
     rowVersion: integer('row_version').notNull().default(0),
     createdAt: ts('created_at').notNull().defaultNow(),
   },
-  (t) => [uniqueIndex('level_reviews_run_round_uq').on(t.runId, t.round)],
+  (t) => [
+    uniqueIndex('level_reviews_run_round_uq').on(t.runId, t.round),
+    check('level_reviews_result_ck', oneOf(t.result, ['pass', 'extend', 'fail'])),
+    check('level_reviews_status_ck', oneOf(t.status, ['draft', 'signing', 'done'])),
+  ],
 );
 
 /**
@@ -457,6 +529,7 @@ export const signoffs = pgTable(
     uniqueIndex('signoffs_stage_step_uq').on(t.runId, t.stageKey, t.step).where(sql`${t.stageKey} is not null`),
     uniqueIndex('signoffs_review_step_uq').on(t.reviewId, t.step).where(sql`${t.reviewId} is not null`),
     index('signoffs_run_idx').on(t.runId),
+    check('signoffs_role_ck', oneOf(t.role, TASK_ROLES)),
   ],
 );
 
@@ -469,4 +542,4 @@ export const auditLogs = pgTable('audit_logs', {
   payload: jsonb('payload'),
   at: ts('at').notNull().defaultNow(),
   ip: text('ip'),
-});
+}, (t) => [index('audit_logs_entity_idx').on(t.entity, t.entityId), index('audit_logs_at_idx').on(t.at)]);

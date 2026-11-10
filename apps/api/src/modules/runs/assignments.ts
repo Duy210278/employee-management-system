@@ -8,7 +8,7 @@ import {
   type IsoDate,
   type PersonOption,
 } from '@lotrinh/shared';
-import { and, asc, eq, inArray, isNull } from 'drizzle-orm';
+import { and, asc, eq, gt, inArray, isNull } from 'drizzle-orm';
 import { badRequest, conflict } from '../../common/errors';
 import type { DbLike } from '../../db/client';
 import { levelRuns, runAssignments, staff, stores, users, userScopes } from '../../db/schema';
@@ -35,12 +35,15 @@ export async function activeAssignmentsOf(db: DbLike, userId: number): Promise<A
   return rows;
 }
 
-/** Đổi người giữ một vai trò trên lượt: đóng phân công cũ, mở phân công mới từ hôm nay. Lịch không đổi (mục 9.3) */
+/**
+ * Đổi người giữ một vai trò trên lượt: đóng phân công cũ, mở phân công mới từ hôm nay. Lịch không đổi (mục 9.3).
+ * Phân công cũ chưa đến ngày bắt đầu (lượt sắp bắt đầu) chưa từng có hiệu lực nên bỏ hẳn, không đóng bằng
+ * một ngày trước ngày bắt đầu; việc chuyển giao vẫn có trong lịch sử tài khoản và nhật ký.
+ */
 export async function reassign(tx: DbLike, runId: number, role: AssignmentRole, toUserId: number, today: IsoDate): Promise<void> {
-  await tx
-    .update(runAssignments)
-    .set({ toDate: today })
-    .where(and(eq(runAssignments.runId, runId), eq(runAssignments.role, role), isNull(runAssignments.toDate)));
+  const current = and(eq(runAssignments.runId, runId), eq(runAssignments.role, role), isNull(runAssignments.toDate));
+  await tx.delete(runAssignments).where(and(current, gt(runAssignments.fromDate, today)));
+  await tx.update(runAssignments).set({ toDate: today }).where(current);
   await tx.insert(runAssignments).values({ runId, role, userId: toUserId, fromDate: today });
 }
 

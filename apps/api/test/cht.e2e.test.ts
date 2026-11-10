@@ -132,7 +132,7 @@ describe('onboarding CHT mới tuyển có sẵn trong dữ liệu mẫu (Phươ
     // Đánh giá đủ nhưng checklist chưa xong thì vẫn chưa xác nhận được
     expect((await huy.post(`${base}/confirm`).send({}).expect(400)).body.message).toMatch(/hoàn thành checklist tuần đầu \(còn 14 việc/);
     const db = harness.app.get<Db>(DB);
-    await db.update(runTasks).set({ status: 'done' }).where(and(eq(runTasks.runId, run!.id), ne(runTasks.status, 'done')));
+    await db.update(runTasks).set({ status: 'done', doneDate: harness.today }).where(and(eq(runTasks.runId, run!.id), ne(runTasks.status, 'done')));
     expect((await onboarding(huy, run!.id)).problems).toEqual([]);
 
     const done = (await huy.post(`${base}/confirm`).send({ note: 'Đồng ý, tuần 2 tập trung điều hành ca' }).expect(200)).body as ChtOnboardingResponse;

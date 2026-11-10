@@ -233,8 +233,9 @@ CREATE TABLE lotrinh.level_runs (
   CONSTRAINT ck_level_runs_dates CHECK (planned_end >= start_date)
 );
 CREATE INDEX ix_level_runs_staff ON lotrinh.level_runs(staff_id);
+-- Cùng danh sách với OPEN_RUN_STATUSES (apps/api/src/modules/runs/task-views.ts)
 CREATE UNIQUE INDEX uq_level_runs_one_open ON lotrinh.level_runs(staff_id)
-  WHERE [status] IN (N'active', N'paused', N'review', N'extended');
+  WHERE [status] IN (N'active', N'paused', N'review');
 
 /* Người phụ trách theo thời gian: to_date NULL = đang hiệu lực. Mỗi vai trò chỉ một người đang hiệu lực. */
 CREATE TABLE lotrinh.run_assignments (
