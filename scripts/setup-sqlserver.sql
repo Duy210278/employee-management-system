@@ -9,9 +9,9 @@ SET NOCOUNT ON;
 GO
 
 -- lotrinh: dữ liệu chạy thử; lotrinh_test: dùng riêng cho kiểm thử API, bị xóa sạch mỗi lần chạy test
-IF DB_ID(N'lotrinh') IS NULL CREATE DATABASE lotrinh COLLATE Vietnamese_CI_AS;
+IF DB_ID(N'lotrinh') IS NULL CREATE DATABASE lotrinh COLLATE Vietnamese_100_CI_AS;
 GO
-IF DB_ID(N'lotrinh_test') IS NULL CREATE DATABASE lotrinh_test COLLATE Vietnamese_CI_AS;
+IF DB_ID(N'lotrinh_test') IS NULL CREATE DATABASE lotrinh_test COLLATE Vietnamese_100_CI_AS;
 GO
 
 -- Người đọc không bị chặn khi có người đang ghi (gần với cách PostgreSQL hoạt động)

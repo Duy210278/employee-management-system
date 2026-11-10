@@ -1,8 +1,11 @@
 /* ============================================================================
    Lộ trình Upharma: script tạo bảng cho SQL Server (bản đã gom nhóm)
    Yêu cầu: SQL Server 2016 trở lên (dùng ISJSON, DATETIMEOFFSET, filtered index).
-   Chạy bằng SSMS, Azure Data Studio hoặc sqlcmd (có lệnh GO tách khối).
-   CHƯA CHẠY THỬ trên SQL Server thật. Cần chạy thử trên CSDL trống trước khi dùng.
+   Chạy bằng sqlcmd (có lệnh GO tách khối), BẮT BUỘC có cờ -I để bật QUOTED_IDENTIFIER
+   (filtered index cần tùy chọn này; thư viện Node mssql bật sẵn):
+     sqlcmd -I -S localhost -U lotrinh_app -d lotrinh_test -C -b -i docs/thiet-ke/sqlserver/01_tao_bang.sql
+   Đã chạy thử ngày 10/11/2026 trên SQL Server 2022 (16.0.4305.5, collation Vietnamese_100_CI_AS):
+   21 bảng, 38 CHECK, 10 filtered index, 2 trigger; các ràng buộc và trigger chặn đúng khi ghi sai.
 
    Quy ước chuyển đổi từ PostgreSQL:
      serial/bigserial        -> INT / BIGINT IDENTITY
