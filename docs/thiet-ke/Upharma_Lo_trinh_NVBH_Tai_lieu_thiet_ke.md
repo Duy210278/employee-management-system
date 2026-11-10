@@ -924,7 +924,7 @@ upharma-lo-trinh/
 │     └─ change-kind/           Phân loại sửa diễn đạt / thay đổi tiêu chí (mục 8.3)
 ├─ seed/                        JSON bộ lộ trình v2.1 và dữ liệu mẫu (mục 14.12)
 ├─ scripts/
-│  └─ setup-db.sql              Tạo user và cơ sở dữ liệu `lotrinh` trên PostgreSQL cài sẵn
+│  └─ setup-sqlserver.sql       Tạo cơ sở dữ liệu `lotrinh`, `lotrinh_test` và tài khoản `lotrinh_app` trên SQL Server
 ├─ .env.example
 └─ README.md                    Hướng dẫn chạy, tài khoản mẫu, kịch bản demo
 ```
@@ -960,31 +960,30 @@ upharma-lo-trinh/
 |---|---|---|
 | Node.js | 20 LTS trở lên | Bộ cài từ nodejs.org, hoặc nvm |
 | pnpm | 9 | `corepack enable && corepack prepare pnpm@9 --activate` (hoặc `npm i -g pnpm@9`) |
-| PostgreSQL | 16 | Ubuntu 24.04: `sudo apt install postgresql` (bản Ubuntu cũ hơn dùng kho apt.postgresql.org); Windows: bộ cài chính thức của PostgreSQL; macOS: Postgres.app hoặc `brew install postgresql@16` |
+| SQL Server | 2016 trở lên (đã thử 2022 Developer) | Ubuntu 22.04: kho `mssql-server-2022` của Microsoft, rồi `sudo /opt/mssql/bin/mssql-conf setup`; công cụ `sqlcmd` trong gói `mssql-tools18`. Windows: bộ cài SQL Server Developer hoặc Express |
 
-PostgreSQL chạy như dịch vụ của hệ điều hành và tự khởi động cùng máy, không cần bật lại mỗi lần demo.
+SQL Server chạy như dịch vụ của hệ điều hành (`mssql-server`) và tự khởi động cùng máy, không cần bật lại mỗi lần demo.
+
+> Cập nhật 10/11/2026: cơ sở dữ liệu đã chuyển từ PostgreSQL sang SQL Server (bỏ PostgreSQL, bỏ bản demo trên Render + Neon). Chi tiết bảng: [CO_SO_DU_LIEU.md](CO_SO_DU_LIEU.md); kế hoạch và kết quả: [../ke-hoach/KE_HOACH_CHUYEN_SQLSERVER.md](../ke-hoach/KE_HOACH_CHUYEN_SQLSERVER.md).
 
 **Bước 1: Tạo cơ sở dữ liệu (làm một lần)**
 
-Tệp `scripts/setup-db.sql` tạo user `lotrinh` (mật khẩu `lotrinh`), cơ sở dữ liệu `lotrinh` cho demo và `lotrinh_test` cho kiểm thử API, đặt múi giờ `Asia/Ho_Chi_Minh`. Chạy lại không lỗi (bỏ qua phần đã tạo).
+Tệp `scripts/setup-sqlserver.sql` tạo cơ sở dữ liệu `lotrinh` cho chạy thử và `lotrinh_test` cho kiểm thử API (collation `Vietnamese_100_CI_AS`, bật `READ_COMMITTED_SNAPSHOT`), cùng tài khoản ứng dụng `lotrinh_app` có quyền `db_owner` trên hai CSDL. Chạy lại không lỗi. Mật khẩu truyền qua biến của `sqlcmd`, không lưu trong file.
 
-Chạy bằng tài khoản quản trị PostgreSQL:
+Chạy bằng tài khoản quản trị `sa`:
 
 ```bash
-# Ubuntu
-sudo -u postgres psql -f scripts/setup-db.sql
-# macOS (Homebrew, Postgres.app)
-psql -d postgres -f scripts/setup-db.sql
-# Windows: mở "SQL Shell (psql)", đăng nhập user postgres, rồi gõ
-#   \i 'C:/duong-dan/upharma-lo-trinh/scripts/setup-db.sql'
+sqlcmd -S localhost -U sa -C -b -v APP_PASSWORD="<mật khẩu cho lotrinh_app>" -i scripts/setup-sqlserver.sql
 ```
+
+Sau đó điền mật khẩu `lotrinh_app` vào `DATABASE_URL`, `DATABASE_URL_TEST` trong `.env` (mẫu ở `.env.example`).
 
 **Bước 2: Cài đặt và chạy**
 
 ```bash
 git clone <địa chỉ repo> upharma-lo-trinh
 cd upharma-lo-trinh
-cp .env.example .env
+cp .env.example .env    # điền mật khẩu lotrinh_app
 pnpm install
 pnpm build        # build gói shared, API và giao diện Vue
 pnpm start        # chạy API, phục vụ luôn giao diện

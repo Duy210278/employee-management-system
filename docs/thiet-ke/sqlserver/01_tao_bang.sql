@@ -1,11 +1,14 @@
 /* ============================================================================
    Lộ trình Upharma: script tạo bảng cho SQL Server (bản đã gom nhóm)
+   SCRIPT THAM KHẢO ĐỂ ĐỌC. Nguồn chuẩn là apps/api/src/db/schema.ts và migration trong
+   apps/api/src/db/migrations (API tự chạy khi khởi động). Tên ràng buộc ở đây có thể khác migration.
    Yêu cầu: SQL Server 2016 trở lên (dùng ISJSON, DATETIMEOFFSET, filtered index).
    Chạy bằng sqlcmd (có lệnh GO tách khối), BẮT BUỘC có cờ -I để bật QUOTED_IDENTIFIER
    (filtered index cần tùy chọn này; thư viện Node mssql bật sẵn):
      sqlcmd -I -S localhost -U lotrinh_app -d lotrinh_test -C -b -i docs/thiet-ke/sqlserver/01_tao_bang.sql
    Đã chạy thử ngày 10/11/2026 trên SQL Server 2022 (16.0.4305.5, collation Vietnamese_100_CI_AS):
-   21 bảng, 38 CHECK, 10 filtered index, 2 trigger; các ràng buộc và trigger chặn đúng khi ghi sai.
+   21 bảng, 38 CHECK, 12 filtered index, 2 trigger; các ràng buộc và trigger chặn đúng khi ghi sai
+   (chạy lại cùng ngày sau khi đổi signoffs sang stage_key/review_id).
 
    Quy ước chuyển đổi từ PostgreSQL:
      serial/bigserial        -> INT / BIGINT IDENTITY
@@ -23,7 +26,7 @@
    Dữ liệu nghiệp vụ không xóa vật lý (R21).
 
    Đã gom so với bản PostgreSQL (26 bảng -> 21 bảng):
-     user_changes                          -> audit_logs (entity = 'user')
+     user_changes                          -> audit_logs (action = 'user.change', entity = 'users')
      task_date_changes                     -> task_events (action = 'date_change', cột data)
      user_store_scopes + user_area_scopes  -> user_scopes
      stage_signoffs + review_signatures    -> signoffs (stage_key hoặc review_id, đúng một trong hai)
@@ -419,7 +422,7 @@ CREATE UNIQUE INDEX uq_signoffs_stage_step  ON lotrinh.signoffs(run_id, stage_ke
 CREATE UNIQUE INDEX uq_signoffs_review_step ON lotrinh.signoffs(review_id, step) WHERE review_id IS NOT NULL;
 CREATE INDEX ix_signoffs_run ON lotrinh.signoffs(run_id);
 
-/* ---------- 5. Nhật ký hệ thống (gồm lịch sử thay đổi tài khoản: entity = 'user') ---------- */
+/* ---------- 5. Nhật ký hệ thống (gồm lịch sử thay đổi tài khoản: action = 'user.change', entity = 'users') ---------- */
 
 CREATE TABLE lotrinh.audit_logs (
   id        BIGINT IDENTITY(1,1) NOT NULL CONSTRAINT pk_audit_logs PRIMARY KEY,

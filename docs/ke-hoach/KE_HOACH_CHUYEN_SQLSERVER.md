@@ -1,5 +1,23 @@
 # Kế hoạch chuyển cơ sở dữ liệu từ PostgreSQL sang SQL Server
 
+## Kết quả (10/11/2026, nhánh `sqlserver`)
+
+Đã làm xong giai đoạn 0–6; giai đoạn 7 (chuyển dữ liệu) không cần vì chỉ dùng dữ liệu mẫu.
+
+| Hạng mục | Kết quả |
+|---|---|
+| Thư viện | Drizzle `1.0.0-rc.5` với `mssql` 11; thử 9 điểm đều đạt ([KET_QUA_THU_DRIZZLE.md](../thiet-ke/sqlserver/KET_QUA_THU_DRIZZLE.md)) |
+| CSDL | SQL Server 2022, schema `lotrinh`, 21 bảng (từ 26), CHECK cho mọi cột trạng thái, filtered unique index, trigger R03 |
+| Kiểm thử | Typecheck sạch; 88 test `shared` và 104 test e2e (11 file) xanh trên SQL Server, bằng mốc PostgreSQL ở tag `pg-cuoi-cung` |
+| Dữ liệu mẫu | Số dòng từng bảng khớp bản PostgreSQL (345 đầu việc, 293 xác nhận, 295 sự kiện…) |
+| Chạy thật | `pnpm build && pnpm start`: kết nối CSDL, đăng nhập, Hôm nay, trang web chạy được |
+
+Lỗi tìm ra trong lúc chuyển (đã sửa):
+- Đổi Buddy của lượt chưa bắt đầu ghi phân công cũ có ngày kết thúc trước ngày bắt đầu (ràng buộc mới bắt được).
+- Hai truy vấn chạy song song trong một giao dịch: `node-mssql` chỉ cho một yêu cầu một lúc.
+- Hằng `true`/`false` trong câu SQL không tồn tại ở SQL Server.
+- Trigger xóa phải là `INSTEAD OF DELETE` để chạy trước kiểm tra khóa ngoại như `BEFORE DELETE` của PostgreSQL.
+
 Đi kèm: [KE_HOACH_LAM_SACH.md](KE_HOACH_LAM_SACH.md) (gom bảng, gộp API) và [01_tao_bang.sql](../thiet-ke/sqlserver/01_tao_bang.sql) (script tạo bảng SQL Server, chưa chạy thử).
 
 ## 1. Hiện trạng đã đo

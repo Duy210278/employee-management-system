@@ -1,5 +1,7 @@
 # Kế hoạch làm sạch CSDL và bộ API
 
+> **Ghi chú 10/11/2026:** phần CSDL (mục 2: gom bảng, siết ràng buộc, bỏ đồng hồ demo) đã làm trên nhánh `sqlserver` cùng đợt chuyển sang SQL Server ([KE_HOACH_CHUYEN_SQLSERVER.md](KE_HOACH_CHUYEN_SQLSERVER.md)); kết quả 21 bảng vì giữ `credentials`. Phần gộp API (mục 3) **chưa làm**. Các bước nhắc tới PostgreSQL, Neon, Render không còn áp dụng.
+
 Mục tiêu: gom bảng, siết ràng buộc dữ liệu, gộp các API chồng chéo. Không đổi nghiệp vụ, không đổi giao diện người dùng.
 Số liệu lấy từ `apps/api/src/db/schema.ts`, các controller trong `apps/api/src/modules`, và `apps/web/src/api/queries.ts`.
 

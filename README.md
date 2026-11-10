@@ -9,15 +9,17 @@ Bản demo chạy trên một máy tính, không dùng Docker.
 
 ## Cài đặt (một lần)
 
-Cần Node.js 20 trở lên, pnpm 9, PostgreSQL 16 trở lên cài trực tiếp trên máy.
+Cần Node.js 20 trở lên, pnpm 9, SQL Server 2016 trở lên (đã thử SQL Server 2022 Developer cài trực tiếp trên Ubuntu 22.04, không Docker) và công cụ `sqlcmd` (gói `mssql-tools18`).
 
 ```bash
-# Tạo user và cơ sở dữ liệu lotrinh (demo), lotrinh_test (test)
-sudo -u postgres psql < scripts/setup-db.sql
+# Tạo cơ sở dữ liệu lotrinh (chạy thử), lotrinh_test (test) và tài khoản ứng dụng lotrinh_app
+sqlcmd -S localhost -U sa -C -b -v APP_PASSWORD="<mật khẩu cho lotrinh_app>" -i scripts/setup-sqlserver.sql
 
-cp .env.example .env          # đổi JWT_SECRET thành chuỗi ngẫu nhiên
+cp .env.example .env          # điền mật khẩu lotrinh_app vào DATABASE_URL, DATABASE_URL_TEST; đổi JWT_SECRET
 pnpm install
 ```
+
+Bảng nằm trong schema `lotrinh`. Khi mở bằng `sqlcmd` cần cờ `-I` (bật `QUOTED_IDENTIFIER`, bắt buộc với filtered index).
 
 ## Chạy bản demo
 
@@ -26,16 +28,12 @@ pnpm build
 pnpm start
 ```
 
-Mở http://localhost:3000. Lần chạy đầu, API tự tạo bảng và nạp dữ liệu mẫu nếu cơ sở dữ liệu còn trống. Giữ cửa sổ terminal mở trong buổi demo; `Ctrl+C` để dừng.
+Mở http://localhost:3000. Lần chạy đầu, API tự tạo bảng (migration) và nạp dữ liệu mẫu nếu cơ sở dữ liệu còn trống. Giữ cửa sổ terminal mở trong buổi demo; `Ctrl+C` để dừng.
 
 Màn đăng nhập có ô **đăng nhập nhanh** (bản demo): chọn tài khoản mẫu trong danh sách thả xuống, theo nhóm vai trò, rồi bấm "Vào". Mật khẩu chung `Demo@123`; sau khi vào có thể đổi tài khoản ở thanh trên cùng.
-Đăng nhập BP Đào tạo (Ngô Quốc Bảo) để tua ngày giả lập (dải dưới thanh tab) và khôi phục dữ liệu mẫu (tab Quản trị).
+Đăng nhập BP Đào tạo (Ngô Quốc Bảo) để khôi phục dữ liệu mẫu (tab Quản trị). Ứng dụng luôn dùng ngày thật; dữ liệu mẫu được dựng lùi từ hôm nay nên luôn có đủ tình huống đúng hạn, sắp đến hạn, quá hạn.
 
 **Tài liệu API (Swagger):** http://localhost:3000/api/docs (JSON OpenAPI ở `/api/docs/json`). Liệt kê mọi API theo nhóm, body mẫu lấy từ schema Zod dùng chung. Muốn thử: gọi `POST /api/v1/auth/login` ngay trên trang (cookie tự lưu), rồi gọi các API khác. Đặt `API_DOCS=false` trong `.env` để tắt.
-
-## Đưa lên mạng miễn phí (Render + Neon)
-
-Ứng dụng chạy trên Render (gói Free, vùng Singapore), cơ sở dữ liệu ở Neon; cấu hình sẵn trong [render.yaml](render.yaml). Hướng dẫn từng bước: [docs/ke-hoach/TRIEN_KHAI_RENDER_NEON.md](docs/ke-hoach/TRIEN_KHAI_RENDER_NEON.md).
 
 ## Chạy khi phát triển
 
@@ -54,13 +52,13 @@ Mở http://localhost:5173 (Vite, tự nạp lại khi sửa mã; `/api` đượ
 | `pnpm db:reset` | Xóa sạch, chạy migration, nạp lại dữ liệu mẫu (ngày bắt đầu Level tính lùi từ hôm nay) |
 | `pnpm db:generate` | Sinh migration SQL sau khi sửa `apps/api/src/db/schema.ts` |
 | `pnpm seed:extract` | Trích lại `seed/v2.1.json` từ giao diện tham chiếu N3 |
-| `pg_dump -h localhost -U lotrinh lotrinh > backup.sql` | Sao lưu nhanh trạng thái demo |
+| `sqlcmd -S localhost -U lotrinh_app -C -Q "BACKUP DATABASE lotrinh TO DISK = N'/var/opt/mssql/data/lotrinh.bak' WITH INIT"` | Sao lưu nhanh dữ liệu chạy thử |
 
 ## Tài khoản mẫu
 
 | Tài khoản | Vai trò | Tình huống |
 |---|---|---|
-| admin@upharma.local | BP Đào tạo | Quản trị, ngày giả lập, khôi phục dữ liệu mẫu |
+| admin@upharma.local | BP Đào tạo | Quản trị, khôi phục dữ liệu mẫu |
 | huy@upharma.local | QLKV Hà Nội 1 | Thấy mọi cửa hàng trong khu vực; người duyệt phiên bản; có đề xuất tạm dừng của Nam chờ duyệt |
 | ha@upharma.local | CHT Nhà thuốc A | |
 | binh@upharma.local | CHT Nhà thuốc B | Đồng thời là Buddy của Nam |
@@ -78,13 +76,13 @@ Mở http://localhost:5173 (Vite, tự nạp lại khi sửa mã; `/api` đượ
 
 ## Kịch bản demo MVP (khoảng 7 phút)
 
-1. **BP ĐT** → Quản trị: thấy ngày hiện tại trong Công cụ demo.
+1. **BP ĐT** → Quản trị → Công cụ demo: khôi phục dữ liệu mẫu để bắt đầu từ trạng thái sạch.
 2. **BP ĐT** → Nhân sự → Thêm nhân viên: chọn tài khoản Bùi Thị Hạnh, ngày nhận việc là ngày mai, Buddy Hùng. Đăng nhập **Hạnh**: "Lộ trình Level 1 bắt đầu ngày … (còn 1 ngày)".
-3. **BP ĐT** tua +1 ngày → **Hùng** → Việc kèm cặp: có việc tuần 1 của Hạnh.
+3. **Hùng** → Việc kèm cặp: thấy việc của các NV mình kèm cặp đang chờ xác nhận (việc của Hạnh xuất hiện từ ngày mai, khi lượt bắt đầu).
 4. **Lan** (chế độ điện thoại trong DevTools): mở một mục → "Tôi đã làm xong".
 5. **Hùng**: mục của Lan ở đầu hàng đợi → "Xác nhận đạt (Buddy)".
 6. **CHT Hà** → Nhân sự → Lan → Checklist: "Yêu cầu làm lại" (bắt buộc nhập lý do); Lan thấy cảnh báo đỏ.
-7. **BP ĐT** tua +1 tuần: mục trễ tăng. Hà mở hồ sơ một NV Nhà thuốc B qua URL: bị từ chối.
+7. **CHT Hà** mở hồ sơ một NV Nhà thuốc B qua URL: bị từ chối (ngoài phạm vi cửa hàng).
 
 Xong thì BP ĐT → Quản trị → "Khôi phục dữ liệu mẫu".
 
@@ -122,7 +120,7 @@ Lưu ý có sẵn: CK-09 báo mục L1-6-5 nhắc "3 tháng" trong khi Level 1 d
 - **Cửa hàng, khu vực:** thêm, sửa, ngừng; không ngừng cửa hàng còn nhân viên đang theo dõi.
 - **Nhập tài khoản:** tải mẫu CSV, xem trước (dòng lỗi được đánh dấu: trùng email/mã NV, cửa hàng không tồn tại…), chỉ nhập các dòng hợp lệ. Mật khẩu ban đầu `Upharma@123`.
 - **Nhật ký hệ thống:** mọi thao tác ghi dữ liệu, lọc theo người, loại thao tác, khoảng ngày.
-- **Cấu hình, công cụ demo:** V20, ngày giả lập, "Chạy job ngay", khôi phục dữ liệu mẫu.
+- **Công cụ demo:** "Chạy job ngay", khôi phục dữ liệu mẫu.
 
 ## Vận hành lượt Level
 
@@ -144,12 +142,11 @@ Checklist làm quen tuần đầu của CHT, trích từ `docs/nguon/Onboarding_
 
 Kịch bản thử: **BP ĐT** → Quản trị → Phan Đức Minh → Gán checklist CHT. Mở hồ sơ **Phương** → tab Nhật ký theo dõi, Đánh giá tuần đầu. Đăng nhập **Phương** → Lộ trình của tôi → báo xong một việc ngày D+2.
 
-Bản đang chạy trên Render + Neon có phiên bản v2.1 ban hành trước khi có tính năng này nên chưa có checklist CHT: hoặc **Khôi phục dữ liệu mẫu**, hoặc tạo bản nháp → tab Checklist CHT → "Thêm … từ mẫu" → gửi duyệt, ban hành.
 
 ## Cảnh báo, thông báo, xuất CSV
 
-- **Cảnh báo** (tab Cảnh báo, cột Cảnh báo ở Nhân sự, đầu Hồ sơ NV): đỏ khi mục GPP quá hạn, Level 1–2 chưa có Buddy sau 48 giờ, có mục trễ hơn 7 ngày, có ca Rubric lỗi an toàn thuốc; vàng khi có mục trễ, chưa gắn CHT, DS tổng dưới 80% hai tháng liền, Rubric dưới mục tiêu, NV Level 1 không đăng nhập quá 5 ngày, quá thời gian Level 14 ngày, trễ ký giai đoạn. Tính trực tiếp nên luôn khớp ngày giả lập. QLKV có thêm khối "Cảnh báo trong khu vực" ở Việc cần xử lý.
-- **Thông báo** (chuông trên thanh trên cùng): NV báo xong / cần hỗ trợ → người xác nhận kế tiếp; yêu cầu làm lại → NV; chữ ký giai đoạn, phiếu → người ký kế tiếp; đề xuất tạm dừng → QLKV; bản nháp chờ duyệt → người duyệt; đăng ký mới → BP ĐT. Mỗi sáng có **bản tin** (việc quá hạn, sắp đến hạn, mới mở), QLKV nhận báo việc quá hạn lâu, lượt sắp bắt đầu được nhắc trước 1 ngày. Job chạy khi khởi động, sang ngày mới, đổi ngày giả lập, khôi phục dữ liệu mẫu, hoặc bấm "Chạy ngay"; chạy lại không tạo trùng.
+- **Cảnh báo** (tab Cảnh báo, cột Cảnh báo ở Nhân sự, đầu Hồ sơ NV): đỏ khi mục GPP quá hạn, Level 1–2 chưa có Buddy sau 48 giờ, có mục trễ hơn 7 ngày, có ca Rubric lỗi an toàn thuốc; vàng khi có mục trễ, chưa gắn CHT, DS tổng dưới 80% hai tháng liền, Rubric dưới mục tiêu, NV Level 1 không đăng nhập quá 5 ngày, quá thời gian Level 14 ngày, trễ ký giai đoạn. Tính trực tiếp nên luôn khớp ngày hôm nay. QLKV có thêm khối "Cảnh báo trong khu vực" ở Việc cần xử lý.
+- **Thông báo** (chuông trên thanh trên cùng): NV báo xong / cần hỗ trợ → người xác nhận kế tiếp; yêu cầu làm lại → NV; chữ ký giai đoạn, phiếu → người ký kế tiếp; đề xuất tạm dừng → QLKV; bản nháp chờ duyệt → người duyệt; đăng ký mới → BP ĐT. Mỗi sáng có **bản tin** (việc quá hạn, sắp đến hạn, mới mở), QLKV nhận báo việc quá hạn lâu, lượt sắp bắt đầu được nhắc trước 1 ngày. Job chạy khi khởi động, sang ngày mới, khôi phục dữ liệu mẫu, hoặc bấm "Chạy ngay"; chạy lại không tạo trùng.
 - **Xuất CSV tiến độ:** Nhân sự → "Xuất CSV" (CHT, QLKV trong phạm vi, BP ĐT toàn chuỗi), mở được bằng Excel.
 
 ## Khung năng lực (chỉ BP Đào tạo sửa)
@@ -162,21 +159,21 @@ Bản đang chạy trên Render + Neon có phiên bản v2.1 ban hành trước 
 
 ```
 apps/api/src      NestJS (mục 14.4–14.5 đặc tả)
-  adapters/         phần hạ tầng tối giản thay được khi chạy thật: clock (ngày giả lập)
+  adapters/         phần hạ tầng tối giản thay được khi chạy thật: clock (nguồn "hôm nay" duy nhất; test thay bằng đồng hồ giả)
   common/           lỗi { code, message }, kiểm tra dữ liệu vào bằng Zod, phiên đăng nhập
-  db/               schema Drizzle, migration SQL, dữ liệu mẫu, lệnh db:*
+  db/               schema Drizzle (SQL Server, schema lotrinh), migration, dữ liệu mẫu, lệnh db:*; mssql.ts thay tính năng PostgreSQL
   modules/          access (ma trận quyền CASL + lọc phạm vi), audit (ghi và xem nhật ký), auth (đăng nhập, đăng ký), demo,
                     health, me (Hôm nay, Việc cần xử lý), runs (checklist, ký giai đoạn, tạm dừng, phân công), staff,
                     tasks, versions (vòng đời phiên bản), sales, observations, reviews (phiếu đánh giá, lên Level),
                     users (tài khoản, chuyển giao, nhập CSV), org (cửa hàng, khu vực), alerts, notifications,
                     jobs (bản tin, leo thang, nhắc lượt, kích hoạt phiên bản), reports (CSV), cht (onboarding CHT)
-  db/migrations/    SQL; 0002 là trigger chặn sửa, xóa bản đã ban hành (R03); 0004 bảng của giai đoạn 2; 0005 onboarding CHT
+  db/migrations/    khởi tạo (sinh từ schema) và trigger chặn sửa, xóa bản đã ban hành (R03, viết tay)
 apps/web/src      Vue 3: api, components (ItemRow, StageChecklist, design/ trình soạn checklist…), designer/ (thao tác soạn),
                   pages, styles (bảng màu N3)
 packages/shared   Lõi nghiệp vụ dùng chung API ↔ giao diện: schema phiên bản, tính lịch, trạng thái đầu việc,
                   quy tắc xác nhận và giao việc, kiểm tra hợp lệ CK (validation/), phân loại thay đổi (change-kind/)
 seed/             Bộ lộ trình v2.1 (trích từ N3) và script trích
-scripts/          setup-db.sql
+scripts/          setup-sqlserver.sql (tạo CSDL, tài khoản ứng dụng)
 docs/             thiet-ke/ (đặc tả) · ke-hoach/ (kế hoạch, tiến độ) · nguon/ (N1, N2, N3)
 ```
 

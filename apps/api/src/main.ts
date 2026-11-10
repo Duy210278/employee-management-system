@@ -53,7 +53,7 @@ async function bootstrap() {
   if (env().API_DOCS) setupApiDocs(app);
   serveWeb(app);
   app.enableShutdownHooks();
-  // Khi chạy sau proxy (Render), lấy IP thật của người dùng cho nhật ký hệ thống
+  // Khi chạy sau proxy ngược (khi nhúng vào hệ thống lớn), lấy IP thật của người dùng cho nhật ký hệ thống
   app.set('trust proxy', 1);
   const { PORT, DEMO_MODE } = env();
   await app.listen(PORT);
@@ -62,6 +62,6 @@ async function bootstrap() {
 
 bootstrap().catch((err) => {
   log.error(err instanceof Error ? err.message : String(err));
-  if (String(err).includes('ECONNREFUSED')) log.error('Không kết nối được PostgreSQL. Kiểm tra dịch vụ PostgreSQL đã chạy và DATABASE_URL trong .env');
+  if (String(err).includes('ECONNREFUSED')) log.error('Không kết nối được SQL Server. Kiểm tra dịch vụ mssql-server đã chạy và DATABASE_URL trong .env');
   process.exit(1);
 });
