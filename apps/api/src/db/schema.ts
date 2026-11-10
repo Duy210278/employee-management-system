@@ -66,23 +66,6 @@ export const users = pgTable('users', {
   createdAt: ts('created_at').notNull().defaultNow(),
 });
 
-/** Lịch sử thay đổi tài khoản (mục 5.3): ai đổi, lúc nào, giá trị cũ và mới */
-export const userChanges = pgTable(
-  'user_changes',
-  {
-    id: serial('id').primaryKey(),
-    userId: integer('user_id')
-      .notNull()
-      .references(() => users.id),
-    changedBy: integer('changed_by').references(() => users.id),
-    field: text('field').notNull(),
-    oldValue: text('old_value'),
-    newValue: text('new_value'),
-    at: ts('at').notNull(),
-  },
-  (t) => [index('user_changes_user_idx').on(t.userId)],
-);
-
 /** Thông báo trong ứng dụng (mục 10.6); dedupe_key chống trùng khi job chạy lại (mục 14.9) */
 export const notifications = pgTable(
   'notifications',

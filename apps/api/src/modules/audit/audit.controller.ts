@@ -15,6 +15,7 @@ const LABELS: [RegExp, string][] = [
   [/^auth\.login_demo$/, 'Đăng nhập nhanh (demo)'],
   [/^auth\.register$/, 'Đăng ký tài khoản'],
   [/^demo\.reset$/, 'Khôi phục dữ liệu mẫu'],
+  [/^user\.change$/, 'Thay đổi tài khoản (từng trường)'],
   [/^POST \/demo\/jobs\/:name\/run$/, 'Chạy job'],
   [/^POST \/tasks\/:id\/confirm$/, 'Xác nhận đầu việc'],
   [/^POST \/tasks\/confirm-many$/, 'Duyệt nhanh nhiều đầu việc'],

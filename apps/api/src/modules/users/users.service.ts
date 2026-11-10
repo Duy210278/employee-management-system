@@ -23,7 +23,8 @@ import { badRequest, conflict, notFound, staleData } from '../../common/errors';
 import type { SessionUser } from '../../common/session';
 import type { Db, Tx } from '../../db/client';
 import { DB } from '../../db/db.provider';
-import { areas, credentials, staff, stores, userAreaScopes, userChanges, users, userStoreScopes } from '../../db/schema';
+import { areas, credentials, staff, stores, userAreaScopes, users, userStoreScopes } from '../../db/schema';
+import { logUserChanges, userChangeHistory } from '../audit/user-changes';
 import { AccessService } from '../access/access.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { activeAssignmentsOf, applyHandover, assignmentCandidates } from '../runs/assignments';
@@ -148,20 +149,14 @@ export class UsersService {
     await this.assertAdmin(user);
     const row = await this.row(id);
     const [item] = await this.items(eq(users.id, id));
-    const by = alias(users, 'by');
-    const history = await this.db
-      .select({ c: userChanges, byName: by.fullName })
-      .from(userChanges)
-      .leftJoin(by, eq(by.id, userChanges.changedBy))
-      .where(eq(userChanges.userId, id))
-      .orderBy(desc(userChanges.at), desc(userChanges.id));
+    const history = await userChangeHistory(this.db, id);
     const [staffRow] = await this.db.select({ name: staff.fullName }).from(staff).where(eq(staff.userId, id));
     return {
       user: { ...item, rowVersion: row.rowVersion, staffName: staffRow?.name ?? null },
-      history: history.map(({ c, byName }) => ({
+      history: history.map((c) => ({
         id: c.id,
         at: c.at.toISOString(),
-        byName,
+        byName: c.byName,
         field: c.field,
         fieldLabel: FIELD_LABEL[c.field] ?? c.field,
         oldValue: c.oldValue,
@@ -234,14 +229,16 @@ export class UsersService {
         .where(eq(users.id, id));
       await this.replaceScopes(tx, id, scope.storeIds, scope.areaIds);
       const scopeText = [names.stores, names.areas].filter(Boolean).join(' · ');
-      await tx.insert(userChanges).values({
-        userId: id,
-        changedBy: user.id,
-        field: 'approved',
-        oldValue: USER_STATUS_LABEL.pending,
-        newValue: `${ROLE_LABEL[body.role]}${scopeText ? ` · ${scopeText}` : ''}${body.canBuddy ? ' · Có thể làm Buddy' : ''}`,
-        at: now,
-      });
+      await logUserChanges(tx, [
+        {
+          userId: id,
+          changedBy: user.id,
+          field: 'approved',
+          oldValue: USER_STATUS_LABEL.pending,
+          newValue: `${ROLE_LABEL[body.role]}${scopeText ? ` · ${scopeText}` : ''}${body.canBuddy ? ' · Có thể làm Buddy' : ''}`,
+          at: now,
+        },
+      ]);
     });
     await this.notifications.notify([id], { type: 'account', title: 'Tài khoản của bạn đã được duyệt', body: `Vai trò: ${ROLE_LABEL[body.role]}`, link: '/' });
     return this.detail(user, id);
@@ -258,7 +255,7 @@ export class UsersService {
         .update(users)
         .set({ status: 'rejected', reviewNote: note, reviewedBy: user.id, reviewedAt: now, rowVersion: sql`${users.rowVersion} + 1` })
         .where(eq(users.id, id));
-      await tx.insert(userChanges).values({ userId: id, changedBy: user.id, field: 'rejected', oldValue: USER_STATUS_LABEL.pending, newValue: note, at: now });
+      await logUserChanges(tx, [{ userId: id, changedBy: user.id, field: 'rejected', oldValue: USER_STATUS_LABEL.pending, newValue: note, at: now }]);
     });
     return this.detail(user, id);
   }
@@ -327,7 +324,7 @@ export class UsersService {
         .filter(([, a, b]) => (a ?? '') !== (b ?? ''))
         .map(([field, oldValue, newValue]) => ({ userId: id, changedBy: user.id, field, oldValue, newValue, at: now }));
       for (const h of handed) rows.push({ userId: id, changedBy: user.id, field: 'handover', oldValue: null, newValue: h, at: now });
-      if (rows.length) await tx.insert(userChanges).values(rows);
+      await logUserChanges(tx, rows);
     });
     return this.detail(user, id);
   }
@@ -365,7 +362,7 @@ export class UsersService {
         .returning();
       await tx.insert(credentials).values({ userId: u.id, passwordHash: hash });
       await this.replaceScopes(tx, u.id, scope.storeIds, scope.areaIds);
-      await tx.insert(userChanges).values({ userId: u.id, changedBy: user.id, field: 'created', newValue: ROLE_LABEL[body.role], at: now });
+      await logUserChanges(tx, [{ userId: u.id, changedBy: user.id, field: 'created', newValue: ROLE_LABEL[body.role], at: now }]);
       return { id: u.id };
     });
   }
@@ -467,7 +464,7 @@ export class UsersService {
             .returning();
           await tx.insert(credentials).values({ userId: u.id, passwordHash: hash });
           await this.replaceScopes(tx, u.id, role === 'cht' && r._storeId ? [r._storeId] : [], role === 'qlkv' && r._areaId ? [r._areaId] : []);
-          await tx.insert(userChanges).values({ userId: u.id, changedBy: user.id, field: 'imported', newValue: `${ROLE_LABEL[role]} · dòng ${r.line}`, at: now });
+          await logUserChanges(tx, [{ userId: u.id, changedBy: user.id, field: 'imported', newValue: `${ROLE_LABEL[role]} · dòng ${r.line}`, at: now }]);
         }
       });
       imported = valid.length;

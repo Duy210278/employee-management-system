@@ -57,6 +57,13 @@
       "when": 1794280105426,
       "tag": "0007_bo_dong_ho_demo",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1794280236755,
+      "tag": "0008_gop_user_changes",
+      "breakpoints": true
     }
   ]
 }

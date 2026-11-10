@@ -9,7 +9,8 @@ import { badRequest, conflict, forbidden, unauthorized } from '../../common/erro
 import { SESSION_COOKIE, SESSION_HOURS } from '../../common/session';
 import { DB } from '../../db/db.provider';
 import type { Db } from '../../db/client';
-import { areas, credentials, stores, userChanges, users } from '../../db/schema';
+import { areas, credentials, stores, users } from '../../db/schema';
+import { logUserChanges } from '../audit/user-changes';
 import { NotificationsService } from '../notifications/notifications.service';
 
 const INACTIVE_MESSAGE: Record<string, string> = {
@@ -122,7 +123,7 @@ export class AuthService {
         })
         .returning();
       await tx.insert(credentials).values({ userId: u.id, passwordHash: hash });
-      await tx.insert(userChanges).values({ userId: u.id, changedBy: u.id, field: 'registered', newValue: `Đăng ký vai trò ${ROLE_LABEL[body.requestedRole]}`, at: now });
+      await logUserChanges(tx, [{ userId: u.id, changedBy: u.id, field: 'registered', newValue: `Đăng ký vai trò ${ROLE_LABEL[body.requestedRole]}`, at: now }]);
       return u;
     });
 
