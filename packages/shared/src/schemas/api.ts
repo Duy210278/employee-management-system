@@ -15,17 +15,6 @@ export const LoginBody = z.object({
 
 export const LoginAsBody = z.object({ userId: z.number().int().positive() });
 
-export const ClockBody = z
-  .object({
-    date: z
-      .string()
-      .refine(isIsoDate, 'Ngày phải có dạng YYYY-MM-DD')
-      .nullable()
-      .optional(),
-    shiftDays: z.number().int().min(-366).max(366).optional(),
-  })
-  .refine((b) => b.date !== undefined || b.shiftDays !== undefined, 'Cần date hoặc shiftDays');
-
 export const ConfirmBody = z.object({
   role: z.enum(TASK_ROLES).optional(),
   note: note.optional(),
@@ -277,7 +266,6 @@ export type SaveReviewBodyT = z.infer<typeof SaveReviewBody>;
 export type SaveDraftBodyT = z.infer<typeof SaveDraftBody>;
 export type ApproveBodyT = z.infer<typeof ApproveBody>;
 export type LoginBodyT = z.infer<typeof LoginBody>;
-export type ClockBodyT = z.infer<typeof ClockBody>;
 export type ConfirmBodyT = z.infer<typeof ConfirmBody>;
 export type ConfirmManyBodyT = z.infer<typeof ConfirmManyBody>;
 export type UndoBodyT = z.infer<typeof UndoBody>;

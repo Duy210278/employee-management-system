@@ -18,10 +18,9 @@ export interface ApiErrorBody {
   message: string;
 }
 
+/** "Hôm nay" theo đồng hồ nghiệp vụ của máy chủ (ngày thật theo múi giờ TZ) */
 export interface ClockView {
   today: IsoDate;
-  realToday: IsoDate;
-  simulated: boolean;
 }
 
 export interface MeResponse {

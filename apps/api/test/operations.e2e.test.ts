@@ -26,7 +26,7 @@ async function staffOf(name: string) {
   const item = list.items.find((i) => i.staff.fullName === name)!;
   return { staffId: item.staff.id, runId: item.run!.id, item };
 }
-const setClock = async (body: { shiftDays?: number; date?: null }) => (await as('admin')).put(`${API}/demo/clock`).send(body).expect(200);
+const setClock = async (body: { shiftDays?: number; date?: null }) => (body.shiftDays !== undefined ? harness.shiftDays(body.shiftDays) : harness.resetClock());
 
 beforeAll(async () => {
   harness = await setupApp();
@@ -253,7 +253,9 @@ describe('nhật ký hệ thống và xuất CSV (mục 5.7, 11.4)', () => {
   it('BP ĐT xem nhật ký có nhãn tiếng Việt, lọc theo người; người khác bị chặn', async () => {
     const admin = await as('admin');
     const all = (await admin.get(`${API}/audit-logs`).expect(200)).body as AuditLogResponse;
-    expect(all.total).toBeGreaterThan(all.items.length);
+    // Trang đầu đủ min(tổng, cỡ trang) bản ghi (không phụ thuộc số thao tác của các test trước)
+    expect(all.total).toBeGreaterThan(0);
+    expect(all.items.length).toBe(Math.min(all.total, all.pageSize));
     expect(all.actions.map((a) => a.label)).toEqual(expect.arrayContaining(['Xác nhận đầu việc', 'Yêu cầu làm lại', 'Tạm dừng lượt Level']));
     const pauseAction = all.actions.find((a) => a.label === 'Tạm dừng lượt Level')!.value;
     const pauses = (await admin.get(`${API}/audit-logs?action=${encodeURIComponent(pauseAction)}`).expect(200)).body as AuditLogResponse;

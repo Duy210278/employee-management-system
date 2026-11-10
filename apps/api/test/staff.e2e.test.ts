@@ -134,8 +134,7 @@ describe('thêm nhân viên và bắt đầu Level 1 (kịch bản 5.6 bước 2
   });
 
   it('tua thêm 1 ngày: việc tuần 1 của NV mới mở và vào hàng đợi Buddy', async () => {
-    const admin = await as('admin');
-    await admin.put(`${API}/demo/clock`).send({ shiftDays: 1 }).expect(200);
+    await harness.shiftDays(1);
     const hung = await as('hung');
     const inbox = (await hung.get(`${API}/me/inbox`).expect(200)).body as InboxResponse;
     const group = inbox.groups.find((g) => g.staff.fullName === 'Bùi Thị Hạnh')!;
@@ -143,7 +142,7 @@ describe('thêm nhân viên và bắt đầu Level 1 (kịch bản 5.6 bước 2
     expect(group.items.length).toBeGreaterThan(0);
     const run = await runTasks(hung, group.run.id);
     expect(run.stages[0]).toMatchObject({ from: addDays(harness.today, 1), to: addDays(harness.today, 8) });
-    await admin.put(`${API}/demo/clock`).send({ date: null }).expect(200);
+    await harness.resetClock();
   });
 });
 

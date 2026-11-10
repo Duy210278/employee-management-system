@@ -82,7 +82,7 @@ export class NotificationsService {
       .select()
       .from(notifications)
       .where(eq(notifications.userId, user.id))
-      // Theo thứ tự nhận; thời điểm tạo theo ngày giả lập có thể nhảy lùi khi đổi ngày
+      // Theo thứ tự nhận
       .orderBy(desc(notifications.id))
       .limit(limit);
     const [{ n }] = await this.db

@@ -24,7 +24,7 @@ import { TaskQueryService } from '../runs/task-query.service';
 import { buildStageSigns, buildTaskViews, currentRunOf, dayIndexOf, isOpenRun } from '../runs/task-views';
 
 /**
- * Cảnh báo (mục 11.6): tính trực tiếp từ dữ liệu mỗi lần đọc nên luôn khớp với ngày giả lập.
+ * Cảnh báo (mục 11.6): tính trực tiếp từ dữ liệu mỗi lần đọc nên luôn khớp với ngày hôm nay.
  * Job "alerts-refresh" vì vậy không cần lưu bảng riêng.
  */
 @Injectable()

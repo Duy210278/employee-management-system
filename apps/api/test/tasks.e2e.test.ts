@@ -156,7 +156,7 @@ describe('phạm vi dữ liệu (R22)', () => {
   });
 });
 
-describe('tổng quan Level và ngày giả lập', () => {
+describe('tổng quan Level và sang ngày mới', () => {
   it('mục 9.4: NV phải xác nhận đã đọc; người khác không xác nhận thay khi NV đã có tài khoản', async () => {
     const [mai, hung] = await Promise.all([as('mai'), as('hung')]);
     const runId = (await todayOf(mai)).run!.id;
@@ -171,19 +171,20 @@ describe('tổng quan Level và ngày giả lập', () => {
     expect((await todayOf(mai)).run!.acknowledged).toBe(true);
   });
 
-  it('chỉ BP ĐT đặt được ngày giả lập; tua ngày thì trạng thái đầu việc đổi theo', async () => {
+  it('không còn API đặt ngày giả lập; sang ngày mới thì trạng thái đầu việc đổi theo', async () => {
     const [admin, lan] = await Promise.all([as('admin'), as('lan')]);
-    await lan.put(`${API}/demo/clock`).send({ shiftDays: 7 }).expect(403);
+    await admin.put(`${API}/demo/clock`).send({ shiftDays: 7 }).expect(404);
 
     const before = await todayOf(lan);
-    const clock = (await admin.put(`${API}/demo/clock`).send({ shiftDays: 7 }).expect(200)).body;
-    expect(clock).toMatchObject({ today: addDays(today, 7), simulated: true });
-    const after = await todayOf(lan);
-    expect(after.today).toBe(addDays(today, 7));
-    expect(after.run!.dayIndex).toBe(before.run!.dayIndex + 7);
-    expect(after.run!.counts.overdue).toBeGreaterThan(before.run!.counts.overdue);
-
-    const back = (await admin.put(`${API}/demo/clock`).send({ date: null }).expect(200)).body;
-    expect(back).toMatchObject({ today, simulated: false });
+    expect(await harness.shiftDays(7)).toBe(addDays(today, 7));
+    try {
+      const after = await todayOf(lan);
+      expect(after.today).toBe(addDays(today, 7));
+      expect(after.run!.dayIndex).toBe(before.run!.dayIndex + 7);
+      expect(after.run!.counts.overdue).toBeGreaterThan(before.run!.counts.overdue);
+    } finally {
+      await harness.resetClock();
+    }
+    expect((await todayOf(lan)).today).toBe(today);
   });
 });

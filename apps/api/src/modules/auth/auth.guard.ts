@@ -51,7 +51,7 @@ export class AuthGuard implements CanActivate {
     if (!user || user.status !== 'active') throw unauthorized('ACCOUNT_INACTIVE', 'Tài khoản không còn hoạt động. Đăng nhập lại.');
 
     req.user = user satisfies SessionUser;
-    // Lần vào cuối theo đồng hồ nghiệp vụ, để cảnh báo "không đăng nhập quá 5 ngày" khớp với ngày giả lập
+    // Lần vào cuối theo đồng hồ nghiệp vụ, để cảnh báo "không đăng nhập quá 5 ngày" khớp với "hôm nay" của nghiệp vụ
     const now = await this.clock.now();
     if (!user.lastSeenAt || Math.abs(now.getTime() - user.lastSeenAt.getTime()) > LAST_SEEN_EVERY_MS) {
       await this.db.update(users).set({ lastSeenAt: now }).where(eq(users.id, user.id));

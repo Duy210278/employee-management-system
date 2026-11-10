@@ -21,13 +21,13 @@ export const JOB_LABEL: Record<JobName, string> = {
 };
 export const JOB_NAMES = Object.keys(JOB_LABEL) as JobName[];
 
-/** Người dùng kiểm tra việc mới mỗi 15 phút; qua ngày thật mới (không giả lập) thì chạy lại các job */
+/** Người dùng kiểm tra việc mới mỗi 15 phút; qua ngày mới thì chạy lại các job */
 const TICK_MS = 15 * 60_000;
 const NEUTRAL = { userId: -1, role: 'nv' as const };
 
 /**
- * Job hằng ngày (mục 14.11). Trên máy demo thường không bật qua đêm nên job chạy khi: khởi động, sang ngày mới,
- * đổi ngày giả lập, hoặc bấm "Chạy ngay". Mỗi thông báo có khóa chống trùng nên chạy lại không tạo trùng (mục 14.9).
+ * Job hằng ngày (mục 14.11). Máy chạy thử thường không bật qua đêm nên job chạy khi: khởi động, sang ngày mới,
+ * hoặc bấm "Chạy ngay". Mỗi thông báo có khóa chống trùng nên chạy lại không tạo trùng (mục 14.9).
  */
 @Injectable()
 export class JobsService implements OnApplicationBootstrap, OnModuleDestroy {

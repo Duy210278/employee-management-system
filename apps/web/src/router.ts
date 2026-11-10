@@ -81,7 +81,7 @@ export const router = createRouter({
             { path: 'danh-muc', name: 'org', component: OrgPage, meta: { title: 'Cửa hàng, khu vực', desc: 'Danh mục cửa hàng, khu vực dùng cho hồ sơ nhân viên và tài khoản' } },
             { path: 'nhap-csv', name: 'import', component: ImportPage, meta: { title: 'Nhập tài khoản', desc: 'Nhập nhiều tài khoản cùng lúc từ tệp CSV' } },
             { path: 'nhat-ky', name: 'audit', component: AuditPage, meta: { title: 'Nhật ký hệ thống', desc: 'Mọi thao tác ghi dữ liệu, theo người thao tác và thời điểm' } },
-            { path: 'he-thong', name: 'admin', component: SystemPage, meta: { title: 'Công cụ demo', desc: 'Ngày giả lập, chạy job ngay, khôi phục dữ liệu mẫu' } },
+            { path: 'he-thong', name: 'admin', component: SystemPage, meta: { title: 'Công cụ demo', desc: 'Chạy job ngay, khôi phục dữ liệu mẫu' } },
           ],
         },
       ],

@@ -50,6 +50,13 @@
       "when": 1793610361615,
       "tag": "0006_drop_version_approver",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1794280105426,
+      "tag": "0007_bo_dong_ho_demo",
+      "breakpoints": true
     }
   ]
 }

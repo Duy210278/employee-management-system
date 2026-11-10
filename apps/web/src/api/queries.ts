@@ -9,7 +9,6 @@ import type {
   AreaBodyT,
   AssignmentRole,
   AuditLogResponse,
-  ClockView,
   ConfirmManyResult,
   CreateUserBodyT,
   ImportUsersResponse,
@@ -196,7 +195,6 @@ export const sessionApi = {
   login: (email: string, password: string) => api.post<{ ok: true }>('/auth/login', { email, password }),
   loginAs: (userId: number) => api.post<{ ok: true }>('/demo/login-as', { userId }),
   logout: () => api.post<{ ok: true }>('/auth/logout'),
-  setClock: (body: { date?: string | null; shiftDays?: number }) => api.put<ClockView>('/demo/clock', body),
   ack: (runId: number) => api.post<{ ok: true }>(`/runs/${runId}/ack`),
   resetDemo: () => api.post<{ ok: true; today: string }>('/demo/reset'),
 };

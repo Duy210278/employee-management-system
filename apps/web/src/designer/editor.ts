@@ -16,7 +16,7 @@ export type DesignerTab = 'framework' | 'checklist' | 'cht' | 'settings';
 export interface DesignerContext {
   content: Ref<VersionContent>;
   tab: Ref<DesignerTab>;
-  /** "Hôm nay" theo đồng hồ nghiệp vụ của máy chủ (có tính ngày giả lập) */
+  /** "Hôm nay" theo đồng hồ nghiệp vụ của máy chủ */
   today: ComputedRef<string>;
   editable: ComputedRef<boolean>;
   levelKey: Ref<number>;

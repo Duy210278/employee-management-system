@@ -90,7 +90,7 @@ function openRow(a: AlertRow, e: MouseEvent) {
       <ul class="ul sm" style="margin-top: 10px">
         <li v-for="r in ALERT_RULES" :key="r.key"><span class="pill" :class="r.severity === 'red' ? 'bad' : 'warn'">{{ r.severity === 'red' ? 'Đỏ' : 'Vàng' }}</span> {{ r.label }}</li>
       </ul>
-      <div class="sm mut" style="margin-top: 8px">Cảnh báo tính trực tiếp từ dữ liệu mỗi lần mở trang, nên luôn khớp với ngày giả lập.</div>
+      <div class="sm mut" style="margin-top: 8px">Cảnh báo tính trực tiếp từ dữ liệu mỗi lần mở trang, nên luôn khớp với ngày hôm nay.</div>
     </details>
   </div>
 </template>

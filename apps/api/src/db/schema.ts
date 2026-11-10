@@ -96,7 +96,7 @@ export const notifications = pgTable(
     body: text('body'),
     link: text('link'),
     dedupeKey: text('dedupe_key').unique(),
-    /** Ngày nghiệp vụ lúc tạo (theo ngày giả lập) */
+    /** Ngày nghiệp vụ lúc tạo */
     businessDate: day('business_date').notNull(),
     createdAt: ts('created_at').notNull(),
     readAt: ts('read_at'),
@@ -136,13 +136,6 @@ export const credentials = pgTable('credentials', {
     .references(() => users.id),
   passwordHash: text('password_hash').notNull(),
   passwordChangedAt: ts('password_changed_at').notNull().defaultNow(),
-});
-
-export const systemSettings = pgTable('system_settings', {
-  key: text('key').primaryKey(),
-  value: jsonb('value').notNull(),
-  updatedBy: integer('updated_by').references(() => users.id),
-  updatedAt: ts('updated_at').notNull().defaultNow(),
 });
 
 // ---------- 13.2 Phiên bản (nội dung lưu một tài liệu JSONB bất biến) ----------

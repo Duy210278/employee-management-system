@@ -40,7 +40,7 @@ const brief = (payload: unknown) => {
     <div v-if="isLoading" class="card empty">Đang tải…</div>
     <div v-else-if="error" class="alert bad"><div>{{ error.message }}</div></div>
     <div v-else-if="data" class="card">
-      <div class="stg"><b>{{ data.total }} bản ghi</b><span class="sm mut">Thời điểm thật của máy chủ (không theo ngày giả lập)</span></div>
+      <div class="stg"><b>{{ data.total }} bản ghi</b><span class="sm mut">Thời điểm theo giờ máy chủ</span></div>
       <table v-if="data.items.length" class="rt">
         <thead>
           <tr><th>Lúc</th><th>Người</th><th>Thao tác</th><th>Đối tượng</th><th>Chi tiết</th></tr>

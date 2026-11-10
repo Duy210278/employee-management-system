@@ -4,7 +4,6 @@ import { useRoute } from 'vue-router';
 import { useAlerts, useInbox, useMe, useNotifications, useUsers } from '@/api/queries';
 import Icon, { type IconName } from './Icon.vue';
 import PageHeader from './PageHeader.vue';
-import SimDateBar from './SimDateBar.vue';
 import UserMenu from './UserMenu.vue';
 
 const { data: me } = useMe();
@@ -132,7 +131,6 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKey));
           </div>
         </div>
       </header>
-      <SimDateBar v-if="me" :me="me" />
       <PageHeader v-if="showHeader" :fallback-title="activeLabel" />
       <main class="wrap" :class="{ wide: route.meta.wide }">
         <RouterView />

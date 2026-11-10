@@ -169,7 +169,7 @@ describe('phiếu đánh giá, chuỗi ký và lên Level (mục 7.4, 9.3, R12�
 
   it('gia hạn (R14): cần mục tiêu; sau khi BP ĐT ký, lượt kéo dài 1 tháng và mở vòng phiếu mới', async () => {
     const [admin, binh, huy] = await Promise.all([as('admin'), as('binh'), as('huy')]);
-    await admin.put(`${API}/demo/clock`).send({ shiftDays: 50 }).expect(200);
+    await harness.shiftDays(50);
     try {
       const namRun = await runIdOf('nam');
       const before = await review(binh, namRun);
@@ -183,7 +183,7 @@ describe('phiếu đánh giá, chuỗi ký và lên Level (mục 7.4, 9.3, R12�
       expect(extended).toMatchObject({ round: 1, extCount: 1, review: { id: null, status: 'draft' }, history: [{ round: 0, result: 'extend' }] });
       expect(extended.run).toMatchObject({ status: 'active', plannedEnd: addDays(before.run.plannedEnd, 30) });
     } finally {
-      await admin.put(`${API}/demo/clock`).send({ date: null }).expect(200);
+      await harness.resetClock();
     }
   });
 });

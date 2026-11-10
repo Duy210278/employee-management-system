@@ -365,37 +365,6 @@ main {
   font-size: 16px;
 }
 
-/* Dải ngày giả lập */
-.simbar {
-  background: var(--warn-bg);
-  color: var(--ink);
-  border-bottom: 1px solid var(--line);
-  font-size: 13px;
-}
-.simbar .row {
-  display: flex;
-  gap: 6px 12px;
-  align-items: center;
-  flex-wrap: wrap;
-  padding-block: 5px;
-  min-height: 40px;
-}
-.simbar.real {
-  background: var(--surface2);
-}
-.sim-txt {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-.sim-txt svg {
-  flex: none;
-}
-.simbar input[type='date'] {
-  min-height: 30px;
-  padding: 3px 8px;
-}
-
 /* ---------- Dải tiêu đề trang ---------- */
 .phead {
   position: relative;

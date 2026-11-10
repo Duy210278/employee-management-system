@@ -9,12 +9,11 @@ import {
   NotFoundException,
   Param,
   Post,
-  Put,
   Req,
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { addDays, ClockBody, LoginAsBody, runTitle, type ClockBodyT, type ClockView, type DemoAccount, type JobName, type JobResult } from '@lotrinh/shared';
+import { LoginAsBody, runTitle, type DemoAccount, type JobName, type JobResult } from '@lotrinh/shared';
 import { and, desc, eq, inArray, isNotNull } from 'drizzle-orm';
 import type { Request, Response } from 'express';
 import { env } from '../../config';
@@ -95,21 +94,6 @@ export class DemoController {
     return { ok: true };
   }
 
-  @Get('clock')
-  clockView(): Promise<ClockView> {
-    return this.clock.view();
-  }
-
-  @Put('clock')
-  async setClock(@Body(new ZodPipe(ClockBody)) body: ClockBodyT, @CurrentUser() user: SessionUser): Promise<ClockView> {
-    await this.access.assertCan(user, 'manage', 'Clock', 'Chỉ BP Đào tạo được đặt ngày giả lập');
-    const date = body.shiftDays !== undefined ? addDays(await this.clock.today(), body.shiftDays) : (body.date ?? null);
-    const view = await this.clock.setFakeToday(date, user.id);
-    // Mục 14.7: đổi ngày giả lập thì tự chạy kích hoạt phiên bản, bản tin, cảnh báo của ngày mới
-    await this.jobs.runAll(view.today);
-    return view;
-  }
-
   /** Nút "Chạy ngay" của từng job (mục 14.11) */
   @Post('jobs/:name/run')
   @HttpCode(200)
@@ -119,12 +103,12 @@ export class DemoController {
     return this.jobs.run(name as JobName);
   }
 
-  /** Xóa sạch, nạp lại bộ mẫu, đặt lại ngày thật (mục 14.7) */
+  /** Xóa sạch, nạp lại bộ mẫu theo ngày hôm nay (mục 14.7) */
   @Post('reset')
   @HttpCode(200)
   async reset(@CurrentUser() user: SessionUser): Promise<{ ok: true; today: string }> {
     await this.access.assertCan(user, 'manage', 'DemoData', 'Chỉ BP Đào tạo được khôi phục dữ liệu mẫu');
-    const today = this.clock.realToday();
+    const today = await this.clock.today();
     await resetDatabase(this.db, today);
     this.versions.clearCache();
     // Có sẵn bản tin, nhắc việc của ngày hôm nay sau khi khôi phục
