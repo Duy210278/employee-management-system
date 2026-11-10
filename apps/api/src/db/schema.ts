@@ -281,6 +281,17 @@ export const taskConfirmations = pgTable(
   ],
 );
 
+/** Mỗi lần tính lại ngày của đầu việc ghi một sự kiện date_change (mục 10.2, R18) */
+export interface DateChangeData {
+  oldOpen: string;
+  oldDue: string;
+  newOpen: string;
+  newDue: string;
+  reason: 'pause' | 'extend' | 'migrate';
+  /** Id của đề xuất tạm dừng hoặc phiếu gia hạn gây ra thay đổi */
+  refId: number | null;
+}
+
 export const taskEvents = pgTable(
   'task_events',
   {
@@ -295,6 +306,8 @@ export const taskEvents = pgTable(
     proxyRole: text('proxy_role').$type<TaskRole>(),
     action: text('action').notNull(),
     note: text('note'),
+    /** Dữ liệu kèm sự kiện; với action = date_change là ngày cũ, ngày mới, lý do (mục 10.2, R18) */
+    data: jsonb('data').$type<DateChangeData>(),
     at: ts('at').notNull(),
   },
   (t) => [index('task_events_task_idx').on(t.taskId)],
@@ -342,26 +355,6 @@ export const runPauses = pgTable(
     decisionNote: text('decision_note'),
   },
   (t) => [index('run_pauses_run_idx').on(t.runId)],
-);
-
-/** Mỗi lần tính lại ngày của đầu việc đều ghi log: ngày cũ, ngày mới, lý do (mục 10.2, R18) */
-export const taskDateChanges = pgTable(
-  'task_date_changes',
-  {
-    id: serial('id').primaryKey(),
-    taskId: integer('task_id')
-      .notNull()
-      .references(() => runTasks.id),
-    oldOpen: day('old_open').notNull(),
-    oldDue: day('old_due').notNull(),
-    newOpen: day('new_open').notNull(),
-    newDue: day('new_due').notNull(),
-    reason: text('reason').$type<'pause' | 'extend' | 'migrate'>().notNull(),
-    refId: integer('ref_id'),
-    at: ts('at').notNull(),
-    by: integer('by').references(() => users.id),
-  },
-  (t) => [index('task_date_changes_task_idx').on(t.taskId)],
 );
 
 /** Nhật ký theo dõi hằng ngày của onboarding CHT: Đào tạo ghi sau mỗi lần check-in, quản lý ghi chú */

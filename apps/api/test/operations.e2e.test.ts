@@ -13,7 +13,7 @@ import {
 import { and, eq } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createDb } from '../src/db/client';
-import { runTasks, taskDateChanges } from '../src/db/schema';
+import { runTasks, taskEvents } from '../src/db/schema';
 import { API, runTasks as tasksOf, setupApp, type Agent, type TestApp } from './helpers';
 
 let harness: TestApp;
@@ -91,7 +91,7 @@ describe('tạm dừng lượt Level (mục 9.3, T-L05)', () => {
     expect(overlap.body.code).toBe('PAUSE_OVERLAP');
   });
 
-  it('QLKV duyệt: mọi mốc chưa xong từ ngày dừng lùi 10 ngày, có log task_date_changes; mốc trước đó giữ nguyên', async () => {
+  it('QLKV duyệt: mọi mốc chưa xong từ ngày dừng lùi 10 ngày, có sự kiện đổi hạn (date_change); mốc trước đó giữ nguyên', async () => {
     const { runId } = await staffOf('Nguyễn Thị Lan');
     const huy = await as('huy');
     const before = await tasksOf(huy, runId);
@@ -118,11 +118,11 @@ describe('tạm dừng lượt Level (mục 9.3, T-L05)', () => {
     const { pool, db } = createDb(process.env.DATABASE_URL!);
     try {
       const logs = await db
-        .select()
-        .from(taskDateChanges)
-        .innerJoin(runTasks, eq(runTasks.id, taskDateChanges.taskId))
-        .where(and(eq(runTasks.runId, runId), eq(taskDateChanges.reason, 'pause')));
-      expect(logs).toHaveLength(shifted);
+        .select({ data: taskEvents.data })
+        .from(taskEvents)
+        .innerJoin(runTasks, eq(runTasks.id, taskEvents.taskId))
+        .where(and(eq(runTasks.runId, runId), eq(taskEvents.action, 'date_change')));
+      expect(logs.filter((l) => l.data?.reason === 'pause')).toHaveLength(shifted);
     } finally {
       await pool.end();
     }

@@ -19,7 +19,7 @@ import { badRequest, conflict, forbidden, notFound } from '../../common/errors';
 import type { SessionUser } from '../../common/session';
 import type { Db, Tx } from '../../db/client';
 import { DB } from '../../db/db.provider';
-import { areas, levelRuns, runPauses, runTasks, staff, stores, taskDateChanges, userAreaScopes, users, userStoreScopes } from '../../db/schema';
+import { areas, levelRuns, runPauses, runTasks, staff, stores, taskEvents, userAreaScopes, users, userStoreScopes } from '../../db/schema';
 import { AccessService } from '../access/access.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { activeAssignmentsOf, applyHandover, assignmentCandidates, reassign } from './assignments';
@@ -139,22 +139,28 @@ export class RunManageService {
     };
   }
 
-  /** Lùi mọi mốc chưa xong từ ngày bắt đầu tạm dừng (mục 10.2), ghi log từng thay đổi (R18) */
+  /** Lùi mọi mốc chưa xong từ ngày bắt đầu tạm dừng (mục 10.2), ghi sự kiện date_change cho từng đầu việc (R18) */
   private async applyPause(tx: Tx, ctx: RunContext, pause: PauseRow, by: number, now: Date) {
     const span = { from: pause.fromDate, to: pause.toDate };
     const tasks = await tx
       .select()
       .from(runTasks)
       .where(and(eq(runTasks.runId, ctx.run.id), notInArray(runTasks.status, ['done', 'na', 'void'])));
-    const changes: (typeof taskDateChanges.$inferInsert)[] = [];
+    const changes: (typeof taskEvents.$inferInsert)[] = [];
     for (const t of tasks) {
       const newOpen = shiftByPauses(t.openDate, [span]);
       const newDue = shiftByPauses(t.dueDate, [span]);
       if (newOpen === t.openDate && newDue === t.dueDate) continue;
       await tx.update(runTasks).set({ openDate: newOpen, dueDate: newDue, updatedAt: now }).where(eq(runTasks.id, t.id));
-      changes.push({ taskId: t.id, oldOpen: t.openDate, oldDue: t.dueDate, newOpen, newDue, reason: 'pause', refId: pause.id, at: now, by });
+      changes.push({
+        taskId: t.id,
+        userId: by,
+        action: 'date_change',
+        data: { oldOpen: t.openDate, oldDue: t.dueDate, newOpen, newDue, reason: 'pause', refId: pause.id },
+        at: now,
+      });
     }
-    if (changes.length) await tx.insert(taskDateChanges).values(changes);
+    if (changes.length) await tx.insert(taskEvents).values(changes);
     await tx.update(levelRuns).set({ plannedEnd: shiftByPauses(ctx.run.plannedEnd, [span]) }).where(eq(levelRuns.id, ctx.run.id));
     return changes.length;
   }

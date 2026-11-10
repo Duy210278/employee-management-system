@@ -1,5 +1,6 @@
 import { HttpException, Inject, Injectable } from '@nestjs/common';
 import {
+  fmtDate,
   decideActions,
   fillableSlots,
   helpRoles,
@@ -57,6 +58,8 @@ function messageOf(err: unknown): string {
 }
 
 /** Nhãn lịch sử thao tác hiển thị cho người dùng */
+const DATE_CHANGE_REASON = { pause: 'tạm dừng', extend: 'gia hạn', migrate: 'chuyển phiên bản' } as const;
+
 export function eventLabel(action: string, role: TaskRole | null, proxyRole: TaskRole | null): string {
   const r = role ? ROLE_SHORT[role] : '';
   switch (action) {
@@ -78,6 +81,8 @@ export function eventLabel(action: string, role: TaskRole | null, proxyRole: Tas
       return 'Đặt trạng thái: Đang thực hiện';
     case 'set_todo':
       return 'Đặt trạng thái: Chưa bắt đầu';
+    case 'date_change':
+      return 'Đổi hạn';
     default:
       return action;
   }
@@ -382,8 +387,8 @@ export class TasksService {
       userName,
       role: e.role,
       action: e.action,
-      actionLabel: eventLabel(e.action, e.role, e.proxyRole),
-      note: e.note,
+      actionLabel: e.data ? `${eventLabel(e.action, e.role, e.proxyRole)} (${DATE_CHANGE_REASON[e.data.reason]})` : eventLabel(e.action, e.role, e.proxyRole),
+      note: e.data ? `Hạn ${fmtDate(e.data.oldDue)} → ${fmtDate(e.data.newDue)}` : e.note,
     }));
   }
 

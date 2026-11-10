@@ -33,7 +33,6 @@ import {
   staff,
   stores,
   taskConfirmations,
-  taskDateChanges,
   taskEvents,
   userAreaScopes,
   users,
@@ -255,7 +254,6 @@ export class StaffService {
         const taskIds = tx.select({ id: runTasks.id }).from(runTasks).where(inArray(runTasks.runId, runIds));
         await tx.delete(taskConfirmations).where(inArray(taskConfirmations.taskId, taskIds));
         await tx.delete(taskEvents).where(inArray(taskEvents.taskId, taskIds));
-        await tx.delete(taskDateChanges).where(inArray(taskDateChanges.taskId, taskIds));
         const reviewIds = tx.select({ id: levelReviews.id }).from(levelReviews).where(inArray(levelReviews.runId, runIds));
         await tx.delete(reviewSignatures).where(inArray(reviewSignatures.reviewId, reviewIds));
         for (const t of [runTasks, runAssignments, stageSignoffs, runPauses, runJournal, runEvaluations, salesMonthly, observations, levelReviews]) {
