@@ -4,13 +4,13 @@ import { createDb } from '../client';
 import { resetDatabase } from '../seed';
 
 async function main() {
-  const { pool, db } = createDb(env().DATABASE_URL);
+  const { db, close } = createDb(env().DATABASE_URL);
   try {
     const today = todayIn(env().TZ);
     await resetDatabase(db, today);
     console.log(`Đã xóa sạch và nạp lại dữ liệu mẫu (mốc ngày ${today}). Mật khẩu chung: Demo@123`);
   } finally {
-    await pool.end();
+    await close();
   }
 }
 

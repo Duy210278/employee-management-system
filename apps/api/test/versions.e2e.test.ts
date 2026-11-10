@@ -28,7 +28,7 @@ async function save(id: number, mutate: (c: VersionContent) => void, changeNote 
 }
 
 /** Drizzle bọc lỗi PostgreSQL trong cause */
-async function pgError(run: () => Promise<unknown>): Promise<string> {
+async function dbError(run: () => Promise<unknown>): Promise<string> {
   try {
     await run();
     return '';
@@ -165,12 +165,12 @@ describe('bản đã ban hành bất biến (R03, T-V06)', () => {
   });
 
   it('trigger ở cơ sở dữ liệu chặn cả khi sửa trực tiếp bằng SQL', async () => {
-    const { pool, db } = createDb(process.env.DATABASE_URL!);
+    const { db, close } = createDb(process.env.DATABASE_URL!);
     try {
-      expect(await pgError(() => db.execute(sql`update versions set content = '{}'::jsonb where code = '2.1'`))).toMatch(/R03/);
-      expect(await pgError(() => db.execute(sql`delete from versions where code = '2.1'`))).toMatch(/R03/);
+      expect(await dbError(() => db.execute(sql`update lotrinh.versions set content = N'{}' where code = N'2.1'`))).toMatch(/R03/);
+      expect(await dbError(() => db.execute(sql`delete from lotrinh.versions where code = N'2.1'`))).toMatch(/R03/);
     } finally {
-      await pool.end();
+      await close();
     }
   });
 

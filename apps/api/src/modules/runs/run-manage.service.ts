@@ -13,7 +13,7 @@ import {
   type TransferBodyT,
 } from '@lotrinh/shared';
 import { and, asc, desc, eq, inArray, notInArray } from 'drizzle-orm';
-import { alias } from 'drizzle-orm/pg-core';
+import { alias } from 'drizzle-orm/mssql-core';
 import { ClockService } from '../../adapters/clock/clock.service';
 import { badRequest, conflict, forbidden, notFound } from '../../common/errors';
 import type { SessionUser } from '../../common/session';
@@ -26,6 +26,7 @@ import { NotificationsService } from '../notifications/notifications.service';
 import { activeAssignmentsOf, applyHandover, assignmentCandidates, reassign } from './assignments';
 import { RunContextService, type RunContext } from './run-context.service';
 import { isOpenRun } from './task-views';
+import { lockRows } from '../../db/mssql';
 
 type PauseRow = typeof runPauses.$inferSelect;
 
@@ -185,6 +186,7 @@ export class RunManageService {
     await this.db.transaction(async (tx) => {
       const [pause] = await tx
         .insert(runPauses)
+        .output()
         .values({
           runId,
           fromDate: body.from,
@@ -195,8 +197,7 @@ export class RunManageService {
           requestedAt: now,
           decidedBy: approved ? user.id : null,
           decidedAt: approved ? now : null,
-        })
-        .returning();
+        });
       if (approved) await this.applyPause(tx, ctx, pause, user.id, now);
     });
 
@@ -217,11 +218,9 @@ export class RunManageService {
     if (!body.approve && !body.note) throw badRequest('NOTE_REQUIRED', 'Nhập lý do từ chối để CHT biết');
     const now = await this.clock.now();
     const pause = await this.db.transaction(async (tx) => {
-      const [p] = await tx
-        .select()
-        .from(runPauses)
-        .where(and(eq(runPauses.id, pauseId), eq(runPauses.runId, runId)))
-        .for('update');
+      const which = and(eq(runPauses.id, pauseId), eq(runPauses.runId, runId));
+      await lockRows(tx, runPauses, 'status', which);
+      const [p] = await tx.select().from(runPauses).where(which);
       if (!p) throw notFound('PAUSE_NOT_FOUND', 'Không tìm thấy đề xuất tạm dừng');
       if (p.status !== 'pending') throw conflict('PAUSE_DECIDED', 'Đề xuất này đã được xử lý');
       await tx

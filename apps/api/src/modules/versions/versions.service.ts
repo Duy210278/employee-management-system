@@ -49,7 +49,8 @@ export class VersionsService {
           .from(versions)
           .where(and(PUBLISHED, eq(versions.criteriaLine, own.line), lte(versions.effectiveFrom, today)))
           .orderBy(desc(versions.effectiveFrom), desc(versions.id))
-          .limit(1)
+          .offset(0)
+          .fetch(1)
       : [];
     const row = latest ?? own;
     return { id: row.id, code: row.code, content: this.parse(row.id, row.content) };

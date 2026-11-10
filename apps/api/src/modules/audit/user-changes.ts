@@ -1,5 +1,5 @@
 import { and, desc, eq } from 'drizzle-orm';
-import { alias } from 'drizzle-orm/pg-core';
+import { alias } from 'drizzle-orm/mssql-core';
 import type { DbLike } from '../../db/client';
 import { auditLogs, users } from '../../db/schema';
 

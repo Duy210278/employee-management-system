@@ -1,22 +1,21 @@
 import { Inject, OnApplicationShutdown, Provider } from '@nestjs/common';
-import { drizzle } from 'drizzle-orm/node-postgres';
-import pg from 'pg';
 import { env } from '../config';
-import * as schema from './schema';
-import './client';
+import { createDb, type Db } from './client';
 
 export const DB = Symbol('DB');
-export const PG_POOL = Symbol('PG_POOL');
+const DB_CONN = Symbol('DB_CONN');
+
+type Conn = ReturnType<typeof createDb>;
 
 export const dbProviders: Provider[] = [
-  { provide: PG_POOL, useFactory: () => new pg.Pool({ connectionString: env().DATABASE_URL, max: 10 }) },
-  { provide: DB, inject: [PG_POOL], useFactory: (pool: pg.Pool) => drizzle(pool, { schema }) },
+  { provide: DB_CONN, useFactory: (): Conn => createDb(env().DATABASE_URL) },
+  { provide: DB, inject: [DB_CONN], useFactory: (conn: Conn): Db => conn.db },
 ];
 
 export class PoolShutdown implements OnApplicationShutdown {
-  constructor(@Inject(PG_POOL) private readonly pool: pg.Pool) {}
+  constructor(@Inject(DB_CONN) private readonly conn: Conn) {}
 
   async onApplicationShutdown(): Promise<void> {
-    await this.pool.end();
+    await this.conn.close();
   }
 }

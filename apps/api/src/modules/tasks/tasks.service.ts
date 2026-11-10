@@ -34,6 +34,7 @@ import { TaskQueryService } from '../runs/task-query.service';
 import { buildTaskViews } from '../runs/task-views';
 import type { Db, Tx } from '../../db/client';
 import { runTasks, taskConfirmations, taskEvents, users } from '../../db/schema';
+import { lockRows } from '../../db/mssql';
 
 interface Locked {
   task: typeof runTasks.$inferSelect;
@@ -167,7 +168,8 @@ export class TasksService {
 
   /** Khóa đầu việc, kiểm tra phạm vi và rowVersion, tính quyền của người gọi bằng cùng hàm với giao diện */
   private async lock(tx: Tx, user: SessionUser, taskId: number, rowVersion: number): Promise<Locked> {
-    const [task] = await tx.select().from(runTasks).where(eq(runTasks.id, taskId)).for('update');
+    await lockRows(tx, runTasks, 'rowVersion', eq(runTasks.id, taskId));
+    const [task] = await tx.select().from(runTasks).where(eq(runTasks.id, taskId));
     if (!task) throw notFound('TASK_NOT_FOUND', 'Không tìm thấy đầu việc');
     const ctx = await this.runs.load(task.runId);
     await this.access.assertCanViewRun(user, ctx);

@@ -18,110 +18,113 @@ import {
   type VersionContent,
 } from '@lotrinh/shared';
 import { sql, type Column } from 'drizzle-orm';
-import {
-  bigserial,
-  boolean,
-  check,
-  date,
-  doublePrecision,
-  index,
-  integer,
-  jsonb,
-  pgTable,
-  primaryKey,
-  serial,
-  text,
-  timestamp,
-  uniqueIndex,
-} from 'drizzle-orm/pg-core';
+import { bigint, bit, check, date, datetimeoffset, float, index, int, mssqlSchema, nvarchar, uniqueIndex } from 'drizzle-orm/mssql-core';
 
 /**
- * Mô hình dữ liệu (mục 13). Ngày nghiệp vụ dùng kiểu date (chuỗi YYYY-MM-DD),
- * thời điểm thao tác dùng timestamptz. Dữ liệu nghiệp vụ không xóa vật lý (R21).
+ * Mô hình dữ liệu (mục 13) trên SQL Server, schema lotrinh. Ngày nghiệp vụ dùng DATE (chuỗi YYYY-MM-DD),
+ * thời điểm thao tác dùng DATETIMEOFFSET. Chữ dùng NVARCHAR để lưu tiếng Việt. JSON lưu trong NVARCHAR(MAX)
+ * kèm CHECK ISJSON. Dữ liệu nghiệp vụ không xóa vật lý (R21).
+ * Script tham khảo đầy đủ: docs/thiet-ke/sqlserver/01_tao_bang.sql.
  */
+export const lotrinh = mssqlSchema('lotrinh');
 
-const ts = (name: string) => timestamp(name, { withTimezone: true });
-/** CHECK: cột chỉ nhận giá trị trong danh sách (danh sách là hằng trong code, không phải dữ liệu người dùng); NULL vẫn qua */
-const oneOf = (col: Column, values: readonly string[]) => sql`${col} in (${sql.raw(values.map((v) => `'${v}'`).join(', '))})`;
+const ts = (name: string) => datetimeoffset(name, { precision: 3 });
+/** Mặc định thời điểm hiện tại kèm múi giờ (GETDATE() không có múi giờ nên bị coi là +00:00) */
+const NOW = sql`SYSDATETIMEOFFSET()`;
 const day = (name: string) => date(name, { mode: 'string' });
+const str = (name: string, length: number) => nvarchar(name, { length });
+const text = (name: string) => nvarchar(name, { length: 'max' });
+const json = (name: string) => nvarchar(name, { length: 'max', mode: 'json' });
+const isJson = (col: Column) => sql`isjson(${col}) = 1`;
+/** CHECK: cột chỉ nhận giá trị trong danh sách (danh sách là hằng trong code, không phải dữ liệu người dùng); NULL vẫn qua */
+const oneOf = (col: Column, values: readonly string[]) => sql`${col} in (${sql.raw(values.map((v) => `N'${v}'`).join(', '))})`;
 
 // ---------- 13.1 Tổ chức và người dùng ----------
 
-export const areas = pgTable('areas', {
-  id: serial('id').primaryKey(),
-  code: text('code').notNull().unique(),
-  name: text('name').notNull(),
-  active: boolean('active').notNull().default(true),
+export const areas = lotrinh.table('areas', {
+  id: int('id').identity().primaryKey(),
+  code: str('code', 50).notNull().unique('areas_code_uq'),
+  name: str('name', 200).notNull(),
+  active: bit('active').notNull().default(true),
 });
 
-export const stores = pgTable('stores', {
-  id: serial('id').primaryKey(),
-  code: text('code').notNull().unique(),
-  name: text('name').notNull(),
-  address: text('address'),
-  areaId: integer('area_id')
+export const stores = lotrinh.table('stores', {
+  id: int('id').identity().primaryKey(),
+  code: str('code', 50).notNull().unique('stores_code_uq'),
+  name: str('name', 200).notNull(),
+  address: str('address', 500),
+  areaId: int('area_id')
     .notNull()
     .references(() => areas.id),
-  active: boolean('active').notNull().default(true),
+  active: bit('active').notNull().default(true),
 });
 
-export const users = pgTable('users', {
-  id: serial('id').primaryKey(),
-  employeeCode: text('employee_code').unique(),
-  fullName: text('full_name').notNull(),
-  email: text('email').notNull().unique(),
-  phone: text('phone'),
-  role: text('role').$type<AccountRole>().notNull(),
-  status: text('status').$type<UserStatus>().notNull().default('pending'),
-  canBuddy: boolean('can_buddy').notNull().default(false),
-  /** Thông tin người đăng ký đề nghị (mục 5.1); BP ĐT chốt vai trò, phạm vi khi duyệt */
-  requestedRole: text('requested_role').$type<AccountRole>(),
-  requestedStoreId: integer('requested_store_id').references(() => stores.id),
-  requestedAreaId: integer('requested_area_id').references(() => areas.id),
-  /** Lý do từ chối đăng ký (mục 5.4 điều 5) */
-  reviewNote: text('review_note'),
-  reviewedBy: integer('reviewed_by'),
-  reviewedAt: ts('reviewed_at'),
-  rowVersion: integer('row_version').notNull().default(0),
-  lastSeenAt: ts('last_seen_at'),
-  createdAt: ts('created_at').notNull().defaultNow(),
-}, (t) => [
-  check('users_role_ck', oneOf(t.role, ACCOUNT_ROLES)),
-  check('users_status_ck', oneOf(t.status, USER_STATUSES)),
-  check('users_requested_role_ck', oneOf(t.requestedRole, ACCOUNT_ROLES)),
-]);
+export const users = lotrinh.table(
+  'users',
+  {
+    id: int('id').identity().primaryKey(),
+    employeeCode: str('employee_code', 30),
+    fullName: str('full_name', 200).notNull(),
+    /** Tên đăng nhập (tới khi chuyển sang SSO) */
+    email: str('email', 255).notNull().unique('users_email_uq'),
+    phone: str('phone', 30),
+    role: str('role', 10).$type<AccountRole>().notNull(),
+    status: str('status', 10).$type<UserStatus>().notNull().default('pending'),
+    canBuddy: bit('can_buddy').notNull().default(false),
+    /** Thông tin người đăng ký đề nghị (mục 5.1); BP ĐT chốt vai trò, phạm vi khi duyệt */
+    requestedRole: str('requested_role', 10).$type<AccountRole>(),
+    requestedStoreId: int('requested_store_id').references(() => stores.id),
+    requestedAreaId: int('requested_area_id').references(() => areas.id),
+    /** Lý do từ chối đăng ký (mục 5.4 điều 5) */
+    reviewNote: text('review_note'),
+    reviewedBy: int('reviewed_by'),
+    reviewedAt: ts('reviewed_at'),
+    rowVersion: int('row_version').notNull().default(0),
+    lastSeenAt: ts('last_seen_at'),
+    createdAt: ts('created_at').notNull().default(NOW),
+  },
+  (t) => [
+    uniqueIndex('users_employee_code_uq').on(t.employeeCode).where(sql`${t.employeeCode} is not null`),
+    check('users_role_ck', oneOf(t.role, ACCOUNT_ROLES)),
+    check('users_status_ck', oneOf(t.status, USER_STATUSES)),
+    check('users_requested_role_ck', oneOf(t.requestedRole, ACCOUNT_ROLES)),
+  ],
+);
 
 /** Thông báo trong ứng dụng (mục 10.6); dedupe_key chống trùng khi job chạy lại (mục 14.9) */
-export const notifications = pgTable(
+export const notifications = lotrinh.table(
   'notifications',
   {
-    id: serial('id').primaryKey(),
-    userId: integer('user_id')
+    id: int('id').identity().primaryKey(),
+    userId: int('user_id')
       .notNull()
       .references(() => users.id),
-    type: text('type').notNull(),
-    title: text('title').notNull(),
+    type: str('type', 50).notNull(),
+    title: str('title', 300).notNull(),
     body: text('body'),
-    link: text('link'),
-    dedupeKey: text('dedupe_key').unique(),
+    link: str('link', 500),
+    dedupeKey: str('dedupe_key', 200),
     /** Ngày nghiệp vụ lúc tạo */
     businessDate: day('business_date').notNull(),
     createdAt: ts('created_at').notNull(),
     readAt: ts('read_at'),
   },
-  (t) => [index('notifications_user_idx').on(t.userId, t.readAt)],
+  (t) => [
+    index('notifications_user_idx').on(t.userId, t.readAt),
+    uniqueIndex('notifications_dedupe_uq').on(t.dedupeKey).where(sql`${t.dedupeKey} is not null`),
+  ],
 );
 
 /** Phạm vi dữ liệu: CHT theo cửa hàng (store_id), QLKV theo khu vực (area_id); mỗi dòng đúng một trong hai */
-export const userScopes = pgTable(
+export const userScopes = lotrinh.table(
   'user_scopes',
   {
-    id: serial('id').primaryKey(),
-    userId: integer('user_id')
+    id: int('id').identity().primaryKey(),
+    userId: int('user_id')
       .notNull()
       .references(() => users.id),
-    storeId: integer('store_id').references(() => stores.id),
-    areaId: integer('area_id').references(() => areas.id),
+    storeId: int('store_id').references(() => stores.id),
+    areaId: int('area_id').references(() => areas.id),
   },
   (t) => [
     check('user_scopes_one_of', sql`(${t.storeId} is not null and ${t.areaId} is null) or (${t.storeId} is null and ${t.areaId} is not null)`),
@@ -130,77 +133,89 @@ export const userScopes = pgTable(
   ],
 );
 
-export const credentials = pgTable('credentials', {
-  userId: integer('user_id')
+/** Mật khẩu đăng nhập nội bộ; bỏ khi chuyển sang SSO */
+export const credentials = lotrinh.table('credentials', {
+  userId: int('user_id')
     .primaryKey()
     .references(() => users.id),
-  passwordHash: text('password_hash').notNull(),
-  passwordChangedAt: ts('password_changed_at').notNull().defaultNow(),
+  passwordHash: str('password_hash', 200).notNull(),
+  passwordChangedAt: ts('password_changed_at').notNull().default(NOW),
 });
 
-// ---------- 13.2 Phiên bản (nội dung lưu một tài liệu JSONB bất biến) ----------
+// ---------- 13.2 Phiên bản (nội dung lưu một tài liệu JSON bất biến) ----------
 
 /**
  * draft: nháp · pending: chờ duyệt · active: đã ban hành (đang, sắp hoặc hết hiệu lực tính theo ngày hiệu lực).
  * expired giữ lại cho dữ liệu cũ; trạng thái hiển thị tính bằng versionState().
+ * Bản đã gửi duyệt hoặc ban hành được trigger chặn sửa nội dung, xóa, đưa về nháp (R03, migration viết tay).
  */
 export const VERSION_STATUSES = ['draft', 'pending', 'active', 'expired'] as const;
 export type VersionStatus = (typeof VERSION_STATUSES)[number];
 
-export const versions = pgTable('versions', {
-  id: serial('id').primaryKey(),
-  /** Cấp khi duyệt; bản nháp chưa có số */
-  code: text('code').unique(),
-  /** Dòng tiêu chí: hai số đầu (2.1). Cấp khi duyệt */
-  criteriaLine: text('criteria_line'),
-  status: text('status').$type<VersionStatus>().notNull(),
-  effectiveFrom: day('effective_from'),
-  effectiveTo: day('effective_to'),
-  parentId: integer('parent_id'),
-  changeNote: text('change_note'),
-  changeKind: text('change_kind').$type<'text' | 'criteria'>(),
-  /** Lý do trả về nháp: chỉ còn ở dữ liệu cũ, khi QLKV còn quyền duyệt phiên bản */
-  reviewNote: text('review_note'),
-  content: jsonb('content').$type<VersionContent>().notNull(),
-  rowVersion: integer('row_version').notNull().default(0),
-  createdBy: integer('created_by').references(() => users.id),
-  updatedBy: integer('updated_by').references(() => users.id),
-  updatedAt: ts('updated_at').notNull().defaultNow(),
-  submittedBy: integer('submitted_by').references(() => users.id),
-  submittedAt: ts('submitted_at'),
-  approvedBy: integer('approved_by').references(() => users.id),
-  approvedAt: ts('approved_at'),
-  createdAt: ts('created_at').notNull().defaultNow(),
-}, (t) => [
-  check('versions_status_ck', oneOf(t.status, VERSION_STATUSES)),
-  check('versions_change_kind_ck', oneOf(t.changeKind, ['text', 'criteria'])),
-  check('versions_effective_ck', sql`${t.effectiveTo} is null or ${t.effectiveFrom} is null or ${t.effectiveTo} >= ${t.effectiveFrom}`),
-]);
+export const versions = lotrinh.table(
+  'versions',
+  {
+    id: int('id').identity().primaryKey(),
+    /** Cấp khi duyệt; bản nháp chưa có số */
+    code: str('code', 30),
+    /** Dòng tiêu chí: hai số đầu (2.1). Cấp khi duyệt */
+    criteriaLine: str('criteria_line', 10),
+    status: str('status', 10).$type<VersionStatus>().notNull(),
+    effectiveFrom: day('effective_from'),
+    effectiveTo: day('effective_to'),
+    parentId: int('parent_id'),
+    changeNote: text('change_note'),
+    changeKind: str('change_kind', 10).$type<'text' | 'criteria'>(),
+    /** Lý do trả về nháp: chỉ còn ở dữ liệu cũ, khi QLKV còn quyền duyệt phiên bản */
+    reviewNote: text('review_note'),
+    content: json('content').$type<VersionContent>().notNull(),
+    rowVersion: int('row_version').notNull().default(0),
+    createdBy: int('created_by').references(() => users.id),
+    updatedBy: int('updated_by').references(() => users.id),
+    updatedAt: ts('updated_at').notNull().default(NOW),
+    submittedBy: int('submitted_by').references(() => users.id),
+    submittedAt: ts('submitted_at'),
+    approvedBy: int('approved_by').references(() => users.id),
+    approvedAt: ts('approved_at'),
+    createdAt: ts('created_at').notNull().default(NOW),
+  },
+  (t) => [
+    uniqueIndex('versions_code_uq').on(t.code).where(sql`${t.code} is not null`),
+    check('versions_status_ck', oneOf(t.status, VERSION_STATUSES)),
+    check('versions_change_kind_ck', oneOf(t.changeKind, ['text', 'criteria'])),
+    check('versions_effective_ck', sql`${t.effectiveTo} is null or ${t.effectiveFrom} is null or ${t.effectiveTo} >= ${t.effectiveFrom}`),
+    check('versions_content_json_ck', isJson(t.content)),
+  ],
+);
 
 // ---------- 13.3 Vận hành ----------
 
-export const staff = pgTable('staff', {
-  id: serial('id').primaryKey(),
-  userId: integer('user_id')
-    .unique()
-    .references(() => users.id),
-  employeeCode: text('employee_code'),
-  fullName: text('full_name').notNull(),
-  storeId: integer('store_id')
-    .notNull()
-    .references(() => stores.id),
-  hireDate: day('hire_date').notNull(),
-  currentLevel: integer('current_level').notNull().default(1),
-  active: boolean('active').notNull().default(true),
-  /** "Ngừng theo dõi" khi nghỉ việc (mục 9.3): dữ liệu giữ nguyên */
-  stopReason: text('stop_reason'),
-  stoppedAt: ts('stopped_at'),
-  stoppedBy: integer('stopped_by').references(() => users.id),
-  createdAt: ts('created_at').notNull().defaultNow(),
-}, (t) => [
-  check('staff_level_ck', sql`${t.currentLevel} between 1 and 4`),
-  uniqueIndex('staff_employee_code_uq').on(t.employeeCode).where(sql`${t.employeeCode} is not null`),
-]);
+export const staff = lotrinh.table(
+  'staff',
+  {
+    id: int('id').identity().primaryKey(),
+    userId: int('user_id').references(() => users.id),
+    employeeCode: str('employee_code', 30),
+    fullName: str('full_name', 200).notNull(),
+    storeId: int('store_id')
+      .notNull()
+      .references(() => stores.id),
+    hireDate: day('hire_date').notNull(),
+    currentLevel: int('current_level').notNull().default(1),
+    active: bit('active').notNull().default(true),
+    /** "Ngừng theo dõi" khi nghỉ việc (mục 9.3): dữ liệu giữ nguyên */
+    stopReason: text('stop_reason'),
+    stoppedAt: ts('stopped_at'),
+    stoppedBy: int('stopped_by').references(() => users.id),
+    createdAt: ts('created_at').notNull().default(NOW),
+  },
+  (t) => [
+    uniqueIndex('staff_user_uq').on(t.userId).where(sql`${t.userId} is not null`),
+    uniqueIndex('staff_employee_code_uq').on(t.employeeCode).where(sql`${t.employeeCode} is not null`),
+    index('staff_store_idx').on(t.storeId),
+    check('staff_level_ck', sql`${t.currentLevel} between 1 and 4`),
+  ],
+);
 
 /** promoted: NVBH thăng chức Cửa hàng trưởng, lượt NVBH đóng và chuyển sang lượt CHT */
 export const RUN_STATUSES = ['active', 'paused', 'review', 'passed', 'extended', 'failed', 'stopped', 'promoted'] as const;
@@ -214,28 +229,28 @@ export interface RunMeta {
   managerNote?: string;
 }
 
-export const levelRuns = pgTable(
+export const levelRuns = lotrinh.table(
   'level_runs',
   {
-    id: serial('id').primaryKey(),
-    staffId: integer('staff_id')
+    id: int('id').identity().primaryKey(),
+    staffId: int('staff_id')
       .notNull()
       .references(() => staff.id),
-    levelKey: integer('level_key').notNull(),
+    levelKey: int('level_key').notNull(),
     /** nvbh: lộ trình 4 Level · cht_moi_tuyen, cht_thang_tien: checklist onboarding Cửa hàng trưởng */
-    track: text('track').$type<Track>().notNull().default('nvbh'),
-    meta: jsonb('meta').$type<RunMeta>().notNull().default({}),
-    versionId: integer('version_id')
+    track: str('track', 20).$type<Track>().notNull().default('nvbh'),
+    meta: json('meta').$type<RunMeta>().notNull().default({}),
+    versionId: int('version_id')
       .notNull()
       .references(() => versions.id),
     startDate: day('start_date').notNull(),
     plannedEnd: day('planned_end').notNull(),
-    status: text('status').$type<RunStatus>().notNull().default('active'),
-    extCount: integer('ext_count').notNull().default(0),
-    ackBy: integer('ack_by').references(() => users.id),
+    status: str('status', 10).$type<RunStatus>().notNull().default('active'),
+    extCount: int('ext_count').notNull().default(0),
+    ackBy: int('ack_by').references(() => users.id),
     ackAt: ts('ack_at'),
-    createdBy: integer('created_by').references(() => users.id),
-    createdAt: ts('created_at').notNull().defaultNow(),
+    createdBy: int('created_by').references(() => users.id),
+    createdAt: ts('created_at').notNull().default(NOW),
   },
   (t) => [
     index('level_runs_staff_idx').on(t.staffId),
@@ -243,20 +258,21 @@ export const levelRuns = pgTable(
     check('level_runs_track_ck', oneOf(t.track, ['nvbh', ...CHT_TRACKS])),
     check('level_runs_status_ck', oneOf(t.status, RUN_STATUSES)),
     check('level_runs_dates_ck', sql`${t.plannedEnd} >= ${t.startDate}`),
+    check('level_runs_meta_json_ck', isJson(t.meta)),
     // Mỗi nhân viên chỉ một lượt đang mở (cùng danh sách với OPEN_RUN_STATUSES ở runs/task-views.ts)
-    uniqueIndex('level_runs_one_open_uq').on(t.staffId).where(sql`${t.status} in ('active', 'paused', 'review')`),
+    uniqueIndex('level_runs_one_open_uq').on(t.staffId).where(sql`${t.status} in (N'active', N'paused', N'review')`),
   ],
 );
 
-export const runAssignments = pgTable(
+export const runAssignments = lotrinh.table(
   'run_assignments',
   {
-    id: serial('id').primaryKey(),
-    runId: integer('run_id')
+    id: int('id').identity().primaryKey(),
+    runId: int('run_id')
       .notNull()
       .references(() => levelRuns.id),
-    role: text('role').$type<AssignmentRole>().notNull(),
-    userId: integer('user_id')
+    role: str('role', 10).$type<AssignmentRole>().notNull(),
+    userId: int('user_id')
       .notNull()
       .references(() => users.id),
     fromDate: day('from_date').notNull(),
@@ -273,56 +289,56 @@ export const runAssignments = pgTable(
   ],
 );
 
-export const runTasks = pgTable(
+export const runTasks = lotrinh.table(
   'run_tasks',
   {
-    id: serial('id').primaryKey(),
-    runId: integer('run_id')
+    id: int('id').identity().primaryKey(),
+    runId: int('run_id')
       .notNull()
       .references(() => levelRuns.id),
-    itemKey: text('item_key').notNull(),
+    itemKey: str('item_key', 100).notNull(),
     openDate: day('open_date').notNull(),
     dueDate: day('due_date').notNull(),
-    status: text('status').$type<TaskStatus>().notNull().default('todo'),
+    status: str('status', 10).$type<TaskStatus>().notNull().default('todo'),
     doneDate: day('done_date'),
     naReason: text('na_reason'),
     reworkNote: text('rework_note'),
-    reworkBy: integer('rework_by').references(() => users.id),
+    reworkBy: int('rework_by').references(() => users.id),
     reworkAt: ts('rework_at'),
     /** Chống ghi đè khi hai người cùng thao tác (mục 14.9) */
-    rowVersion: integer('row_version').notNull().default(0),
-    updatedAt: ts('updated_at').notNull().defaultNow(),
+    rowVersion: int('row_version').notNull().default(0),
+    updatedAt: ts('updated_at').notNull().default(NOW),
   },
   (t) => [
     uniqueIndex('run_tasks_run_item_uq').on(t.runId, t.itemKey),
     check('run_tasks_status_ck', oneOf(t.status, TASK_STATUSES)),
     check('run_tasks_dates_ck', sql`${t.dueDate} >= ${t.openDate}`),
-    check('run_tasks_done_ck', sql`${t.status} <> 'done' or ${t.doneDate} is not null`),
-    check('run_tasks_na_ck', sql`${t.status} <> 'na' or ${t.naReason} is not null`),
+    check('run_tasks_done_ck', sql`${t.status} <> N'done' or ${t.doneDate} is not null`),
+    check('run_tasks_na_ck', sql`${t.status} <> N'na' or ${t.naReason} is not null`),
   ],
 );
 
-export const taskConfirmations = pgTable(
+export const taskConfirmations = lotrinh.table(
   'task_confirmations',
   {
-    id: serial('id').primaryKey(),
-    taskId: integer('task_id')
+    id: int('id').identity().primaryKey(),
+    taskId: int('task_id')
       .notNull()
       .references(() => runTasks.id),
     /** Ô xác nhận được điền */
-    role: text('role').$type<TaskRole>().notNull(),
-    userId: integer('user_id')
+    role: str('role', 10).$type<TaskRole>().notNull(),
+    userId: int('user_id')
       .notNull()
       .references(() => users.id),
     /** Vai trò thật của người điền khi xác nhận thay (ví dụ CHT xác nhận thay Buddy) */
-    proxyRole: text('proxy_role').$type<TaskRole>(),
+    proxyRole: str('proxy_role', 10).$type<TaskRole>(),
     at: ts('at').notNull(),
     note: text('note'),
     revokedAt: ts('revoked_at'),
-    revokedBy: integer('revoked_by').references(() => users.id),
+    revokedBy: int('revoked_by').references(() => users.id),
   },
   (t) => [
-    uniqueIndex('task_confirmations_active_uq').on(t.taskId, t.role).where(sql`revoked_at is null`),
+    uniqueIndex('task_confirmations_active_uq').on(t.taskId, t.role).where(sql`${t.revokedAt} is null`),
     index('task_confirmations_task_idx').on(t.taskId),
     check('task_confirmations_role_ck', oneOf(t.role, TASK_ROLES)),
     check('task_confirmations_proxy_ck', oneOf(t.proxyRole, TASK_ROLES)),
@@ -340,28 +356,29 @@ export interface DateChangeData {
   refId: number | null;
 }
 
-export const taskEvents = pgTable(
+export const taskEvents = lotrinh.table(
   'task_events',
   {
-    id: serial('id').primaryKey(),
-    taskId: integer('task_id')
+    id: int('id').identity().primaryKey(),
+    taskId: int('task_id')
       .notNull()
       .references(() => runTasks.id),
-    userId: integer('user_id')
+    userId: int('user_id')
       .notNull()
       .references(() => users.id),
-    role: text('role').$type<TaskRole>(),
-    proxyRole: text('proxy_role').$type<TaskRole>(),
-    action: text('action').notNull(),
+    role: str('role', 10).$type<TaskRole>(),
+    proxyRole: str('proxy_role', 10).$type<TaskRole>(),
+    action: str('action', 50).notNull(),
     note: text('note'),
     /** Dữ liệu kèm sự kiện; với action = date_change là ngày cũ, ngày mới, lý do (mục 10.2, R18) */
-    data: jsonb('data').$type<DateChangeData>(),
+    data: json('data').$type<DateChangeData>(),
     at: ts('at').notNull(),
   },
   (t) => [
     index('task_events_task_idx').on(t.taskId),
     check('task_events_role_ck', oneOf(t.role, TASK_ROLES)),
     check('task_events_proxy_ck', oneOf(t.proxyRole, TASK_ROLES)),
+    check('task_events_data_json_ck', sql`${t.data} is null or isjson(${t.data}) = 1`),
   ],
 );
 
@@ -369,22 +386,22 @@ export const PAUSE_STATUSES = ['pending', 'approved', 'rejected'] as const;
 export type PauseStatus = (typeof PAUSE_STATUSES)[number];
 
 /** Tạm dừng lượt Level (mục 9.3): CHT đề xuất, QLKV hoặc BP ĐT duyệt */
-export const runPauses = pgTable(
+export const runPauses = lotrinh.table(
   'run_pauses',
   {
-    id: serial('id').primaryKey(),
-    runId: integer('run_id')
+    id: int('id').identity().primaryKey(),
+    runId: int('run_id')
       .notNull()
       .references(() => levelRuns.id),
     fromDate: day('from_date').notNull(),
     toDate: day('to_date').notNull(),
     reason: text('reason').notNull(),
-    status: text('status').$type<PauseStatus>().notNull().default('pending'),
-    requestedBy: integer('requested_by')
+    status: str('status', 10).$type<PauseStatus>().notNull().default('pending'),
+    requestedBy: int('requested_by')
       .notNull()
       .references(() => users.id),
     requestedAt: ts('requested_at').notNull(),
-    decidedBy: integer('decided_by').references(() => users.id),
+    decidedBy: int('decided_by').references(() => users.id),
     decidedAt: ts('decided_at'),
     decisionNote: text('decision_note'),
   },
@@ -396,111 +413,114 @@ export const runPauses = pgTable(
 );
 
 /** Nhật ký theo dõi hằng ngày của onboarding CHT: Đào tạo ghi sau mỗi lần check-in, quản lý ghi chú */
-export const runJournal = pgTable(
+export const runJournal = lotrinh.table(
   'run_journal',
   {
-    id: serial('id').primaryKey(),
-    runId: integer('run_id')
+    id: int('id').identity().primaryKey(),
+    runId: int('run_id')
       .notNull()
       .references(() => levelRuns.id),
     /** 0 là Ngày D */
-    day: integer('day').notNull(),
-    mood: text('mood'),
+    day: int('day').notNull(),
+    mood: str('mood', 100),
     difficulties: text('difficulties').notNull().default(''),
     actions: text('actions').notNull().default(''),
     managerNote: text('manager_note').notNull().default(''),
-    updatedBy: integer('updated_by').references(() => users.id),
+    updatedBy: int('updated_by').references(() => users.id),
     updatedAt: ts('updated_at'),
-    managerBy: integer('manager_by').references(() => users.id),
+    managerBy: int('manager_by').references(() => users.id),
     managerAt: ts('manager_at'),
   },
   (t) => [uniqueIndex('run_journal_run_day_uq').on(t.runId, t.day)],
 );
 
 /** Đánh giá tổng kết tuần đầu của onboarding CHT; quản lý cấp trên xác nhận thì lượt hoàn thành */
-export const runEvaluations = pgTable('run_evaluations', {
-  id: serial('id').primaryKey(),
-  runId: integer('run_id')
-    .notNull()
-    .unique()
-    .references(() => levelRuns.id),
-  ratings: jsonb('ratings').$type<Record<string, number>>().notNull().default({}),
-  risk: text('risk').$type<AttritionRisk>(),
-  suggestion: text('suggestion').notNull().default(''),
-  savedBy: integer('saved_by').references(() => users.id),
-  savedAt: ts('saved_at'),
-  confirmedBy: integer('confirmed_by').references(() => users.id),
-  confirmedAt: ts('confirmed_at'),
-  confirmNote: text('confirm_note'),
-}, (t) => [check('run_evaluations_risk_ck', oneOf(t.risk, ATTRITION_RISKS))]);
+export const runEvaluations = lotrinh.table(
+  'run_evaluations',
+  {
+    id: int('id').identity().primaryKey(),
+    runId: int('run_id')
+      .notNull()
+      .unique('run_evaluations_run_uq')
+      .references(() => levelRuns.id),
+    ratings: json('ratings').$type<Record<string, number>>().notNull().default({}),
+    risk: str('risk', 10).$type<AttritionRisk>(),
+    suggestion: text('suggestion').notNull().default(''),
+    savedBy: int('saved_by').references(() => users.id),
+    savedAt: ts('saved_at'),
+    confirmedBy: int('confirmed_by').references(() => users.id),
+    confirmedAt: ts('confirmed_at'),
+    confirmNote: text('confirm_note'),
+  },
+  (t) => [check('run_evaluations_risk_ck', oneOf(t.risk, ATTRITION_RISKS)), check('run_evaluations_ratings_json_ck', isJson(t.ratings))],
+);
 
 // ---------- Đánh giá (mục 11.5) ----------
 
 /** Doanh số theo tháng của Level (V8), đơn vị triệu đồng; POS ghi vào cùng bảng khi tích hợp (giai đoạn 3) */
-export const salesMonthly = pgTable(
+export const salesMonthly = lotrinh.table(
   'sales_monthly',
   {
-    id: serial('id').primaryKey(),
-    runId: integer('run_id')
+    id: int('id').identity().primaryKey(),
+    runId: int('run_id')
       .notNull()
       .references(() => levelRuns.id),
-    monthIndex: integer('month_index').notNull(),
-    total: doublePrecision('total'),
-    coef1: doublePrecision('coef1'),
-    source: text('source').$type<'manual' | 'pos'>().notNull().default('manual'),
-    enteredBy: integer('entered_by').references(() => users.id),
-    at: ts('at').notNull().defaultNow(),
+    monthIndex: int('month_index').notNull(),
+    total: float('total'),
+    coef1: float('coef1'),
+    source: str('source', 10).$type<'manual' | 'pos'>().notNull().default('manual'),
+    enteredBy: int('entered_by').references(() => users.id),
+    at: ts('at').notNull().default(NOW),
   },
-  (t) => [
-    uniqueIndex('sales_monthly_run_month_uq').on(t.runId, t.monthIndex),
-    check('sales_monthly_source_ck', oneOf(t.source, ['manual', 'pos'])),
-  ],
+  (t) => [uniqueIndex('sales_monthly_run_month_uq').on(t.runId, t.monthIndex), check('sales_monthly_source_ck', oneOf(t.source, ['manual', 'pos']))],
 );
 
 /** Ca quan sát Rubric (Phụ lục C): điểm theo mã tiêu chí của phiên bản */
-export const observations = pgTable(
+export const observations = lotrinh.table(
   'observations',
   {
-    id: serial('id').primaryKey(),
-    runId: integer('run_id')
+    id: int('id').identity().primaryKey(),
+    runId: int('run_id')
       .notNull()
       .references(() => levelRuns.id),
     obsDate: day('obs_date').notNull(),
-    scores: jsonb('scores').$type<Record<string, number>>().notNull(),
+    scores: json('scores').$type<Record<string, number>>().notNull(),
     note: text('note'),
-    observerId: integer('observer_id')
+    observerId: int('observer_id')
       .notNull()
       .references(() => users.id),
-    createdAt: ts('created_at').notNull().defaultNow(),
+    createdAt: ts('created_at').notNull().default(NOW),
   },
-  (t) => [index('observations_run_idx').on(t.runId)],
+  (t) => [index('observations_run_idx').on(t.runId), check('observations_scores_json_ck', isJson(t.scores))],
 );
 
 /** Phiếu đánh giá tổng kết; mỗi vòng gia hạn là một phiếu mới (round) */
-export const levelReviews = pgTable(
+export const levelReviews = lotrinh.table(
   'level_reviews',
   {
-    id: serial('id').primaryKey(),
-    runId: integer('run_id')
+    id: int('id').identity().primaryKey(),
+    runId: int('run_id')
       .notNull()
       .references(() => levelRuns.id),
-    round: integer('round').notNull().default(0),
-    criteriaResults: jsonb('criteria_results').$type<CriterionResult[]>().notNull().default([]),
-    notes: jsonb('notes').$type<Record<string, string>>().notNull().default({}),
-    result: text('result').$type<ReviewResult>(),
+    round: int('round').notNull().default(0),
+    criteriaResults: json('criteria_results').$type<CriterionResult[]>().notNull().default([]),
+    notes: json('notes').$type<Record<string, string>>().notNull().default({}),
+    result: str('result', 10).$type<ReviewResult>(),
     extGoals: text('ext_goals').notNull().default(''),
-    status: text('status').$type<'draft' | 'signing' | 'done'>().notNull().default('draft'),
-    savedBy: integer('saved_by').references(() => users.id),
+    status: str('status', 10).$type<'draft' | 'signing' | 'done'>().notNull().default('draft'),
+    savedBy: int('saved_by').references(() => users.id),
     savedAt: ts('saved_at'),
     /** Thời điểm kết quả được áp dụng (chuyển Level, gia hạn, đóng lượt) */
     appliedAt: ts('applied_at'),
-    rowVersion: integer('row_version').notNull().default(0),
-    createdAt: ts('created_at').notNull().defaultNow(),
+    rowVersion: int('row_version').notNull().default(0),
+    createdAt: ts('created_at').notNull().default(NOW),
   },
   (t) => [
     uniqueIndex('level_reviews_run_round_uq').on(t.runId, t.round),
     check('level_reviews_result_ck', oneOf(t.result, ['pass', 'extend', 'fail'])),
     check('level_reviews_status_ck', oneOf(t.status, ['draft', 'signing', 'done'])),
+    check('level_reviews_criteria_json_ck', isJson(t.criteriaResults)),
+    check('level_reviews_notes_json_ck', isJson(t.notes)),
   ],
 );
 
@@ -508,18 +528,18 @@ export const levelReviews = pgTable(
  * Chữ ký theo chuỗi ký: cuối giai đoạn (stage_key, mục 10.2, R11, R12) hoặc phiếu đánh giá tổng kết
  * (review_id, mục 11.5). Mỗi dòng đúng một trong hai cột; mỗi bước ký một lần.
  */
-export const signoffs = pgTable(
+export const signoffs = lotrinh.table(
   'signoffs',
   {
-    id: serial('id').primaryKey(),
-    runId: integer('run_id')
+    id: int('id').identity().primaryKey(),
+    runId: int('run_id')
       .notNull()
       .references(() => levelRuns.id),
-    stageKey: text('stage_key'),
-    reviewId: integer('review_id').references(() => levelReviews.id),
-    step: integer('step').notNull(),
-    role: text('role').$type<TaskRole>().notNull(),
-    userId: integer('user_id')
+    stageKey: str('stage_key', 100),
+    reviewId: int('review_id').references(() => levelReviews.id),
+    step: int('step').notNull(),
+    role: str('role', 10).$type<TaskRole>().notNull(),
+    userId: int('user_id')
       .notNull()
       .references(() => users.id),
     at: ts('at').notNull(),
@@ -533,13 +553,21 @@ export const signoffs = pgTable(
   ],
 );
 
-export const auditLogs = pgTable('audit_logs', {
-  id: bigserial('id', { mode: 'number' }).primaryKey(),
-  userId: integer('user_id').references(() => users.id),
-  action: text('action').notNull(),
-  entity: text('entity'),
-  entityId: text('entity_id'),
-  payload: jsonb('payload'),
-  at: ts('at').notNull().defaultNow(),
-  ip: text('ip'),
-}, (t) => [index('audit_logs_entity_idx').on(t.entity, t.entityId), index('audit_logs_at_idx').on(t.at)]);
+export const auditLogs = lotrinh.table(
+  'audit_logs',
+  {
+    id: bigint('id', { mode: 'number' }).identity().primaryKey(),
+    userId: int('user_id').references(() => users.id),
+    action: str('action', 100).notNull(),
+    entity: str('entity', 50),
+    entityId: str('entity_id', 100),
+    payload: json('payload'),
+    at: ts('at').notNull().default(NOW),
+    ip: str('ip', 64),
+  },
+  (t) => [
+    index('audit_logs_entity_idx').on(t.entity, t.entityId),
+    index('audit_logs_at_idx').on(t.at),
+    check('audit_logs_payload_json_ck', sql`${t.payload} is null or isjson(${t.payload}) = 1`),
+  ],
+);

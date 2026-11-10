@@ -17,7 +17,7 @@ import {
 } from '@lotrinh/shared';
 import bcrypt from 'bcryptjs';
 import { and, asc, desc, eq, inArray, ne, sql } from 'drizzle-orm';
-import { alias } from 'drizzle-orm/pg-core';
+import { alias } from 'drizzle-orm/mssql-core';
 import { ClockService } from '../../adapters/clock/clock.service';
 import { badRequest, conflict, notFound, staleData } from '../../common/errors';
 import type { SessionUser } from '../../common/session';
@@ -30,6 +30,7 @@ import { AccessService } from '../access/access.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { activeAssignmentsOf, applyHandover, assignmentCandidates } from '../runs/assignments';
 import { parseCsv } from './csv';
+import { lockRows } from '../../db/mssql';
 
 type UserRow = typeof users.$inferSelect;
 
@@ -140,8 +141,8 @@ export class UsersService {
   }
 
   private async row(id: number, tx: Tx | Db = this.db, lock = false): Promise<UserRow> {
-    const q = tx.select().from(users).where(eq(users.id, id));
-    const [row] = lock ? await q.for('update') : await q;
+    if (lock) await lockRows(tx, users, 'rowVersion', eq(users.id, id));
+    const [row] = await tx.select().from(users).where(eq(users.id, id));
     if (!row) throw notFound('USER_NOT_FOUND', 'Không tìm thấy tài khoản');
     return row;
   }
@@ -172,7 +173,7 @@ export class UsersService {
 
   private async otherActiveBp(exceptId: number, tx: Tx | Db = this.db): Promise<number> {
     const [{ n }] = await tx
-      .select({ n: sql<number>`count(*)::int` })
+      .select({ n: sql<number>`count(*)` })
       .from(users)
       .where(and(eq(users.role, 'bp'), eq(users.status, 'active'), ne(users.id, exceptId)));
     return n;
@@ -285,10 +286,9 @@ export class UsersService {
       const affected = (await activeAssignmentsOf(tx, id)).filter((a) => !canHoldAssignment(a.role, next));
       const handed = await applyHandover(tx, affected, body.handover, today, id);
 
-      const [oldStores, oldAreas] = await Promise.all([
-        storeScopeRows(tx).where(eq(userScopes.userId, id)),
-        areaScopeRows(tx).where(eq(userScopes.userId, id)),
-      ]);
+      // Trong giao dịch SQL Server mỗi lần chỉ chạy một truy vấn: đọc tuần tự, không dùng Promise.all
+      const oldStores = await storeScopeRows(tx).where(eq(userScopes.userId, id));
+      const oldAreas = await areaScopeRows(tx).where(eq(userScopes.userId, id));
       const old = await this.scopeNames(
         oldStores.map((s) => s.storeId),
         oldAreas.map((a) => a.areaId),
@@ -346,6 +346,7 @@ export class UsersService {
     return this.db.transaction(async (tx) => {
       const [u] = await tx
         .insert(users)
+        .output()
         .values({
           fullName: body.fullName,
           employeeCode: body.employeeCode || null,
@@ -356,8 +357,7 @@ export class UsersService {
           canBuddy: body.canBuddy,
           reviewedBy: user.id,
           reviewedAt: now,
-        })
-        .returning();
+        });
       await tx.insert(credentials).values({ userId: u.id, passwordHash: hash });
       await this.replaceScopes(tx, u.id, scope.storeIds, scope.areaIds);
       await logUserChanges(tx, [{ userId: u.id, changedBy: user.id, field: 'created', newValue: ROLE_LABEL[body.role], at: now }]);
@@ -447,6 +447,7 @@ export class UsersService {
           const role = r._role!;
           const [u] = await tx
             .insert(users)
+            .output()
             .values({
               fullName: r.fullName,
               employeeCode: r.employeeCode || null,
@@ -458,8 +459,7 @@ export class UsersService {
               requestedStoreId: role === 'nv' ? (r._storeId ?? null) : null,
               reviewedBy: user.id,
               reviewedAt: now,
-            })
-            .returning();
+            });
           await tx.insert(credentials).values({ userId: u.id, passwordHash: hash });
           await this.replaceScopes(tx, u.id, role === 'cht' && r._storeId ? [r._storeId] : [], role === 'qlkv' && r._areaId ? [r._areaId] : []);
           await logUserChanges(tx, [{ userId: u.id, changedBy: user.id, field: 'imported', newValue: `${ROLE_LABEL[role]} · dòng ${r.line}`, at: now }]);

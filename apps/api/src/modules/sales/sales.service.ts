@@ -9,6 +9,7 @@ import { DB } from '../../db/db.provider';
 import { salesMonthly, users } from '../../db/schema';
 import { AccessService } from '../access/access.service';
 import { assertNvbh, RunContextService, type RunContext } from '../runs/run-context.service';
+import { upsert } from '../../db/mssql';
 
 /** Doanh số tháng của lượt Level (mục 11.5 tab Doanh số, R15). Nhập tay, POS ghi vào cùng bảng khi tích hợp */
 @Injectable()
@@ -82,10 +83,10 @@ export class SalesService {
       enteredBy: user.id,
       at: new Date(),
     };
-    await this.db
-      .insert(salesMonthly)
-      .values({ runId, monthIndex: month, ...provided })
-      .onConflictDoUpdate({ target: [salesMonthly.runId, salesMonthly.monthIndex], set: provided });
+    await upsert(
+      () => this.db.update(salesMonthly).set(provided).where(where),
+      () => this.db.insert(salesMonthly).values({ runId, monthIndex: month, ...provided }),
+    );
     await this.db.delete(salesMonthly).where(and(where, isNull(salesMonthly.total), isNull(salesMonthly.coef1)));
     return this.get(user, runId);
   }

@@ -98,9 +98,9 @@ export class AuditController {
         .leftJoin(users, eq(users.id, auditLogs.userId))
         .where(where)
         .orderBy(desc(auditLogs.at), desc(auditLogs.id))
-        .limit(PAGE_SIZE)
-        .offset((page - 1) * PAGE_SIZE),
-      this.db.select({ n: sql<number>`count(*)::int` }).from(auditLogs).where(where),
+        .offset((page - 1) * PAGE_SIZE)
+        .fetch(PAGE_SIZE),
+      this.db.select({ n: sql<number>`count(*)` }).from(auditLogs).where(where),
       this.db.selectDistinct({ id: users.id, fullName: users.fullName }).from(auditLogs).innerJoin(users, eq(users.id, auditLogs.userId)).orderBy(asc(users.fullName)),
       this.db.selectDistinct({ action: auditLogs.action }).from(auditLogs),
     ]);

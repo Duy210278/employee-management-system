@@ -88,6 +88,7 @@ export class AccessService {
     const parts: SQL[] = [eq(staff.userId, user.id), assigned];
     if (user.role === 'cht' && storeIds.length) parts.push(inArray(staff.storeId, storeIds));
     if (user.role === 'qlkv' && areaIds.length) parts.push(inArray(stores.areaId, areaIds));
-    return or(...parts) ?? sql`false`;
+    // SQL Server không có hằng false trong câu lệnh
+    return or(...parts) ?? sql`1 = 0`;
   }
 }

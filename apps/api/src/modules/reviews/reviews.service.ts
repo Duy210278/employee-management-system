@@ -32,6 +32,7 @@ import { createRun, findVersionForDate } from '../runs/run-factory';
 import { assertNvbh, RunContextService, type RunContext } from '../runs/run-context.service';
 import { TaskQueryService } from '../runs/task-query.service';
 import { buildTaskViews, levelSummary, summarizeRun } from '../runs/task-views';
+import { affected, insertIgnore, lockRows } from '../../db/mssql';
 
 type ReviewRow = typeof levelReviews.$inferSelect;
 type SignatureRow = typeof signoffs.$inferSelect;
@@ -184,9 +185,9 @@ export class ReviewsService {
       if (ctx.level.key >= 4) return 'Đã đạt chuẩn Level 4';
       const [next] = await this.db
         .select({ startDate: levelRuns.startDate })
+        .top(1)
         .from(levelRuns)
-        .where(and(eq(levelRuns.staffId, ctx.staff.id), eq(levelRuns.levelKey, ctx.level.key + 1)))
-        .limit(1);
+        .where(and(eq(levelRuns.staffId, ctx.staff.id), eq(levelRuns.levelKey, ctx.level.key + 1)));
       return `Đã chuyển lên Level ${ctx.level.key + 1}${next ? ` từ ${fmtDate(next.startDate)}` : ''}`;
     }
     if (row.result === 'extend') return `Đã gia hạn lần ${row.round + 1}; kết thúc dự kiến mới ${fmtDate(ctx.run.plannedEnd)}`;
@@ -220,11 +221,10 @@ export class ReviewsService {
       const updated = await this.db
         .update(levelReviews)
         .set({ ...values, rowVersion: sql`${levelReviews.rowVersion} + 1` })
-        .where(and(eq(levelReviews.id, row.id), eq(levelReviews.rowVersion, row.rowVersion)))
-        .returning({ id: levelReviews.id });
-      if (!updated.length) throw staleData();
+        .where(and(eq(levelReviews.id, row.id), eq(levelReviews.rowVersion, row.rowVersion)));
+      if (!affected(updated)) throw staleData();
     } else {
-      await this.db.insert(levelReviews).values({ runId, round, ...values }).onConflictDoNothing();
+      await insertIgnore(() => this.db.insert(levelReviews).values({ runId, round, ...values }));
     }
     return this.get(user, runId);
   }
@@ -239,7 +239,8 @@ export class ReviewsService {
     const now = await this.clock.now();
 
     await this.db.transaction(async (tx) => {
-      const reviews = await tx.select().from(levelReviews).where(eq(levelReviews.runId, runId)).orderBy(asc(levelReviews.round)).for('update');
+      await lockRows(tx, levelReviews, 'rowVersion', eq(levelReviews.runId, runId));
+      const reviews = await tx.select().from(levelReviews).where(eq(levelReviews.runId, runId)).orderBy(asc(levelReviews.round));
       const { round, row } = currentRound(reviews);
       if (!row) throw badRequest('REVIEW_NOT_SAVED', 'Lưu phiếu trước khi ký');
       const signed = await tx.select().from(signoffs).where(eq(signoffs.reviewId, row.id));

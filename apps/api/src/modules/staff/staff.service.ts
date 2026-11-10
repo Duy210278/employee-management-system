@@ -212,6 +212,7 @@ export class StaffService {
     return this.db.transaction(async (tx) => {
       const [st] = await tx
         .insert(staff)
+        .output()
         .values({
           userId: body.userId ?? null,
           employeeCode: body.employeeCode || account?.employeeCode || null,
@@ -219,8 +220,7 @@ export class StaffService {
           storeId: store.id,
           hireDate: body.hireDate,
           currentLevel: body.levelKey,
-        })
-        .returning();
+        });
       const { run } = await createRun(tx, {
         staffId: st.id,
         levelKey: body.levelKey,

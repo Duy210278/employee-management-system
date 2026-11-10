@@ -12,6 +12,7 @@ import { TaskQueryService } from './task-query.service';
 import { buildStageSigns, buildTaskViews, isOpenRun, levelSummary, stageViews, summarizeRun } from './task-views';
 import type { Db } from '../../db/client';
 import { levelRuns, signoffs as signoffTable, users } from '../../db/schema';
+import { insertIgnore } from '../../db/mssql';
 
 @Injectable()
 export class RunsService {
@@ -65,12 +66,11 @@ export class RunsService {
     if (sign.blocked) throw badRequest('STAGE_NOT_READY', `Chưa ký được: ${sign.blocked.charAt(0).toLowerCase()}${sign.blocked.slice(1)}`);
     if (!canSignAs(actor, ctx.people, next.role)) throw forbidden('CANNOT_SIGN', `Bước "${STAGE_SIGN_LABEL[next.role]}" không phải của bạn`);
 
-    const inserted = await this.db
-      .insert(signoffTable)
-      .values({ runId, stageKey, step, role: next.role, userId: user.id, at: await this.clock.now() })
-      .onConflictDoNothing()
-      .returning({ id: signoffTable.id });
-    if (!inserted.length) throw conflict('STALE', 'Bước này vừa được người khác ký, tải lại trang');
+    const at = await this.clock.now();
+    const inserted = await insertIgnore(() =>
+      this.db.insert(signoffTable).output({ id: signoffTable.id }).values({ runId, stageKey, step, role: next.role, userId: user.id, at }),
+    );
+    if (!inserted?.length) throw conflict('STALE', 'Bước này vừa được người khác ký, tải lại trang');
 
     // Báo người ký bước sau (mục 10.6: "Có phiếu chờ ký → người ký kế tiếp")
     const following = stage.signers[step + 1];

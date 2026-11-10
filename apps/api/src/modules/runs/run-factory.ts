@@ -2,6 +2,7 @@ import { levelForTrack, planRunTasks, plannedEnd, VersionContentSchema, type Iso
 import { and, desc, eq, inArray, lte } from 'drizzle-orm';
 import type { DbLike } from '../../db/client';
 import { levelRuns, runAssignments, runTasks, versions, type RunMeta } from '../../db/schema';
+import { insertChunkedOutput } from '../../db/mssql';
 
 /** Bản đã ban hành (đang, sắp hoặc hết hiệu lực) */
 export const PUBLISHED = inArray(versions.status, ['active', 'expired']);
@@ -17,14 +18,16 @@ export async function findVersionForDate(db: DbLike, date: IsoDate) {
     .from(versions)
     .where(and(PUBLISHED, lte(versions.effectiveFrom, date), eq(versions.code, versions.criteriaLine)))
     .orderBy(desc(versions.effectiveFrom), desc(versions.id))
-    .limit(1);
+    .offset(0)
+    .fetch(1);
   if (!head?.line) throw new Error(`Không có phiên bản nào hiệu lực tại ngày ${date}`);
   const [row] = await db
     .select()
     .from(versions)
     .where(and(PUBLISHED, eq(versions.criteriaLine, head.line), lte(versions.effectiveFrom, date)))
     .orderBy(desc(versions.effectiveFrom), desc(versions.id))
-    .limit(1);
+    .offset(0)
+    .fetch(1);
   return { ...row, criteriaLine: head.line, content: VersionContentSchema.parse(row.content) as VersionContent };
 }
 
@@ -49,6 +52,7 @@ export async function createRun(tx: DbLike, input: CreateRunInput) {
   const level = levelForTrack(input.version.content, track, input.levelKey);
   const [run] = await tx
     .insert(levelRuns)
+    .output()
     .values({
       staffId: input.staffId,
       levelKey: input.levelKey,
@@ -59,8 +63,7 @@ export async function createRun(tx: DbLike, input: CreateRunInput) {
       plannedEnd: plannedEnd(level, input.startDate),
       status: 'active',
       createdBy: input.createdBy,
-    })
-    .returning();
+    });
 
   const assignments = (['buddy', 'cht', 'qlkv', 'trainer'] as const)
     .filter((role) => input.people[role])
@@ -68,10 +71,12 @@ export async function createRun(tx: DbLike, input: CreateRunInput) {
   if (assignments.length) await tx.insert(runAssignments).values(assignments);
 
   const planned = planRunTasks(level, input.startDate);
-  const tasks = await tx
-    .insert(runTasks)
-    .values(planned.map((p) => ({ runId: run.id, itemKey: p.itemKey, openDate: p.openDate, dueDate: p.dueDate })))
-    .returning({ id: runTasks.id, itemKey: runTasks.itemKey });
+  // Một lượt có hàng chục đầu việc: chia lô để không vượt 2100 tham số của SQL Server
+  const tasks = await insertChunkedOutput(
+    tx,
+    runTasks,
+    planned.map((p) => ({ runId: run.id, itemKey: p.itemKey, openDate: p.openDate, dueDate: p.dueDate })),
+  );
 
   return { run, level, tasks };
 }

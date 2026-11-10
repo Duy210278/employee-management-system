@@ -110,6 +110,7 @@ export class AuthService {
     const user = await this.db.transaction(async (tx) => {
       const [u] = await tx
         .insert(users)
+        .output()
         .values({
           fullName: body.fullName,
           employeeCode: body.employeeCode,
@@ -120,8 +121,7 @@ export class AuthService {
           requestedRole: body.requestedRole,
           requestedStoreId: storeId,
           requestedAreaId: areaId,
-        })
-        .returning();
+        });
       await tx.insert(credentials).values({ userId: u.id, passwordHash: hash });
       await logUserChanges(tx, [{ userId: u.id, changedBy: u.id, field: 'registered', newValue: `Đăng ký vai trò ${ROLE_LABEL[body.requestedRole]}`, at: now }]);
       return u;

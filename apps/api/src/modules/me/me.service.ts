@@ -89,12 +89,12 @@ export class MeService {
     const [own] = await this.db.select({ id: staff.id }).from(staff).where(and(eq(staff.userId, user.id), eq(staff.active, true)));
     const buddyOf = await this.db
       .select({ runId: runAssignments.runId })
+      .top(1)
       .from(runAssignments)
       .innerJoin(levelRuns, eq(levelRuns.id, runAssignments.runId))
       .where(
         and(eq(runAssignments.userId, user.id), eq(runAssignments.role, 'buddy'), isNull(runAssignments.toDate), eq(levelRuns.status, 'active')),
-      )
-      .limit(1);
+      );
     return {
       user: {
         id: user.id,

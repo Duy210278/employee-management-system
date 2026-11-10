@@ -4,7 +4,7 @@ import { createDb } from '../client';
 import { isDatabaseEmpty, seedDatabase } from '../seed';
 
 async function main() {
-  const { pool, db } = createDb(env().DATABASE_URL);
+  const { db, close } = createDb(env().DATABASE_URL);
   try {
     if (!(await isDatabaseEmpty(db))) {
       console.log('Cơ sở dữ liệu đã có dữ liệu, bỏ qua. Dùng "pnpm db:reset" để xóa sạch và nạp lại dữ liệu mẫu.');
@@ -14,7 +14,7 @@ async function main() {
     await seedDatabase(db, today);
     console.log(`Đã nạp dữ liệu mẫu (mốc ngày ${today}). Mật khẩu chung: Demo@123`);
   } finally {
-    await pool.end();
+    await close();
   }
 }
 

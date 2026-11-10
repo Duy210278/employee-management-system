@@ -44,7 +44,7 @@ export interface TestApp {
 /** Nạp lại dữ liệu mẫu vào cơ sở dữ liệu test rồi dựng ứng dụng Nest đầy đủ */
 export async function setupApp(): Promise<TestApp> {
   const today = todayIn(TZ);
-  const { pool, db } = createDb(process.env.DATABASE_URL!);
+  const { db, close } = createDb(process.env.DATABASE_URL!);
   await resetDatabase(db, today);
   const clock = new TestClock();
   const moduleRef = await Test.createTestingModule({ imports: [AppModule] }).overrideProvider(ClockService).useValue(clock).compile();
@@ -78,7 +78,7 @@ export async function setupApp(): Promise<TestApp> {
     anonymous: () => request(app.getHttpServer()),
     async close() {
       await app.close();
-      await pool.end();
+      await close();
     },
   };
 }

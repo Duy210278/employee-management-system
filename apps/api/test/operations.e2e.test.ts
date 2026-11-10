@@ -115,7 +115,7 @@ describe('tạm dừng lượt Level (mục 9.3, T-L05)', () => {
     const last = (s: RunTasksResponse) => s.stages.at(-1)!;
     expect(last(after).to).toBe(addDays(last(before).to, 10));
 
-    const { pool, db } = createDb(process.env.DATABASE_URL!);
+    const { db, close } = createDb(process.env.DATABASE_URL!);
     try {
       const logs = await db
         .select({ data: taskEvents.data })
@@ -124,7 +124,7 @@ describe('tạm dừng lượt Level (mục 9.3, T-L05)', () => {
         .where(and(eq(runTasks.runId, runId), eq(taskEvents.action, 'date_change')));
       expect(logs.filter((l) => l.data?.reason === 'pause')).toHaveLength(shifted);
     } finally {
-      await pool.end();
+      await close();
     }
 
     // Trong thời gian dừng, ngày thứ N đứng yên và hồ sơ báo đang tạm dừng

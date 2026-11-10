@@ -19,7 +19,7 @@ import {
   type PersonOption,
 } from '@lotrinh/shared';
 import { and, asc, desc, eq, gt, inArray, notInArray } from 'drizzle-orm';
-import { alias } from 'drizzle-orm/pg-core';
+import { alias } from 'drizzle-orm/mssql-core';
 import { ClockService } from '../../adapters/clock/clock.service';
 import { badRequest, conflict, forbidden, notFound } from '../../common/errors';
 import type { SessionUser } from '../../common/session';
@@ -32,6 +32,7 @@ import { NotificationsService } from '../notifications/notifications.service';
 import { createRun, findVersionForDate, PUBLISHED } from '../runs/run-factory';
 import { RunContextService, type RunContext } from '../runs/run-context.service';
 import { isOpenRun, OPEN_RUN_STATUSES } from '../runs/task-views';
+import { upsert } from '../../db/mssql';
 
 const monthsBetween = (from: string, to: string) => Math.max(0, Math.floor(diffDays(to, from) / 30));
 
@@ -193,8 +194,8 @@ export class ChtService {
       } else {
         const [st] = await tx
           .insert(staff)
-          .values({ userId: account.id, employeeCode: account.employeeCode, fullName: account.fullName, storeId: store.id, hireDate: body.startDate, currentLevel: 1 })
-          .returning();
+          .output()
+          .values({ userId: account.id, employeeCode: account.employeeCode, fullName: account.fullName, storeId: store.id, hireDate: body.startDate, currentLevel: 1 });
         staffId = st.id;
       }
       const { run } = await createRun(tx, {
@@ -351,10 +352,10 @@ export class ChtService {
       ...(trainerChanged ? { updatedBy: user.id, updatedAt: now } : {}),
       ...(noteChanged ? { managerNote: body.managerNote, managerBy: user.id, managerAt: now } : {}),
     };
-    await this.db
-      .insert(runJournal)
-      .values({ runId, day, ...values })
-      .onConflictDoUpdate({ target: [runJournal.runId, runJournal.day], set: values });
+    await upsert(
+      () => this.db.update(runJournal).set(values).where(and(eq(runJournal.runId, runId), eq(runJournal.day, day))),
+      () => this.db.insert(runJournal).values({ runId, day, ...values }),
+    );
     return this.get(user, runId);
   }
 
@@ -367,7 +368,10 @@ export class ChtService {
     const unknown = Object.keys(body.ratings).filter((k) => !keys.has(k));
     if (unknown.length) throw badRequest('INVALID_RATING', `Tiêu chí không có trong checklist: ${unknown.join(', ')}`);
     const values = { ratings: body.ratings, risk: body.risk, suggestion: body.suggestion, savedBy: user.id, savedAt: await this.clock.now() };
-    await this.db.insert(runEvaluations).values({ runId, ...values }).onConflictDoUpdate({ target: runEvaluations.runId, set: values });
+    await upsert(
+      () => this.db.update(runEvaluations).set(values).where(eq(runEvaluations.runId, runId)),
+      () => this.db.insert(runEvaluations).values({ runId, ...values }),
+    );
     if (body.risk === 'high' && ctx.people.qlkvId) {
       await this.notifications.notify([ctx.people.qlkvId], {
         type: 'escalation',

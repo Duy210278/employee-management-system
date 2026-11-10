@@ -8,6 +8,7 @@ import type { Db } from '../../db/client';
 import { DB } from '../../db/db.provider';
 import { areas, staff, stores, users, userScopes } from '../../db/schema';
 import { AccessService } from '../access/access.service';
+import { affected } from '../../db/mssql';
 
 /**
  * Danh mục cửa hàng, khu vực (mục 5.5): chỉ BP Đào tạo quản lý.
@@ -42,7 +43,7 @@ export class OrgController {
         .innerJoin(stores, eq(stores.id, userScopes.storeId))
         .innerJoin(users, eq(users.id, userScopes.userId))
         .where(and(eq(users.role, 'cht'), eq(users.status, 'active'))),
-      this.db.select({ storeId: staff.storeId, n: sql<number>`count(*)::int` }).from(staff).where(eq(staff.active, true)).groupBy(staff.storeId),
+      this.db.select({ storeId: staff.storeId, n: sql<number>`count(*)` }).from(staff).where(eq(staff.active, true)).groupBy(staff.storeId),
     ]);
     return {
       areas: areaRows.map((a) => ({
@@ -86,11 +87,11 @@ export class OrgController {
     await this.assert(user);
     await this.uniqueCode(areas, body.code, id);
     if (!body.active) {
-      const [open] = await this.db.select({ id: stores.id }).from(stores).where(and(eq(stores.areaId, id), eq(stores.active, true))).limit(1);
+      const [open] = await this.db.select({ id: stores.id }).top(1).from(stores).where(and(eq(stores.areaId, id), eq(stores.active, true)));
       if (open) throw conflict('AREA_IN_USE', 'Khu vực còn cửa hàng đang hoạt động. Ngừng hoặc chuyển các cửa hàng trước');
     }
-    const updated = await this.db.update(areas).set(body).where(eq(areas.id, id)).returning({ id: areas.id });
-    if (!updated.length) throw notFound('AREA_NOT_FOUND', 'Không tìm thấy khu vực');
+    const updated = await this.db.update(areas).set(body).where(eq(areas.id, id));
+    if (!affected(updated)) throw notFound('AREA_NOT_FOUND', 'Không tìm thấy khu vực');
     return this.list(user);
   }
 
@@ -108,7 +109,7 @@ export class OrgController {
     await this.uniqueCode(stores, body.code, id);
     if (!body.active) {
       const [{ n }] = await this.db
-        .select({ n: sql<number>`count(*)::int` })
+        .select({ n: sql<number>`count(*)` })
         .from(staff)
         .where(and(eq(staff.storeId, id), eq(staff.active, true)));
       if (n) throw conflict('STORE_IN_USE', `Còn ${n} nhân viên đang theo dõi ở cửa hàng này. Chuyển cửa hàng cho họ trước`);
@@ -116,9 +117,8 @@ export class OrgController {
     const updated = await this.db
       .update(stores)
       .set({ ...body, address: body.address || null })
-      .where(eq(stores.id, id))
-      .returning({ id: stores.id });
-    if (!updated.length) throw notFound('STORE_NOT_FOUND', 'Không tìm thấy cửa hàng');
+      .where(eq(stores.id, id));
+    if (!affected(updated)) throw notFound('STORE_NOT_FOUND', 'Không tìm thấy cửa hàng');
     return this.list(user);
   }
 }

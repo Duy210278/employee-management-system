@@ -16,7 +16,7 @@ import {
   type VersionState,
 } from '@lotrinh/shared';
 import { and, eq, gte, inArray, isNull, lt, ne, sql } from 'drizzle-orm';
-import { alias } from 'drizzle-orm/pg-core';
+import { alias } from 'drizzle-orm/mssql-core';
 import { ClockService } from '../../adapters/clock/clock.service';
 import { badRequest, conflict, notFound, staleData } from '../../common/errors';
 import type { SessionUser } from '../../common/session';
@@ -26,6 +26,7 @@ import { levelRuns, staff, users, versions } from '../../db/schema';
 import { AccessService } from '../access/access.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { findVersionForDate, PUBLISHED } from '../runs/run-factory';
+import { affected, lockRows } from '../../db/mssql';
 
 type VersionRow = typeof versions.$inferSelect;
 const OPEN = ['draft', 'pending'] as const;
@@ -66,7 +67,7 @@ export class VersionLifecycleService {
       .leftJoin(submitter, eq(submitter.id, versions.submittedBy))
       .leftJoin(approver, eq(approver.id, versions.approvedBy));
     const runs = await this.db
-      .select({ line: versions.criteriaLine, n: sql<number>`count(*)::int` })
+      .select({ line: versions.criteriaLine, n: sql<number>`count(*)` })
       .from(levelRuns)
       .innerJoin(versions, eq(versions.id, levelRuns.versionId))
       .where(eq(levelRuns.status, 'active'))
@@ -170,8 +171,8 @@ export class VersionLifecycleService {
     }
     const [row] = await this.db
       .insert(versions)
-      .values({ status: 'draft', parentId: source.id, content: source.content, changeNote: '', createdBy: user.id, updatedBy: user.id })
-      .returning({ id: versions.id });
+      .output({ id: versions.id })
+      .values({ status: 'draft', parentId: source.id, content: source.content, changeNote: '', createdBy: user.id, updatedBy: user.id });
     return row;
   }
 
@@ -182,9 +183,9 @@ export class VersionLifecycleService {
     const updated = await this.db
       .update(versions)
       .set({ content: body.content, changeNote: body.changeNote, rowVersion: sql`${versions.rowVersion} + 1`, updatedBy: user.id, updatedAt: new Date() })
-      .where(and(eq(versions.id, id), eq(versions.rowVersion, body.rowVersion)))
-      .returning({ id: versions.id });
-    if (!updated.length) throw staleData();
+      .where(and(eq(versions.id, id), eq(versions.rowVersion, body.rowVersion)));
+    // Bảng versions có trigger nên không dùng OUTPUT; kiểm số dòng bị sửa
+    if (!affected(updated)) throw staleData();
     return this.detail(user, id);
   }
 
@@ -238,7 +239,7 @@ export class VersionLifecycleService {
     const later = await this.db
       .select({ code: versions.code, effectiveFrom: versions.effectiveFrom })
       .from(versions)
-      .where(and(PUBLISHED, sql`${versions.effectiveFrom} >= ${body.effectiveFrom}`, kind === 'text' ? eq(versions.criteriaLine, parentLine) : sql`true`));
+      .where(and(PUBLISHED, sql`${versions.effectiveFrom} >= ${body.effectiveFrom}`, kind === 'text' ? eq(versions.criteriaLine, parentLine) : undefined));
     if (later.length) {
       throw badRequest('EFFECTIVE_CONFLICT', `Đã có v${later[0].code} hiệu lực từ ${later[0].effectiveFrom}. Chọn ngày hiệu lực sau ngày đó`);
     }
@@ -328,7 +329,8 @@ export class VersionLifecycleService {
     }
 
     await this.db.transaction(async (tx) => {
-      const [locked] = await tx.select().from(versions).where(eq(versions.id, id)).for('update');
+      await lockRows(tx, versions, 'rowVersion', eq(versions.id, id));
+      const [locked] = await tx.select().from(versions).where(eq(versions.id, id));
       if (locked.effectiveFrom !== old) throw staleData();
       await tx.update(versions).set({ effectiveFrom, updatedAt: new Date() }).where(eq(versions.id, id));
       // Bản bị bản này thay thế (đã được đặt kết thúc = ngày cũ − 1 khi duyệt) kết thúc theo ngày mới

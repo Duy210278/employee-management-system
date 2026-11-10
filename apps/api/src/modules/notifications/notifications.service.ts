@@ -5,6 +5,7 @@ import { ClockService } from '../../adapters/clock/clock.service';
 import type { SessionUser } from '../../common/session';
 import type { Db } from '../../db/client';
 import { DB } from '../../db/db.provider';
+import { insertIgnore } from '../../db/mssql';
 import { notifications, users } from '../../db/schema';
 
 export interface NotifyInput {
@@ -32,10 +33,7 @@ export class NotificationsService {
     if (!ids.length) return 0;
     try {
       const [today, now] = await Promise.all([this.clock.today(), this.clock.now()]);
-      const rows = await this.db
-        .insert(notifications)
-        .values(
-          ids.map((userId) => ({
+      const rows = ids.map((userId) => ({
             userId,
             type: input.type,
             title: input.title,
@@ -44,11 +42,11 @@ export class NotificationsService {
             dedupeKey: input.dedupeKey ? `${input.dedupeKey}:${userId}` : null,
             businessDate: today,
             createdAt: now,
-          })),
-        )
-        .onConflictDoNothing()
-        .returning({ id: notifications.id });
-      return rows.length;
+          }));
+      // Khóa chống trùng (dedupe_key) đã có thì bỏ qua người đó; từng dòng một để một dòng trùng không chặn cả lô
+      let created = 0;
+      for (const row of rows) if (await insertIgnore(() => this.db.insert(notifications).values(row))) created++;
+      return created;
     } catch (err) {
       // Thông báo không được làm hỏng thao tác nghiệp vụ đã thành công
       this.logger.error(`Không tạo được thông báo ${input.type}: ${(err as Error).message}`);
@@ -84,9 +82,10 @@ export class NotificationsService {
       .where(eq(notifications.userId, user.id))
       // Theo thứ tự nhận
       .orderBy(desc(notifications.id))
-      .limit(limit);
+      .offset(0)
+      .fetch(limit);
     const [{ n }] = await this.db
-      .select({ n: sql<number>`count(*)::int` })
+      .select({ n: sql<number>`count(*)` })
       .from(notifications)
       .where(and(eq(notifications.userId, user.id), isNull(notifications.readAt)));
     return {

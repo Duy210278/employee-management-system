@@ -17,7 +17,7 @@ const log = new Logger('Bootstrap');
 
 /** Lần chạy đầu: tự chạy migration và nạp dữ liệu mẫu nếu cơ sở dữ liệu còn trống (mục 14.6) */
 async function prepareDatabase(): Promise<void> {
-  const { pool, db } = createDb(env().DATABASE_URL);
+  const { db, close } = createDb(env().DATABASE_URL);
   try {
     await runMigrations(db);
     if (env().DEMO_MODE && (await isDatabaseEmpty(db))) {
@@ -26,7 +26,7 @@ async function prepareDatabase(): Promise<void> {
       log.log(`Cơ sở dữ liệu còn trống: đã nạp dữ liệu mẫu (mốc ngày ${today})`);
     }
   } finally {
-    await pool.end();
+    await close();
   }
 }
 

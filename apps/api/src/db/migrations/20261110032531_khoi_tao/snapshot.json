@@ -1,0 +1,4311 @@
+{
+  "version": "2",
+  "dialect": "mssql",
+  "id": "cbf493fc-a645-406f-a25f-5a4674cb6adb",
+  "prevIds": [
+    "00000000-0000-0000-0000-000000000000"
+  ],
+  "ddl": [
+    {
+      "name": "lotrinh",
+      "entityType": "schemas"
+    },
+    {
+      "schema": "lotrinh",
+      "name": "areas",
+      "entityType": "tables"
+    },
+    {
+      "schema": "lotrinh",
+      "name": "audit_logs",
+      "entityType": "tables"
+    },
+    {
+      "schema": "lotrinh",
+      "name": "credentials",
+      "entityType": "tables"
+    },
+    {
+      "schema": "lotrinh",
+      "name": "level_reviews",
+      "entityType": "tables"
+    },
+    {
+      "schema": "lotrinh",
+      "name": "level_runs",
+      "entityType": "tables"
+    },
+    {
+      "schema": "lotrinh",
+      "name": "notifications",
+      "entityType": "tables"
+    },
+    {
+      "schema": "lotrinh",
+      "name": "observations",
+      "entityType": "tables"
+    },
+    {
+      "schema": "lotrinh",
+      "name": "run_assignments",
+      "entityType": "tables"
+    },
+    {
+      "schema": "lotrinh",
+      "name": "run_evaluations",
+      "entityType": "tables"
+    },
+    {
+      "schema": "lotrinh",
+      "name": "run_journal",
+      "entityType": "tables"
+    },
+    {
+      "schema": "lotrinh",
+      "name": "run_pauses",
+      "entityType": "tables"
+    },
+    {
+      "schema": "lotrinh",
+      "name": "run_tasks",
+      "entityType": "tables"
+    },
+    {
+      "schema": "lotrinh",
+      "name": "sales_monthly",
+      "entityType": "tables"
+    },
+    {
+      "schema": "lotrinh",
+      "name": "signoffs",
+      "entityType": "tables"
+    },
+    {
+      "schema": "lotrinh",
+      "name": "staff",
+      "entityType": "tables"
+    },
+    {
+      "schema": "lotrinh",
+      "name": "stores",
+      "entityType": "tables"
+    },
+    {
+      "schema": "lotrinh",
+      "name": "task_confirmations",
+      "entityType": "tables"
+    },
+    {
+      "schema": "lotrinh",
+      "name": "task_events",
+      "entityType": "tables"
+    },
+    {
+      "schema": "lotrinh",
+      "name": "user_scopes",
+      "entityType": "tables"
+    },
+    {
+      "schema": "lotrinh",
+      "name": "users",
+      "entityType": "tables"
+    },
+    {
+      "schema": "lotrinh",
+      "name": "versions",
+      "entityType": "tables"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "areas",
+      "name": "id",
+      "type": "int",
+      "notNull": true,
+      "generated": null,
+      "identity": {
+        "seed": 1,
+        "increment": 1
+      },
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "areas",
+      "name": "code",
+      "type": "nvarchar(50)",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "areas",
+      "name": "name",
+      "type": "nvarchar(200)",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "areas",
+      "name": "active",
+      "type": "bit",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "audit_logs",
+      "name": "id",
+      "type": "bigint",
+      "notNull": true,
+      "generated": null,
+      "identity": {
+        "seed": 1,
+        "increment": 1
+      },
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "audit_logs",
+      "name": "user_id",
+      "type": "int",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "audit_logs",
+      "name": "action",
+      "type": "nvarchar(100)",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "audit_logs",
+      "name": "entity",
+      "type": "nvarchar(50)",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "audit_logs",
+      "name": "entity_id",
+      "type": "nvarchar(100)",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "audit_logs",
+      "name": "payload",
+      "type": "nvarchar(max)",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "audit_logs",
+      "name": "at",
+      "type": "datetimeoffset(3)",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "audit_logs",
+      "name": "ip",
+      "type": "nvarchar(64)",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "credentials",
+      "name": "user_id",
+      "type": "int",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "credentials",
+      "name": "password_hash",
+      "type": "nvarchar(200)",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "credentials",
+      "name": "password_changed_at",
+      "type": "datetimeoffset(3)",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "level_reviews",
+      "name": "id",
+      "type": "int",
+      "notNull": true,
+      "generated": null,
+      "identity": {
+        "seed": 1,
+        "increment": 1
+      },
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "level_reviews",
+      "name": "run_id",
+      "type": "int",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "level_reviews",
+      "name": "round",
+      "type": "int",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "level_reviews",
+      "name": "criteria_results",
+      "type": "nvarchar(max)",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "level_reviews",
+      "name": "notes",
+      "type": "nvarchar(max)",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "level_reviews",
+      "name": "result",
+      "type": "nvarchar(10)",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "level_reviews",
+      "name": "ext_goals",
+      "type": "nvarchar(max)",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "level_reviews",
+      "name": "status",
+      "type": "nvarchar(10)",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "level_reviews",
+      "name": "saved_by",
+      "type": "int",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "level_reviews",
+      "name": "saved_at",
+      "type": "datetimeoffset(3)",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "level_reviews",
+      "name": "applied_at",
+      "type": "datetimeoffset(3)",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "level_reviews",
+      "name": "row_version",
+      "type": "int",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "level_reviews",
+      "name": "created_at",
+      "type": "datetimeoffset(3)",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "level_runs",
+      "name": "id",
+      "type": "int",
+      "notNull": true,
+      "generated": null,
+      "identity": {
+        "seed": 1,
+        "increment": 1
+      },
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "level_runs",
+      "name": "staff_id",
+      "type": "int",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "level_runs",
+      "name": "level_key",
+      "type": "int",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "level_runs",
+      "name": "track",
+      "type": "nvarchar(20)",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "level_runs",
+      "name": "meta",
+      "type": "nvarchar(max)",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "level_runs",
+      "name": "version_id",
+      "type": "int",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "level_runs",
+      "name": "start_date",
+      "type": "date",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "level_runs",
+      "name": "planned_end",
+      "type": "date",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "level_runs",
+      "name": "status",
+      "type": "nvarchar(10)",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "level_runs",
+      "name": "ext_count",
+      "type": "int",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "level_runs",
+      "name": "ack_by",
+      "type": "int",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "level_runs",
+      "name": "ack_at",
+      "type": "datetimeoffset(3)",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "level_runs",
+      "name": "created_by",
+      "type": "int",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "level_runs",
+      "name": "created_at",
+      "type": "datetimeoffset(3)",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "notifications",
+      "name": "id",
+      "type": "int",
+      "notNull": true,
+      "generated": null,
+      "identity": {
+        "seed": 1,
+        "increment": 1
+      },
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "notifications",
+      "name": "user_id",
+      "type": "int",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "notifications",
+      "name": "type",
+      "type": "nvarchar(50)",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "notifications",
+      "name": "title",
+      "type": "nvarchar(300)",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "notifications",
+      "name": "body",
+      "type": "nvarchar(max)",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "notifications",
+      "name": "link",
+      "type": "nvarchar(500)",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "notifications",
+      "name": "dedupe_key",
+      "type": "nvarchar(200)",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "notifications",
+      "name": "business_date",
+      "type": "date",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "notifications",
+      "name": "created_at",
+      "type": "datetimeoffset(3)",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "notifications",
+      "name": "read_at",
+      "type": "datetimeoffset(3)",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "observations",
+      "name": "id",
+      "type": "int",
+      "notNull": true,
+      "generated": null,
+      "identity": {
+        "seed": 1,
+        "increment": 1
+      },
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "observations",
+      "name": "run_id",
+      "type": "int",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "observations",
+      "name": "obs_date",
+      "type": "date",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "observations",
+      "name": "scores",
+      "type": "nvarchar(max)",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "observations",
+      "name": "note",
+      "type": "nvarchar(max)",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "observations",
+      "name": "observer_id",
+      "type": "int",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "observations",
+      "name": "created_at",
+      "type": "datetimeoffset(3)",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_assignments",
+      "name": "id",
+      "type": "int",
+      "notNull": true,
+      "generated": null,
+      "identity": {
+        "seed": 1,
+        "increment": 1
+      },
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_assignments",
+      "name": "run_id",
+      "type": "int",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_assignments",
+      "name": "role",
+      "type": "nvarchar(10)",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_assignments",
+      "name": "user_id",
+      "type": "int",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_assignments",
+      "name": "from_date",
+      "type": "date",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_assignments",
+      "name": "to_date",
+      "type": "date",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_evaluations",
+      "name": "id",
+      "type": "int",
+      "notNull": true,
+      "generated": null,
+      "identity": {
+        "seed": 1,
+        "increment": 1
+      },
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_evaluations",
+      "name": "run_id",
+      "type": "int",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_evaluations",
+      "name": "ratings",
+      "type": "nvarchar(max)",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_evaluations",
+      "name": "risk",
+      "type": "nvarchar(10)",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_evaluations",
+      "name": "suggestion",
+      "type": "nvarchar(max)",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_evaluations",
+      "name": "saved_by",
+      "type": "int",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_evaluations",
+      "name": "saved_at",
+      "type": "datetimeoffset(3)",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_evaluations",
+      "name": "confirmed_by",
+      "type": "int",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_evaluations",
+      "name": "confirmed_at",
+      "type": "datetimeoffset(3)",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_evaluations",
+      "name": "confirm_note",
+      "type": "nvarchar(max)",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_journal",
+      "name": "id",
+      "type": "int",
+      "notNull": true,
+      "generated": null,
+      "identity": {
+        "seed": 1,
+        "increment": 1
+      },
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_journal",
+      "name": "run_id",
+      "type": "int",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_journal",
+      "name": "day",
+      "type": "int",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_journal",
+      "name": "mood",
+      "type": "nvarchar(100)",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_journal",
+      "name": "difficulties",
+      "type": "nvarchar(max)",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_journal",
+      "name": "actions",
+      "type": "nvarchar(max)",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_journal",
+      "name": "manager_note",
+      "type": "nvarchar(max)",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_journal",
+      "name": "updated_by",
+      "type": "int",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_journal",
+      "name": "updated_at",
+      "type": "datetimeoffset(3)",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_journal",
+      "name": "manager_by",
+      "type": "int",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_journal",
+      "name": "manager_at",
+      "type": "datetimeoffset(3)",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_pauses",
+      "name": "id",
+      "type": "int",
+      "notNull": true,
+      "generated": null,
+      "identity": {
+        "seed": 1,
+        "increment": 1
+      },
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_pauses",
+      "name": "run_id",
+      "type": "int",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_pauses",
+      "name": "from_date",
+      "type": "date",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_pauses",
+      "name": "to_date",
+      "type": "date",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_pauses",
+      "name": "reason",
+      "type": "nvarchar(max)",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_pauses",
+      "name": "status",
+      "type": "nvarchar(10)",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_pauses",
+      "name": "requested_by",
+      "type": "int",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_pauses",
+      "name": "requested_at",
+      "type": "datetimeoffset(3)",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_pauses",
+      "name": "decided_by",
+      "type": "int",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_pauses",
+      "name": "decided_at",
+      "type": "datetimeoffset(3)",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_pauses",
+      "name": "decision_note",
+      "type": "nvarchar(max)",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_tasks",
+      "name": "id",
+      "type": "int",
+      "notNull": true,
+      "generated": null,
+      "identity": {
+        "seed": 1,
+        "increment": 1
+      },
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_tasks",
+      "name": "run_id",
+      "type": "int",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_tasks",
+      "name": "item_key",
+      "type": "nvarchar(100)",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_tasks",
+      "name": "open_date",
+      "type": "date",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_tasks",
+      "name": "due_date",
+      "type": "date",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_tasks",
+      "name": "status",
+      "type": "nvarchar(10)",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_tasks",
+      "name": "done_date",
+      "type": "date",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_tasks",
+      "name": "na_reason",
+      "type": "nvarchar(max)",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_tasks",
+      "name": "rework_note",
+      "type": "nvarchar(max)",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_tasks",
+      "name": "rework_by",
+      "type": "int",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_tasks",
+      "name": "rework_at",
+      "type": "datetimeoffset(3)",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_tasks",
+      "name": "row_version",
+      "type": "int",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_tasks",
+      "name": "updated_at",
+      "type": "datetimeoffset(3)",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "sales_monthly",
+      "name": "id",
+      "type": "int",
+      "notNull": true,
+      "generated": null,
+      "identity": {
+        "seed": 1,
+        "increment": 1
+      },
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "sales_monthly",
+      "name": "run_id",
+      "type": "int",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "sales_monthly",
+      "name": "month_index",
+      "type": "int",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "sales_monthly",
+      "name": "total",
+      "type": "float",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "sales_monthly",
+      "name": "coef1",
+      "type": "float",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "sales_monthly",
+      "name": "source",
+      "type": "nvarchar(10)",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "sales_monthly",
+      "name": "entered_by",
+      "type": "int",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "sales_monthly",
+      "name": "at",
+      "type": "datetimeoffset(3)",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "signoffs",
+      "name": "id",
+      "type": "int",
+      "notNull": true,
+      "generated": null,
+      "identity": {
+        "seed": 1,
+        "increment": 1
+      },
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "signoffs",
+      "name": "run_id",
+      "type": "int",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "signoffs",
+      "name": "stage_key",
+      "type": "nvarchar(100)",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "signoffs",
+      "name": "review_id",
+      "type": "int",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "signoffs",
+      "name": "step",
+      "type": "int",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "signoffs",
+      "name": "role",
+      "type": "nvarchar(10)",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "signoffs",
+      "name": "user_id",
+      "type": "int",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "signoffs",
+      "name": "at",
+      "type": "datetimeoffset(3)",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "staff",
+      "name": "id",
+      "type": "int",
+      "notNull": true,
+      "generated": null,
+      "identity": {
+        "seed": 1,
+        "increment": 1
+      },
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "staff",
+      "name": "user_id",
+      "type": "int",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "staff",
+      "name": "employee_code",
+      "type": "nvarchar(30)",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "staff",
+      "name": "full_name",
+      "type": "nvarchar(200)",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "staff",
+      "name": "store_id",
+      "type": "int",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "staff",
+      "name": "hire_date",
+      "type": "date",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "staff",
+      "name": "current_level",
+      "type": "int",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "staff",
+      "name": "active",
+      "type": "bit",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "staff",
+      "name": "stop_reason",
+      "type": "nvarchar(max)",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "staff",
+      "name": "stopped_at",
+      "type": "datetimeoffset(3)",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "staff",
+      "name": "stopped_by",
+      "type": "int",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "staff",
+      "name": "created_at",
+      "type": "datetimeoffset(3)",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "stores",
+      "name": "id",
+      "type": "int",
+      "notNull": true,
+      "generated": null,
+      "identity": {
+        "seed": 1,
+        "increment": 1
+      },
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "stores",
+      "name": "code",
+      "type": "nvarchar(50)",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "stores",
+      "name": "name",
+      "type": "nvarchar(200)",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "stores",
+      "name": "address",
+      "type": "nvarchar(500)",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "stores",
+      "name": "area_id",
+      "type": "int",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "stores",
+      "name": "active",
+      "type": "bit",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "task_confirmations",
+      "name": "id",
+      "type": "int",
+      "notNull": true,
+      "generated": null,
+      "identity": {
+        "seed": 1,
+        "increment": 1
+      },
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "task_confirmations",
+      "name": "task_id",
+      "type": "int",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "task_confirmations",
+      "name": "role",
+      "type": "nvarchar(10)",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "task_confirmations",
+      "name": "user_id",
+      "type": "int",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "task_confirmations",
+      "name": "proxy_role",
+      "type": "nvarchar(10)",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "task_confirmations",
+      "name": "at",
+      "type": "datetimeoffset(3)",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "task_confirmations",
+      "name": "note",
+      "type": "nvarchar(max)",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "task_confirmations",
+      "name": "revoked_at",
+      "type": "datetimeoffset(3)",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "task_confirmations",
+      "name": "revoked_by",
+      "type": "int",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "task_events",
+      "name": "id",
+      "type": "int",
+      "notNull": true,
+      "generated": null,
+      "identity": {
+        "seed": 1,
+        "increment": 1
+      },
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "task_events",
+      "name": "task_id",
+      "type": "int",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "task_events",
+      "name": "user_id",
+      "type": "int",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "task_events",
+      "name": "role",
+      "type": "nvarchar(10)",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "task_events",
+      "name": "proxy_role",
+      "type": "nvarchar(10)",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "task_events",
+      "name": "action",
+      "type": "nvarchar(50)",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "task_events",
+      "name": "note",
+      "type": "nvarchar(max)",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "task_events",
+      "name": "data",
+      "type": "nvarchar(max)",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "task_events",
+      "name": "at",
+      "type": "datetimeoffset(3)",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "user_scopes",
+      "name": "id",
+      "type": "int",
+      "notNull": true,
+      "generated": null,
+      "identity": {
+        "seed": 1,
+        "increment": 1
+      },
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "user_scopes",
+      "name": "user_id",
+      "type": "int",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "user_scopes",
+      "name": "store_id",
+      "type": "int",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "user_scopes",
+      "name": "area_id",
+      "type": "int",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "users",
+      "name": "id",
+      "type": "int",
+      "notNull": true,
+      "generated": null,
+      "identity": {
+        "seed": 1,
+        "increment": 1
+      },
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "users",
+      "name": "employee_code",
+      "type": "nvarchar(30)",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "users",
+      "name": "full_name",
+      "type": "nvarchar(200)",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "users",
+      "name": "email",
+      "type": "nvarchar(255)",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "users",
+      "name": "phone",
+      "type": "nvarchar(30)",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "users",
+      "name": "role",
+      "type": "nvarchar(10)",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "users",
+      "name": "status",
+      "type": "nvarchar(10)",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "users",
+      "name": "can_buddy",
+      "type": "bit",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "users",
+      "name": "requested_role",
+      "type": "nvarchar(10)",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "users",
+      "name": "requested_store_id",
+      "type": "int",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "users",
+      "name": "requested_area_id",
+      "type": "int",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "users",
+      "name": "review_note",
+      "type": "nvarchar(max)",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "users",
+      "name": "reviewed_by",
+      "type": "int",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "users",
+      "name": "reviewed_at",
+      "type": "datetimeoffset(3)",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "users",
+      "name": "row_version",
+      "type": "int",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "users",
+      "name": "last_seen_at",
+      "type": "datetimeoffset(3)",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "users",
+      "name": "created_at",
+      "type": "datetimeoffset(3)",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "versions",
+      "name": "id",
+      "type": "int",
+      "notNull": true,
+      "generated": null,
+      "identity": {
+        "seed": 1,
+        "increment": 1
+      },
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "versions",
+      "name": "code",
+      "type": "nvarchar(30)",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "versions",
+      "name": "criteria_line",
+      "type": "nvarchar(10)",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "versions",
+      "name": "status",
+      "type": "nvarchar(10)",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "versions",
+      "name": "effective_from",
+      "type": "date",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "versions",
+      "name": "effective_to",
+      "type": "date",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "versions",
+      "name": "parent_id",
+      "type": "int",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "versions",
+      "name": "change_note",
+      "type": "nvarchar(max)",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "versions",
+      "name": "change_kind",
+      "type": "nvarchar(10)",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "versions",
+      "name": "review_note",
+      "type": "nvarchar(max)",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "versions",
+      "name": "content",
+      "type": "nvarchar(max)",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "versions",
+      "name": "row_version",
+      "type": "int",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "versions",
+      "name": "created_by",
+      "type": "int",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "versions",
+      "name": "updated_by",
+      "type": "int",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "versions",
+      "name": "updated_at",
+      "type": "datetimeoffset(3)",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "versions",
+      "name": "submitted_by",
+      "type": "int",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "versions",
+      "name": "submitted_at",
+      "type": "datetimeoffset(3)",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "versions",
+      "name": "approved_by",
+      "type": "int",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "versions",
+      "name": "approved_at",
+      "type": "datetimeoffset(3)",
+      "notNull": false,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "versions",
+      "name": "created_at",
+      "type": "datetimeoffset(3)",
+      "notNull": true,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "areas",
+      "name": "areas_pkey",
+      "nameExplicit": false,
+      "columns": [
+        "id"
+      ],
+      "entityType": "pks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "audit_logs",
+      "name": "audit_logs_pkey",
+      "nameExplicit": false,
+      "columns": [
+        "id"
+      ],
+      "entityType": "pks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "credentials",
+      "name": "credentials_pkey",
+      "nameExplicit": false,
+      "columns": [
+        "user_id"
+      ],
+      "entityType": "pks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "level_reviews",
+      "name": "level_reviews_pkey",
+      "nameExplicit": false,
+      "columns": [
+        "id"
+      ],
+      "entityType": "pks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "level_runs",
+      "name": "level_runs_pkey",
+      "nameExplicit": false,
+      "columns": [
+        "id"
+      ],
+      "entityType": "pks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "notifications",
+      "name": "notifications_pkey",
+      "nameExplicit": false,
+      "columns": [
+        "id"
+      ],
+      "entityType": "pks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "observations",
+      "name": "observations_pkey",
+      "nameExplicit": false,
+      "columns": [
+        "id"
+      ],
+      "entityType": "pks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_assignments",
+      "name": "run_assignments_pkey",
+      "nameExplicit": false,
+      "columns": [
+        "id"
+      ],
+      "entityType": "pks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_evaluations",
+      "name": "run_evaluations_pkey",
+      "nameExplicit": false,
+      "columns": [
+        "id"
+      ],
+      "entityType": "pks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_journal",
+      "name": "run_journal_pkey",
+      "nameExplicit": false,
+      "columns": [
+        "id"
+      ],
+      "entityType": "pks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_pauses",
+      "name": "run_pauses_pkey",
+      "nameExplicit": false,
+      "columns": [
+        "id"
+      ],
+      "entityType": "pks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_tasks",
+      "name": "run_tasks_pkey",
+      "nameExplicit": false,
+      "columns": [
+        "id"
+      ],
+      "entityType": "pks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "sales_monthly",
+      "name": "sales_monthly_pkey",
+      "nameExplicit": false,
+      "columns": [
+        "id"
+      ],
+      "entityType": "pks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "signoffs",
+      "name": "signoffs_pkey",
+      "nameExplicit": false,
+      "columns": [
+        "id"
+      ],
+      "entityType": "pks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "staff",
+      "name": "staff_pkey",
+      "nameExplicit": false,
+      "columns": [
+        "id"
+      ],
+      "entityType": "pks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "stores",
+      "name": "stores_pkey",
+      "nameExplicit": false,
+      "columns": [
+        "id"
+      ],
+      "entityType": "pks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "task_confirmations",
+      "name": "task_confirmations_pkey",
+      "nameExplicit": false,
+      "columns": [
+        "id"
+      ],
+      "entityType": "pks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "task_events",
+      "name": "task_events_pkey",
+      "nameExplicit": false,
+      "columns": [
+        "id"
+      ],
+      "entityType": "pks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "user_scopes",
+      "name": "user_scopes_pkey",
+      "nameExplicit": false,
+      "columns": [
+        "id"
+      ],
+      "entityType": "pks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "users",
+      "name": "users_pkey",
+      "nameExplicit": false,
+      "columns": [
+        "id"
+      ],
+      "entityType": "pks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "versions",
+      "name": "versions_pkey",
+      "nameExplicit": false,
+      "columns": [
+        "id"
+      ],
+      "entityType": "pks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "audit_logs",
+      "name": "audit_logs_user_id_users_id_fk",
+      "columns": [
+        "user_id"
+      ],
+      "nameExplicit": false,
+      "schemaTo": "lotrinh",
+      "tableTo": "users",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "entityType": "fks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "credentials",
+      "name": "credentials_user_id_users_id_fk",
+      "columns": [
+        "user_id"
+      ],
+      "nameExplicit": false,
+      "schemaTo": "lotrinh",
+      "tableTo": "users",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "entityType": "fks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "level_reviews",
+      "name": "level_reviews_run_id_level_runs_id_fk",
+      "columns": [
+        "run_id"
+      ],
+      "nameExplicit": false,
+      "schemaTo": "lotrinh",
+      "tableTo": "level_runs",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "entityType": "fks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "level_reviews",
+      "name": "level_reviews_saved_by_users_id_fk",
+      "columns": [
+        "saved_by"
+      ],
+      "nameExplicit": false,
+      "schemaTo": "lotrinh",
+      "tableTo": "users",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "entityType": "fks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "level_runs",
+      "name": "level_runs_staff_id_staff_id_fk",
+      "columns": [
+        "staff_id"
+      ],
+      "nameExplicit": false,
+      "schemaTo": "lotrinh",
+      "tableTo": "staff",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "entityType": "fks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "level_runs",
+      "name": "level_runs_version_id_versions_id_fk",
+      "columns": [
+        "version_id"
+      ],
+      "nameExplicit": false,
+      "schemaTo": "lotrinh",
+      "tableTo": "versions",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "entityType": "fks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "level_runs",
+      "name": "level_runs_ack_by_users_id_fk",
+      "columns": [
+        "ack_by"
+      ],
+      "nameExplicit": false,
+      "schemaTo": "lotrinh",
+      "tableTo": "users",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "entityType": "fks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "level_runs",
+      "name": "level_runs_created_by_users_id_fk",
+      "columns": [
+        "created_by"
+      ],
+      "nameExplicit": false,
+      "schemaTo": "lotrinh",
+      "tableTo": "users",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "entityType": "fks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "notifications",
+      "name": "notifications_user_id_users_id_fk",
+      "columns": [
+        "user_id"
+      ],
+      "nameExplicit": false,
+      "schemaTo": "lotrinh",
+      "tableTo": "users",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "entityType": "fks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "observations",
+      "name": "observations_run_id_level_runs_id_fk",
+      "columns": [
+        "run_id"
+      ],
+      "nameExplicit": false,
+      "schemaTo": "lotrinh",
+      "tableTo": "level_runs",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "entityType": "fks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "observations",
+      "name": "observations_observer_id_users_id_fk",
+      "columns": [
+        "observer_id"
+      ],
+      "nameExplicit": false,
+      "schemaTo": "lotrinh",
+      "tableTo": "users",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "entityType": "fks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_assignments",
+      "name": "run_assignments_run_id_level_runs_id_fk",
+      "columns": [
+        "run_id"
+      ],
+      "nameExplicit": false,
+      "schemaTo": "lotrinh",
+      "tableTo": "level_runs",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "entityType": "fks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_assignments",
+      "name": "run_assignments_user_id_users_id_fk",
+      "columns": [
+        "user_id"
+      ],
+      "nameExplicit": false,
+      "schemaTo": "lotrinh",
+      "tableTo": "users",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "entityType": "fks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_evaluations",
+      "name": "run_evaluations_run_id_level_runs_id_fk",
+      "columns": [
+        "run_id"
+      ],
+      "nameExplicit": false,
+      "schemaTo": "lotrinh",
+      "tableTo": "level_runs",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "entityType": "fks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_evaluations",
+      "name": "run_evaluations_saved_by_users_id_fk",
+      "columns": [
+        "saved_by"
+      ],
+      "nameExplicit": false,
+      "schemaTo": "lotrinh",
+      "tableTo": "users",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "entityType": "fks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_evaluations",
+      "name": "run_evaluations_confirmed_by_users_id_fk",
+      "columns": [
+        "confirmed_by"
+      ],
+      "nameExplicit": false,
+      "schemaTo": "lotrinh",
+      "tableTo": "users",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "entityType": "fks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_journal",
+      "name": "run_journal_run_id_level_runs_id_fk",
+      "columns": [
+        "run_id"
+      ],
+      "nameExplicit": false,
+      "schemaTo": "lotrinh",
+      "tableTo": "level_runs",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "entityType": "fks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_journal",
+      "name": "run_journal_updated_by_users_id_fk",
+      "columns": [
+        "updated_by"
+      ],
+      "nameExplicit": false,
+      "schemaTo": "lotrinh",
+      "tableTo": "users",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "entityType": "fks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_journal",
+      "name": "run_journal_manager_by_users_id_fk",
+      "columns": [
+        "manager_by"
+      ],
+      "nameExplicit": false,
+      "schemaTo": "lotrinh",
+      "tableTo": "users",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "entityType": "fks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_pauses",
+      "name": "run_pauses_run_id_level_runs_id_fk",
+      "columns": [
+        "run_id"
+      ],
+      "nameExplicit": false,
+      "schemaTo": "lotrinh",
+      "tableTo": "level_runs",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "entityType": "fks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_pauses",
+      "name": "run_pauses_requested_by_users_id_fk",
+      "columns": [
+        "requested_by"
+      ],
+      "nameExplicit": false,
+      "schemaTo": "lotrinh",
+      "tableTo": "users",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "entityType": "fks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_pauses",
+      "name": "run_pauses_decided_by_users_id_fk",
+      "columns": [
+        "decided_by"
+      ],
+      "nameExplicit": false,
+      "schemaTo": "lotrinh",
+      "tableTo": "users",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "entityType": "fks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_tasks",
+      "name": "run_tasks_run_id_level_runs_id_fk",
+      "columns": [
+        "run_id"
+      ],
+      "nameExplicit": false,
+      "schemaTo": "lotrinh",
+      "tableTo": "level_runs",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "entityType": "fks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_tasks",
+      "name": "run_tasks_rework_by_users_id_fk",
+      "columns": [
+        "rework_by"
+      ],
+      "nameExplicit": false,
+      "schemaTo": "lotrinh",
+      "tableTo": "users",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "entityType": "fks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "sales_monthly",
+      "name": "sales_monthly_run_id_level_runs_id_fk",
+      "columns": [
+        "run_id"
+      ],
+      "nameExplicit": false,
+      "schemaTo": "lotrinh",
+      "tableTo": "level_runs",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "entityType": "fks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "sales_monthly",
+      "name": "sales_monthly_entered_by_users_id_fk",
+      "columns": [
+        "entered_by"
+      ],
+      "nameExplicit": false,
+      "schemaTo": "lotrinh",
+      "tableTo": "users",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "entityType": "fks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "signoffs",
+      "name": "signoffs_run_id_level_runs_id_fk",
+      "columns": [
+        "run_id"
+      ],
+      "nameExplicit": false,
+      "schemaTo": "lotrinh",
+      "tableTo": "level_runs",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "entityType": "fks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "signoffs",
+      "name": "signoffs_review_id_level_reviews_id_fk",
+      "columns": [
+        "review_id"
+      ],
+      "nameExplicit": false,
+      "schemaTo": "lotrinh",
+      "tableTo": "level_reviews",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "entityType": "fks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "signoffs",
+      "name": "signoffs_user_id_users_id_fk",
+      "columns": [
+        "user_id"
+      ],
+      "nameExplicit": false,
+      "schemaTo": "lotrinh",
+      "tableTo": "users",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "entityType": "fks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "staff",
+      "name": "staff_user_id_users_id_fk",
+      "columns": [
+        "user_id"
+      ],
+      "nameExplicit": false,
+      "schemaTo": "lotrinh",
+      "tableTo": "users",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "entityType": "fks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "staff",
+      "name": "staff_store_id_stores_id_fk",
+      "columns": [
+        "store_id"
+      ],
+      "nameExplicit": false,
+      "schemaTo": "lotrinh",
+      "tableTo": "stores",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "entityType": "fks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "staff",
+      "name": "staff_stopped_by_users_id_fk",
+      "columns": [
+        "stopped_by"
+      ],
+      "nameExplicit": false,
+      "schemaTo": "lotrinh",
+      "tableTo": "users",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "entityType": "fks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "stores",
+      "name": "stores_area_id_areas_id_fk",
+      "columns": [
+        "area_id"
+      ],
+      "nameExplicit": false,
+      "schemaTo": "lotrinh",
+      "tableTo": "areas",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "entityType": "fks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "task_confirmations",
+      "name": "task_confirmations_task_id_run_tasks_id_fk",
+      "columns": [
+        "task_id"
+      ],
+      "nameExplicit": false,
+      "schemaTo": "lotrinh",
+      "tableTo": "run_tasks",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "entityType": "fks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "task_confirmations",
+      "name": "task_confirmations_user_id_users_id_fk",
+      "columns": [
+        "user_id"
+      ],
+      "nameExplicit": false,
+      "schemaTo": "lotrinh",
+      "tableTo": "users",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "entityType": "fks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "task_confirmations",
+      "name": "task_confirmations_revoked_by_users_id_fk",
+      "columns": [
+        "revoked_by"
+      ],
+      "nameExplicit": false,
+      "schemaTo": "lotrinh",
+      "tableTo": "users",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "entityType": "fks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "task_events",
+      "name": "task_events_task_id_run_tasks_id_fk",
+      "columns": [
+        "task_id"
+      ],
+      "nameExplicit": false,
+      "schemaTo": "lotrinh",
+      "tableTo": "run_tasks",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "entityType": "fks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "task_events",
+      "name": "task_events_user_id_users_id_fk",
+      "columns": [
+        "user_id"
+      ],
+      "nameExplicit": false,
+      "schemaTo": "lotrinh",
+      "tableTo": "users",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "entityType": "fks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "user_scopes",
+      "name": "user_scopes_user_id_users_id_fk",
+      "columns": [
+        "user_id"
+      ],
+      "nameExplicit": false,
+      "schemaTo": "lotrinh",
+      "tableTo": "users",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "entityType": "fks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "user_scopes",
+      "name": "user_scopes_store_id_stores_id_fk",
+      "columns": [
+        "store_id"
+      ],
+      "nameExplicit": false,
+      "schemaTo": "lotrinh",
+      "tableTo": "stores",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "entityType": "fks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "user_scopes",
+      "name": "user_scopes_area_id_areas_id_fk",
+      "columns": [
+        "area_id"
+      ],
+      "nameExplicit": false,
+      "schemaTo": "lotrinh",
+      "tableTo": "areas",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "entityType": "fks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "users",
+      "name": "users_requested_store_id_stores_id_fk",
+      "columns": [
+        "requested_store_id"
+      ],
+      "nameExplicit": false,
+      "schemaTo": "lotrinh",
+      "tableTo": "stores",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "entityType": "fks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "users",
+      "name": "users_requested_area_id_areas_id_fk",
+      "columns": [
+        "requested_area_id"
+      ],
+      "nameExplicit": false,
+      "schemaTo": "lotrinh",
+      "tableTo": "areas",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "entityType": "fks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "versions",
+      "name": "versions_created_by_users_id_fk",
+      "columns": [
+        "created_by"
+      ],
+      "nameExplicit": false,
+      "schemaTo": "lotrinh",
+      "tableTo": "users",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "entityType": "fks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "versions",
+      "name": "versions_updated_by_users_id_fk",
+      "columns": [
+        "updated_by"
+      ],
+      "nameExplicit": false,
+      "schemaTo": "lotrinh",
+      "tableTo": "users",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "entityType": "fks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "versions",
+      "name": "versions_submitted_by_users_id_fk",
+      "columns": [
+        "submitted_by"
+      ],
+      "nameExplicit": false,
+      "schemaTo": "lotrinh",
+      "tableTo": "users",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "entityType": "fks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "versions",
+      "name": "versions_approved_by_users_id_fk",
+      "columns": [
+        "approved_by"
+      ],
+      "nameExplicit": false,
+      "schemaTo": "lotrinh",
+      "tableTo": "users",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "entityType": "fks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "audit_logs",
+      "name": "audit_logs_entity_idx",
+      "columns": [
+        {
+          "value": "entity",
+          "isExpression": false
+        },
+        {
+          "value": "entity_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "entityType": "indexes"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "audit_logs",
+      "name": "audit_logs_at_idx",
+      "columns": [
+        {
+          "value": "at",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "entityType": "indexes"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "level_reviews",
+      "name": "level_reviews_run_round_uq",
+      "columns": [
+        {
+          "value": "run_id",
+          "isExpression": false
+        },
+        {
+          "value": "round",
+          "isExpression": false
+        }
+      ],
+      "isUnique": true,
+      "where": null,
+      "entityType": "indexes"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "level_runs",
+      "name": "level_runs_staff_idx",
+      "columns": [
+        {
+          "value": "staff_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "entityType": "indexes"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "level_runs",
+      "name": "level_runs_one_open_uq",
+      "columns": [
+        {
+          "value": "staff_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": true,
+      "where": "[status] in (N'active', N'paused', N'review')",
+      "entityType": "indexes"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "notifications",
+      "name": "notifications_user_idx",
+      "columns": [
+        {
+          "value": "user_id",
+          "isExpression": false
+        },
+        {
+          "value": "read_at",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "entityType": "indexes"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "notifications",
+      "name": "notifications_dedupe_uq",
+      "columns": [
+        {
+          "value": "dedupe_key",
+          "isExpression": false
+        }
+      ],
+      "isUnique": true,
+      "where": "[dedupe_key] is not null",
+      "entityType": "indexes"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "observations",
+      "name": "observations_run_idx",
+      "columns": [
+        {
+          "value": "run_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "entityType": "indexes"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_assignments",
+      "name": "run_assignments_run_idx",
+      "columns": [
+        {
+          "value": "run_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "entityType": "indexes"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_assignments",
+      "name": "run_assignments_user_idx",
+      "columns": [
+        {
+          "value": "user_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "entityType": "indexes"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_assignments",
+      "name": "run_assignments_active_uq",
+      "columns": [
+        {
+          "value": "run_id",
+          "isExpression": false
+        },
+        {
+          "value": "role",
+          "isExpression": false
+        }
+      ],
+      "isUnique": true,
+      "where": "[to_date] is null",
+      "entityType": "indexes"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_journal",
+      "name": "run_journal_run_day_uq",
+      "columns": [
+        {
+          "value": "run_id",
+          "isExpression": false
+        },
+        {
+          "value": "day",
+          "isExpression": false
+        }
+      ],
+      "isUnique": true,
+      "where": null,
+      "entityType": "indexes"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_pauses",
+      "name": "run_pauses_run_idx",
+      "columns": [
+        {
+          "value": "run_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "entityType": "indexes"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_tasks",
+      "name": "run_tasks_run_item_uq",
+      "columns": [
+        {
+          "value": "run_id",
+          "isExpression": false
+        },
+        {
+          "value": "item_key",
+          "isExpression": false
+        }
+      ],
+      "isUnique": true,
+      "where": null,
+      "entityType": "indexes"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "sales_monthly",
+      "name": "sales_monthly_run_month_uq",
+      "columns": [
+        {
+          "value": "run_id",
+          "isExpression": false
+        },
+        {
+          "value": "month_index",
+          "isExpression": false
+        }
+      ],
+      "isUnique": true,
+      "where": null,
+      "entityType": "indexes"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "signoffs",
+      "name": "signoffs_stage_step_uq",
+      "columns": [
+        {
+          "value": "run_id",
+          "isExpression": false
+        },
+        {
+          "value": "stage_key",
+          "isExpression": false
+        },
+        {
+          "value": "step",
+          "isExpression": false
+        }
+      ],
+      "isUnique": true,
+      "where": "[stage_key] is not null",
+      "entityType": "indexes"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "signoffs",
+      "name": "signoffs_review_step_uq",
+      "columns": [
+        {
+          "value": "review_id",
+          "isExpression": false
+        },
+        {
+          "value": "step",
+          "isExpression": false
+        }
+      ],
+      "isUnique": true,
+      "where": "[review_id] is not null",
+      "entityType": "indexes"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "signoffs",
+      "name": "signoffs_run_idx",
+      "columns": [
+        {
+          "value": "run_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "entityType": "indexes"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "staff",
+      "name": "staff_user_uq",
+      "columns": [
+        {
+          "value": "user_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": true,
+      "where": "[user_id] is not null",
+      "entityType": "indexes"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "staff",
+      "name": "staff_employee_code_uq",
+      "columns": [
+        {
+          "value": "employee_code",
+          "isExpression": false
+        }
+      ],
+      "isUnique": true,
+      "where": "[employee_code] is not null",
+      "entityType": "indexes"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "staff",
+      "name": "staff_store_idx",
+      "columns": [
+        {
+          "value": "store_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "entityType": "indexes"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "task_confirmations",
+      "name": "task_confirmations_active_uq",
+      "columns": [
+        {
+          "value": "task_id",
+          "isExpression": false
+        },
+        {
+          "value": "role",
+          "isExpression": false
+        }
+      ],
+      "isUnique": true,
+      "where": "[revoked_at] is null",
+      "entityType": "indexes"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "task_confirmations",
+      "name": "task_confirmations_task_idx",
+      "columns": [
+        {
+          "value": "task_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "entityType": "indexes"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "task_events",
+      "name": "task_events_task_idx",
+      "columns": [
+        {
+          "value": "task_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "entityType": "indexes"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "user_scopes",
+      "name": "user_scopes_store_uq",
+      "columns": [
+        {
+          "value": "user_id",
+          "isExpression": false
+        },
+        {
+          "value": "store_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": true,
+      "where": "[store_id] is not null",
+      "entityType": "indexes"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "user_scopes",
+      "name": "user_scopes_area_uq",
+      "columns": [
+        {
+          "value": "user_id",
+          "isExpression": false
+        },
+        {
+          "value": "area_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": true,
+      "where": "[area_id] is not null",
+      "entityType": "indexes"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "users",
+      "name": "users_employee_code_uq",
+      "columns": [
+        {
+          "value": "employee_code",
+          "isExpression": false
+        }
+      ],
+      "isUnique": true,
+      "where": "[employee_code] is not null",
+      "entityType": "indexes"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "versions",
+      "name": "versions_code_uq",
+      "columns": [
+        {
+          "value": "code",
+          "isExpression": false
+        }
+      ],
+      "isUnique": true,
+      "where": "[code] is not null",
+      "entityType": "indexes"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "areas",
+      "name": "areas_code_uq",
+      "nameExplicit": true,
+      "columns": [
+        "code"
+      ],
+      "entityType": "uniques"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_evaluations",
+      "name": "run_evaluations_run_uq",
+      "nameExplicit": true,
+      "columns": [
+        "run_id"
+      ],
+      "entityType": "uniques"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "stores",
+      "name": "stores_code_uq",
+      "nameExplicit": true,
+      "columns": [
+        "code"
+      ],
+      "entityType": "uniques"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "users",
+      "name": "users_email_uq",
+      "nameExplicit": true,
+      "columns": [
+        "email"
+      ],
+      "entityType": "uniques"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "audit_logs",
+      "name": "audit_logs_payload_json_ck",
+      "value": "[audit_logs].[payload] is null or isjson([audit_logs].[payload]) = 1",
+      "entityType": "checks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "level_reviews",
+      "name": "level_reviews_result_ck",
+      "value": "[level_reviews].[result] in (N'pass', N'extend', N'fail')",
+      "entityType": "checks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "level_reviews",
+      "name": "level_reviews_status_ck",
+      "value": "[level_reviews].[status] in (N'draft', N'signing', N'done')",
+      "entityType": "checks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "level_reviews",
+      "name": "level_reviews_criteria_json_ck",
+      "value": "isjson([level_reviews].[criteria_results]) = 1",
+      "entityType": "checks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "level_reviews",
+      "name": "level_reviews_notes_json_ck",
+      "value": "isjson([level_reviews].[notes]) = 1",
+      "entityType": "checks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "level_runs",
+      "name": "level_runs_level_ck",
+      "value": "[level_runs].[level_key] between 1 and 4",
+      "entityType": "checks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "level_runs",
+      "name": "level_runs_track_ck",
+      "value": "[level_runs].[track] in (N'nvbh', N'cht_moi_tuyen', N'cht_thang_tien')",
+      "entityType": "checks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "level_runs",
+      "name": "level_runs_status_ck",
+      "value": "[level_runs].[status] in (N'active', N'paused', N'review', N'passed', N'extended', N'failed', N'stopped', N'promoted')",
+      "entityType": "checks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "level_runs",
+      "name": "level_runs_dates_ck",
+      "value": "[level_runs].[planned_end] >= [level_runs].[start_date]",
+      "entityType": "checks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "level_runs",
+      "name": "level_runs_meta_json_ck",
+      "value": "isjson([level_runs].[meta]) = 1",
+      "entityType": "checks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "observations",
+      "name": "observations_scores_json_ck",
+      "value": "isjson([observations].[scores]) = 1",
+      "entityType": "checks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_assignments",
+      "name": "run_assignments_role_ck",
+      "value": "[run_assignments].[role] in (N'buddy', N'cht', N'qlkv', N'trainer')",
+      "entityType": "checks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_assignments",
+      "name": "run_assignments_dates_ck",
+      "value": "[run_assignments].[to_date] is null or [run_assignments].[to_date] >= [run_assignments].[from_date]",
+      "entityType": "checks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_evaluations",
+      "name": "run_evaluations_risk_ck",
+      "value": "[run_evaluations].[risk] in (N'low', N'medium', N'high')",
+      "entityType": "checks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_evaluations",
+      "name": "run_evaluations_ratings_json_ck",
+      "value": "isjson([run_evaluations].[ratings]) = 1",
+      "entityType": "checks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_pauses",
+      "name": "run_pauses_status_ck",
+      "value": "[run_pauses].[status] in (N'pending', N'approved', N'rejected')",
+      "entityType": "checks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_pauses",
+      "name": "run_pauses_dates_ck",
+      "value": "[run_pauses].[to_date] >= [run_pauses].[from_date]",
+      "entityType": "checks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_tasks",
+      "name": "run_tasks_status_ck",
+      "value": "[run_tasks].[status] in (N'todo', N'doing', N'help', N'na', N'done', N'void')",
+      "entityType": "checks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_tasks",
+      "name": "run_tasks_dates_ck",
+      "value": "[run_tasks].[due_date] >= [run_tasks].[open_date]",
+      "entityType": "checks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_tasks",
+      "name": "run_tasks_done_ck",
+      "value": "[run_tasks].[status] <> N'done' or [run_tasks].[done_date] is not null",
+      "entityType": "checks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_tasks",
+      "name": "run_tasks_na_ck",
+      "value": "[run_tasks].[status] <> N'na' or [run_tasks].[na_reason] is not null",
+      "entityType": "checks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "sales_monthly",
+      "name": "sales_monthly_source_ck",
+      "value": "[sales_monthly].[source] in (N'manual', N'pos')",
+      "entityType": "checks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "signoffs",
+      "name": "signoffs_one_of",
+      "value": "([signoffs].[stage_key] is not null and [signoffs].[review_id] is null) or ([signoffs].[stage_key] is null and [signoffs].[review_id] is not null)",
+      "entityType": "checks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "signoffs",
+      "name": "signoffs_role_ck",
+      "value": "[signoffs].[role] in (N'nv', N'buddy', N'cht', N'qlkv', N'bp')",
+      "entityType": "checks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "staff",
+      "name": "staff_level_ck",
+      "value": "[staff].[current_level] between 1 and 4",
+      "entityType": "checks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "task_confirmations",
+      "name": "task_confirmations_role_ck",
+      "value": "[task_confirmations].[role] in (N'nv', N'buddy', N'cht', N'qlkv', N'bp')",
+      "entityType": "checks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "task_confirmations",
+      "name": "task_confirmations_proxy_ck",
+      "value": "[task_confirmations].[proxy_role] in (N'nv', N'buddy', N'cht', N'qlkv', N'bp')",
+      "entityType": "checks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "task_events",
+      "name": "task_events_role_ck",
+      "value": "[task_events].[role] in (N'nv', N'buddy', N'cht', N'qlkv', N'bp')",
+      "entityType": "checks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "task_events",
+      "name": "task_events_proxy_ck",
+      "value": "[task_events].[proxy_role] in (N'nv', N'buddy', N'cht', N'qlkv', N'bp')",
+      "entityType": "checks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "task_events",
+      "name": "task_events_data_json_ck",
+      "value": "[task_events].[data] is null or isjson([task_events].[data]) = 1",
+      "entityType": "checks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "user_scopes",
+      "name": "user_scopes_one_of",
+      "value": "([user_scopes].[store_id] is not null and [user_scopes].[area_id] is null) or ([user_scopes].[store_id] is null and [user_scopes].[area_id] is not null)",
+      "entityType": "checks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "users",
+      "name": "users_role_ck",
+      "value": "[users].[role] in (N'nv', N'cht', N'qlkv', N'bp')",
+      "entityType": "checks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "users",
+      "name": "users_status_ck",
+      "value": "[users].[status] in (N'pending', N'active', N'locked', N'left', N'rejected')",
+      "entityType": "checks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "users",
+      "name": "users_requested_role_ck",
+      "value": "[users].[requested_role] in (N'nv', N'cht', N'qlkv', N'bp')",
+      "entityType": "checks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "versions",
+      "name": "versions_status_ck",
+      "value": "[versions].[status] in (N'draft', N'pending', N'active', N'expired')",
+      "entityType": "checks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "versions",
+      "name": "versions_change_kind_ck",
+      "value": "[versions].[change_kind] in (N'text', N'criteria')",
+      "entityType": "checks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "versions",
+      "name": "versions_effective_ck",
+      "value": "[versions].[effective_to] is null or [versions].[effective_from] is null or [versions].[effective_to] >= [versions].[effective_from]",
+      "entityType": "checks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "versions",
+      "name": "versions_content_json_ck",
+      "value": "isjson([versions].[content]) = 1",
+      "entityType": "checks"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "areas",
+      "name": "areas_active_default",
+      "column": "active",
+      "nameExplicit": false,
+      "default": "((1))",
+      "entityType": "defaults"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "audit_logs",
+      "name": "audit_logs_at_default",
+      "column": "at",
+      "nameExplicit": false,
+      "default": "(SYSDATETIMEOFFSET())",
+      "entityType": "defaults"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "credentials",
+      "name": "credentials_password_changed_at_default",
+      "column": "password_changed_at",
+      "nameExplicit": false,
+      "default": "(SYSDATETIMEOFFSET())",
+      "entityType": "defaults"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "level_reviews",
+      "name": "level_reviews_round_default",
+      "column": "round",
+      "nameExplicit": false,
+      "default": "((0))",
+      "entityType": "defaults"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "level_reviews",
+      "name": "level_reviews_criteria_results_default",
+      "column": "criteria_results",
+      "nameExplicit": false,
+      "default": "('[]')",
+      "entityType": "defaults"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "level_reviews",
+      "name": "level_reviews_notes_default",
+      "column": "notes",
+      "nameExplicit": false,
+      "default": "('{}')",
+      "entityType": "defaults"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "level_reviews",
+      "name": "level_reviews_ext_goals_default",
+      "column": "ext_goals",
+      "nameExplicit": false,
+      "default": "('')",
+      "entityType": "defaults"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "level_reviews",
+      "name": "level_reviews_status_default",
+      "column": "status",
+      "nameExplicit": false,
+      "default": "('draft')",
+      "entityType": "defaults"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "level_reviews",
+      "name": "level_reviews_row_version_default",
+      "column": "row_version",
+      "nameExplicit": false,
+      "default": "((0))",
+      "entityType": "defaults"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "level_reviews",
+      "name": "level_reviews_created_at_default",
+      "column": "created_at",
+      "nameExplicit": false,
+      "default": "(SYSDATETIMEOFFSET())",
+      "entityType": "defaults"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "level_runs",
+      "name": "level_runs_track_default",
+      "column": "track",
+      "nameExplicit": false,
+      "default": "('nvbh')",
+      "entityType": "defaults"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "level_runs",
+      "name": "level_runs_meta_default",
+      "column": "meta",
+      "nameExplicit": false,
+      "default": "('{}')",
+      "entityType": "defaults"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "level_runs",
+      "name": "level_runs_status_default",
+      "column": "status",
+      "nameExplicit": false,
+      "default": "('active')",
+      "entityType": "defaults"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "level_runs",
+      "name": "level_runs_ext_count_default",
+      "column": "ext_count",
+      "nameExplicit": false,
+      "default": "((0))",
+      "entityType": "defaults"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "level_runs",
+      "name": "level_runs_created_at_default",
+      "column": "created_at",
+      "nameExplicit": false,
+      "default": "(SYSDATETIMEOFFSET())",
+      "entityType": "defaults"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "observations",
+      "name": "observations_created_at_default",
+      "column": "created_at",
+      "nameExplicit": false,
+      "default": "(SYSDATETIMEOFFSET())",
+      "entityType": "defaults"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_evaluations",
+      "name": "run_evaluations_ratings_default",
+      "column": "ratings",
+      "nameExplicit": false,
+      "default": "('{}')",
+      "entityType": "defaults"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_evaluations",
+      "name": "run_evaluations_suggestion_default",
+      "column": "suggestion",
+      "nameExplicit": false,
+      "default": "('')",
+      "entityType": "defaults"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_journal",
+      "name": "run_journal_difficulties_default",
+      "column": "difficulties",
+      "nameExplicit": false,
+      "default": "('')",
+      "entityType": "defaults"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_journal",
+      "name": "run_journal_actions_default",
+      "column": "actions",
+      "nameExplicit": false,
+      "default": "('')",
+      "entityType": "defaults"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_journal",
+      "name": "run_journal_manager_note_default",
+      "column": "manager_note",
+      "nameExplicit": false,
+      "default": "('')",
+      "entityType": "defaults"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_pauses",
+      "name": "run_pauses_status_default",
+      "column": "status",
+      "nameExplicit": false,
+      "default": "('pending')",
+      "entityType": "defaults"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_tasks",
+      "name": "run_tasks_status_default",
+      "column": "status",
+      "nameExplicit": false,
+      "default": "('todo')",
+      "entityType": "defaults"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_tasks",
+      "name": "run_tasks_row_version_default",
+      "column": "row_version",
+      "nameExplicit": false,
+      "default": "((0))",
+      "entityType": "defaults"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "run_tasks",
+      "name": "run_tasks_updated_at_default",
+      "column": "updated_at",
+      "nameExplicit": false,
+      "default": "(SYSDATETIMEOFFSET())",
+      "entityType": "defaults"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "sales_monthly",
+      "name": "sales_monthly_source_default",
+      "column": "source",
+      "nameExplicit": false,
+      "default": "('manual')",
+      "entityType": "defaults"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "sales_monthly",
+      "name": "sales_monthly_at_default",
+      "column": "at",
+      "nameExplicit": false,
+      "default": "(SYSDATETIMEOFFSET())",
+      "entityType": "defaults"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "staff",
+      "name": "staff_current_level_default",
+      "column": "current_level",
+      "nameExplicit": false,
+      "default": "((1))",
+      "entityType": "defaults"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "staff",
+      "name": "staff_active_default",
+      "column": "active",
+      "nameExplicit": false,
+      "default": "((1))",
+      "entityType": "defaults"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "staff",
+      "name": "staff_created_at_default",
+      "column": "created_at",
+      "nameExplicit": false,
+      "default": "(SYSDATETIMEOFFSET())",
+      "entityType": "defaults"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "stores",
+      "name": "stores_active_default",
+      "column": "active",
+      "nameExplicit": false,
+      "default": "((1))",
+      "entityType": "defaults"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "users",
+      "name": "users_status_default",
+      "column": "status",
+      "nameExplicit": false,
+      "default": "('pending')",
+      "entityType": "defaults"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "users",
+      "name": "users_can_buddy_default",
+      "column": "can_buddy",
+      "nameExplicit": false,
+      "default": "((0))",
+      "entityType": "defaults"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "users",
+      "name": "users_row_version_default",
+      "column": "row_version",
+      "nameExplicit": false,
+      "default": "((0))",
+      "entityType": "defaults"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "users",
+      "name": "users_created_at_default",
+      "column": "created_at",
+      "nameExplicit": false,
+      "default": "(SYSDATETIMEOFFSET())",
+      "entityType": "defaults"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "versions",
+      "name": "versions_row_version_default",
+      "column": "row_version",
+      "nameExplicit": false,
+      "default": "((0))",
+      "entityType": "defaults"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "versions",
+      "name": "versions_updated_at_default",
+      "column": "updated_at",
+      "nameExplicit": false,
+      "default": "(SYSDATETIMEOFFSET())",
+      "entityType": "defaults"
+    },
+    {
+      "schema": "lotrinh",
+      "table": "versions",
+      "name": "versions_created_at_default",
+      "column": "created_at",
+      "nameExplicit": false,
+      "default": "(SYSDATETIMEOFFSET())",
+      "entityType": "defaults"
+    }
+  ],
+  "renames": []
+}

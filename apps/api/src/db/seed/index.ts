@@ -49,6 +49,7 @@ import {
   SEED_USERS,
   type ProgressPlan,
 } from './seed-data';
+import { insertChunked } from '../mssql';
 
 const SEED_CONTENT_PATH = path.resolve(__dirname, '../../../../../seed/v2.1.json');
 
@@ -66,16 +67,17 @@ export async function seedDatabase(db: Db, today: IsoDate): Promise<void> {
   const passwordHash = await bcrypt.hash(SEED_PASSWORD, 10);
 
   await db.transaction(async (tx) => {
-    const areaRows = await tx.insert(areas).values(SEED_AREAS).returning();
+    const areaRows = await tx.insert(areas).output().values(SEED_AREAS);
     const areaId = new Map(areaRows.map((a) => [a.code, a.id]));
     const storeRows = await tx
       .insert(stores)
-      .values(SEED_STORES.map((s) => ({ code: s.code, name: s.name, address: s.address, areaId: areaId.get(s.area)! })))
-      .returning();
+      .output()
+      .values(SEED_STORES.map((s) => ({ code: s.code, name: s.name, address: s.address, areaId: areaId.get(s.area)! })));
     const storeId = new Map(storeRows.map((s) => [s.code, s.id]));
 
     const userRows = await tx
       .insert(users)
+      .output()
       .values(
         SEED_USERS.map((u) => ({
           employeeCode: u.employeeCode,
@@ -88,8 +90,7 @@ export async function seedDatabase(db: Db, today: IsoDate): Promise<void> {
           // Lần vào cuối: mặc định hôm qua; một số người để trống hoặc lâu ngày để có cảnh báo "không đăng nhập" (mục 11.6)
           lastSeenAt: u.status === 'active' && LAST_SEEN_DAYS_AGO[u.key] !== null ? at(addDays(today, -(LAST_SEEN_DAYS_AGO[u.key] ?? 1)), '20:00') : null,
         })),
-      )
-      .returning();
+      );
     const byEmail = new Map(userRows.map((u) => [u.email, u]));
     const user = (key: string) => {
       const def = SEED_USERS.find((u) => u.key === key);
@@ -107,6 +108,7 @@ export async function seedDatabase(db: Db, today: IsoDate): Promise<void> {
     const adminId = user('admin').id;
     const [version] = await tx
       .insert(versions)
+      .output()
       .values({
         code: '2.1',
         criteriaLine: '2.1',
@@ -116,8 +118,7 @@ export async function seedDatabase(db: Db, today: IsoDate): Promise<void> {
         content,
         approvedBy: adminId,
         approvedAt: at(today, '08:00'),
-      })
-      .returning();
+      });
 
     const runOf = new Map<string, { id: number; start: IsoDate; observer: number }>();
     for (const s of SEED_STAFF) {
@@ -125,6 +126,7 @@ export async function seedDatabase(db: Db, today: IsoDate): Promise<void> {
       const start = addDays(today, s.startOffset);
       const [st] = await tx
         .insert(staff)
+        .output()
         .values({
           userId: u.id,
           employeeCode: u.employeeCode,
@@ -132,8 +134,7 @@ export async function seedDatabase(db: Db, today: IsoDate): Promise<void> {
           storeId: storeId.get(s.store)!,
           hireDate: addDays(start, -HIRE_BEFORE_LEVEL_START[s.level]),
           currentLevel: s.level,
-        })
-        .returning();
+        });
       const people = { buddy: s.buddy ? user(s.buddy).id : null, cht: user(s.cht).id, qlkv: user(s.qlkv).id };
       const { run, level, tasks } = await createRun(tx, {
         staffId: st.id,
@@ -155,8 +156,8 @@ export async function seedDatabase(db: Db, today: IsoDate): Promise<void> {
       const start = addDays(today, SEED_CHT.startOffset);
       const [st] = await tx
         .insert(staff)
-        .values({ userId: u.id, employeeCode: u.employeeCode, fullName: u.fullName, storeId: storeId.get(SEED_CHT.store)!, hireDate: start, currentLevel: 1 })
-        .returning();
+        .output()
+        .values({ userId: u.id, employeeCode: u.employeeCode, fullName: u.fullName, storeId: storeId.get(SEED_CHT.store)!, hireDate: start, currentLevel: 1 });
       // Checklist CHT không có bước "CHT xác nhận"; seedProgress cần đủ người cho mọi vai trò nên điền BP ĐT
       const people = { buddy: null, cht: adminId, qlkv: user(SEED_CHT.qlkv).id };
       const { run, level, tasks } = await createRun(tx, {
@@ -204,7 +205,7 @@ export async function seedDatabase(db: Db, today: IsoDate): Promise<void> {
     const sales = Object.entries(SEED_SALES).flatMap(([key, months]) =>
       months.map(([total, coef1], i) => ({ runId: runOf.get(key)!.id, monthIndex: i + 1, total, coef1, enteredBy: user(SEED_STAFF.find((x) => x.user === key)!.cht).id, at: at(today, '08:00') })),
     );
-    if (sales.length) await tx.insert(salesMonthly).values(sales);
+    await insertChunked(tx, salesMonthly, sales);
     const keys = (content.rubric ?? { criteria: [] }).criteria.map((c) => c.key);
     const obs = Object.entries(SEED_OBSERVATIONS).flatMap(([key, rows]) =>
       rows.map(([dayNo, points, note]) => {
@@ -212,7 +213,7 @@ export async function seedDatabase(db: Db, today: IsoDate): Promise<void> {
         return { runId: r.id, obsDate: addDays(r.start, dayNo), scores: Object.fromEntries(keys.map((k, i) => [k, points[i]])), note: note || null, observerId: r.observer };
       }),
     );
-    if (obs.length) await tx.insert(observations).values(obs);
+    await insertChunked(tx, observations, obs);
 
     // Bản nháp có sẵn 2 thay đổi để demo luồng phiên bản (mục 14.12)
     const draft = structuredClone(content);
@@ -325,8 +326,9 @@ async function seedProgress(tx: Tx, p: ProgressInput): Promise<void> {
     await tx.update(runTasks).set({ status: 'help' }).where(eq(runTasks.id, id));
   }
 
-  if (confirmations.length) await tx.insert(taskConfirmations).values(confirmations);
-  if (events.length) await tx.insert(taskEvents).values(events);
+  // Hàng trăm dòng: chia lô để không vượt 2100 tham số của SQL Server
+  await insertChunked(tx, taskConfirmations, confirmations);
+  await insertChunked(tx, taskEvents, events);
 
   // Ký cuối giai đoạn (mục 10.2) cho giai đoạn đã qua hạn ký và đủ mục bắt buộc; giai đoạn vừa kết thúc để trống cho CHT ký thử
   const signoffs: (typeof signoffRows.$inferInsert)[] = [];
@@ -338,7 +340,7 @@ async function seedProgress(tx: Tx, p: ProgressInput): Promise<void> {
       signoffs.push({ runId: p.runId, stageKey: stage.key, step, role, userId: filler(role).userId, at: at(addDays(p.start, stage.offsetEnd), '17:00') });
     });
   }
-  if (signoffs.length) await tx.insert(signoffRows).values(signoffs);
+  await insertChunked(tx, signoffRows, signoffs);
 }
 
 /** Xóa sạch, chạy migration, nạp lại dữ liệu mẫu */
@@ -349,6 +351,6 @@ export async function resetDatabase(db: Db, today: IsoDate): Promise<void> {
 }
 
 export async function isDatabaseEmpty(db: Db): Promise<boolean> {
-  const rows = await db.select({ id: users.id }).from(users).limit(1);
+  const rows = await db.select({ id: users.id }).top(1).from(users);
   return rows.length === 0;
 }

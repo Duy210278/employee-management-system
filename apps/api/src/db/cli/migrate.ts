@@ -2,12 +2,12 @@ import { env } from '../../config';
 import { createDb, runMigrations } from '../client';
 
 async function main() {
-  const { pool, db } = createDb(env().DATABASE_URL);
+  const { db, close } = createDb(env().DATABASE_URL);
   try {
     await runMigrations(db);
     console.log('Đã chạy migration.');
   } finally {
-    await pool.end();
+    await close();
   }
 }
 
