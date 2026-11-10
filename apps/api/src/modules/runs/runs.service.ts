@@ -11,7 +11,7 @@ import { RunContextService, type RunContext } from './run-context.service';
 import { TaskQueryService } from './task-query.service';
 import { buildStageSigns, buildTaskViews, isOpenRun, levelSummary, stageViews, summarizeRun } from './task-views';
 import type { Db } from '../../db/client';
-import { levelRuns, stageSignoffs, users } from '../../db/schema';
+import { levelRuns, signoffs as signoffTable, users } from '../../db/schema';
 
 @Injectable()
 export class RunsService {
@@ -66,10 +66,10 @@ export class RunsService {
     if (!canSignAs(actor, ctx.people, next.role)) throw forbidden('CANNOT_SIGN', `Bước "${STAGE_SIGN_LABEL[next.role]}" không phải của bạn`);
 
     const inserted = await this.db
-      .insert(stageSignoffs)
+      .insert(signoffTable)
       .values({ runId, stageKey, step, role: next.role, userId: user.id, at: await this.clock.now() })
       .onConflictDoNothing()
-      .returning({ id: stageSignoffs.id });
+      .returning({ id: signoffTable.id });
     if (!inserted.length) throw conflict('STALE', 'Bước này vừa được người khác ký, tải lại trang');
 
     // Báo người ký bước sau (mục 10.6: "Có phiếu chờ ký → người ký kế tiếp")

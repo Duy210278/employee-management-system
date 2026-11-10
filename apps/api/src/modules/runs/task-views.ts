@@ -22,10 +22,10 @@ import {
   type StageView,
   type TaskView,
 } from '@lotrinh/shared';
-import type { runTasks, stageSignoffs, taskConfirmations } from '../../db/schema';
+import type { runTasks, signoffs, taskConfirmations } from '../../db/schema';
 import type { RunContext } from './run-context.service';
 
-export type SignoffRow = typeof stageSignoffs.$inferSelect & { userName: string };
+export type SignoffRow = typeof signoffs.$inferSelect & { userName: string };
 
 export type RunTaskRow = typeof runTasks.$inferSelect;
 export type ConfirmationRow = typeof taskConfirmations.$inferSelect & { userName: string };

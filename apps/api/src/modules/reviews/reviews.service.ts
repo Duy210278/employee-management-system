@@ -25,7 +25,7 @@ import { badRequest, conflict, forbidden, staleData } from '../../common/errors'
 import { toActor, type SessionUser } from '../../common/session';
 import type { Db, Tx } from '../../db/client';
 import { DB } from '../../db/db.provider';
-import { levelReviews, levelRuns, observations, reviewSignatures, salesMonthly, staff, users } from '../../db/schema';
+import { levelReviews, levelRuns, observations, salesMonthly, signoffs, staff, users } from '../../db/schema';
 import { AccessService } from '../access/access.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { createRun, findVersionForDate } from '../runs/run-factory';
@@ -34,7 +34,7 @@ import { TaskQueryService } from '../runs/task-query.service';
 import { buildTaskViews, levelSummary, summarizeRun } from '../runs/task-views';
 
 type ReviewRow = typeof levelReviews.$inferSelect;
-type SignatureRow = typeof reviewSignatures.$inferSelect;
+type SignatureRow = typeof signoffs.$inferSelect;
 
 /** Vòng phiếu đang xét: phiếu mới nhất, hoặc vòng mới sau khi gia hạn đã được áp dụng */
 function currentRound(reviews: ReviewRow[]): { round: number; row: ReviewRow | null } {
@@ -64,12 +64,12 @@ export class ReviewsService {
     const signatures = reviews.length
       ? (
           await this.db
-            .select({ s: reviewSignatures, name: users.fullName })
-            .from(reviewSignatures)
-            .innerJoin(users, eq(users.id, reviewSignatures.userId))
+            .select({ s: signoffs, name: users.fullName })
+            .from(signoffs)
+            .innerJoin(users, eq(users.id, signoffs.userId))
             .where(
               inArray(
-                reviewSignatures.reviewId,
+                signoffs.reviewId,
                 reviews.map((r) => r.id),
               ),
             )
@@ -242,7 +242,7 @@ export class ReviewsService {
       const reviews = await tx.select().from(levelReviews).where(eq(levelReviews.runId, runId)).orderBy(asc(levelReviews.round)).for('update');
       const { round, row } = currentRound(reviews);
       if (!row) throw badRequest('REVIEW_NOT_SAVED', 'Lưu phiếu trước khi ký');
-      const signed = await tx.select().from(reviewSignatures).where(eq(reviewSignatures.reviewId, row.id));
+      const signed = await tx.select().from(signoffs).where(eq(signoffs.reviewId, row.id));
       const next = nextSignStep(
         form.signers,
         signed.map((s) => s.step),
@@ -258,7 +258,7 @@ export class ReviewsService {
         if (problems.length) throw badRequest('REVIEW_INCOMPLETE', `${problems[0]} trước khi ký`);
       }
 
-      await tx.insert(reviewSignatures).values({ reviewId: row.id, step, role, userId: user.id, at: now });
+      await tx.insert(signoffs).values({ runId: row.runId, reviewId: row.id, step, role, userId: user.id, at: now });
       const patch: Partial<typeof levelReviews.$inferInsert> = { status: step === form.signers.length - 1 ? 'done' : 'signing' };
       if (step === outcomeStep(form.signers)) {
         await this.applyOutcome(tx, ctx, row, user.id, today, form.extension.months);

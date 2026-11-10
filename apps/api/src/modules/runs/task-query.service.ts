@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { and, asc, eq, inArray, isNull } from 'drizzle-orm';
+import { and, asc, eq, inArray, isNotNull, isNull } from 'drizzle-orm';
 import type { Db } from '../../db/client';
-import { runTasks, stageSignoffs, taskConfirmations, users } from '../../db/schema';
+import { runTasks, signoffs, taskConfirmations, users } from '../../db/schema';
 import { DB } from '../../db/db.provider';
 import type { RunTaskData, SignoffRow } from './task-views';
 
@@ -14,11 +14,11 @@ export class TaskQueryService {
     const out = new Map<number, SignoffRow[]>(runIds.map((id) => [id, []]));
     if (!runIds.length) return out;
     const rows = await this.db
-      .select({ s: stageSignoffs, userName: users.fullName })
-      .from(stageSignoffs)
-      .innerJoin(users, eq(users.id, stageSignoffs.userId))
-      .where(inArray(stageSignoffs.runId, runIds))
-      .orderBy(asc(stageSignoffs.step));
+      .select({ s: signoffs, userName: users.fullName })
+      .from(signoffs)
+      .innerJoin(users, eq(users.id, signoffs.userId))
+      .where(and(inArray(signoffs.runId, runIds), isNotNull(signoffs.stageKey)))
+      .orderBy(asc(signoffs.step));
     for (const { s, userName } of rows) out.get(s.runId)?.push({ ...s, userName });
     return out;
   }

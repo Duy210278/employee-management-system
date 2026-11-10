@@ -22,14 +22,13 @@ import {
   levelRuns,
   notifications,
   observations,
-  reviewSignatures,
   runAssignments,
   runEvaluations,
   runJournal,
   runPauses,
   runTasks,
   salesMonthly,
-  stageSignoffs,
+  signoffs,
   staff,
   stores,
   taskConfirmations,
@@ -253,9 +252,8 @@ export class StaffService {
         const taskIds = tx.select({ id: runTasks.id }).from(runTasks).where(inArray(runTasks.runId, runIds));
         await tx.delete(taskConfirmations).where(inArray(taskConfirmations.taskId, taskIds));
         await tx.delete(taskEvents).where(inArray(taskEvents.taskId, taskIds));
-        const reviewIds = tx.select({ id: levelReviews.id }).from(levelReviews).where(inArray(levelReviews.runId, runIds));
-        await tx.delete(reviewSignatures).where(inArray(reviewSignatures.reviewId, reviewIds));
-        for (const t of [runTasks, runAssignments, stageSignoffs, runPauses, runJournal, runEvaluations, salesMonthly, observations, levelReviews]) {
+        // signoffs trước level_reviews vì chữ ký phiếu đánh giá trỏ tới phiếu
+        for (const t of [runTasks, runAssignments, signoffs, runPauses, runJournal, runEvaluations, salesMonthly, observations, levelReviews]) {
           await tx.delete(t).where(inArray(t.runId, runIds));
         }
         await tx.delete(levelRuns).where(inArray(levelRuns.id, runIds));

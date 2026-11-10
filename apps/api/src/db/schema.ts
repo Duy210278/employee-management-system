@@ -306,25 +306,6 @@ export const taskEvents = pgTable(
   (t) => [index('task_events_task_idx').on(t.taskId)],
 );
 
-/** Ký cuối giai đoạn theo chuỗi ký của giai đoạn (mục 10.2, R11, R12) */
-export const stageSignoffs = pgTable(
-  'stage_signoffs',
-  {
-    id: serial('id').primaryKey(),
-    runId: integer('run_id')
-      .notNull()
-      .references(() => levelRuns.id),
-    stageKey: text('stage_key').notNull(),
-    step: integer('step').notNull(),
-    role: text('role').$type<TaskRole>().notNull(),
-    userId: integer('user_id')
-      .notNull()
-      .references(() => users.id),
-    at: ts('at').notNull(),
-  },
-  (t) => [uniqueIndex('stage_signoffs_step_uq').on(t.runId, t.stageKey, t.step)],
-);
-
 export type PauseStatus = 'pending' | 'approved' | 'rejected';
 
 /** Tạm dừng lượt Level (mục 9.3): CHT đề xuất, QLKV hoặc BP ĐT duyệt */
@@ -452,13 +433,19 @@ export const levelReviews = pgTable(
   (t) => [uniqueIndex('level_reviews_run_round_uq').on(t.runId, t.round)],
 );
 
-export const reviewSignatures = pgTable(
-  'review_signatures',
+/**
+ * Chữ ký theo chuỗi ký: cuối giai đoạn (stage_key, mục 10.2, R11, R12) hoặc phiếu đánh giá tổng kết
+ * (review_id, mục 11.5). Mỗi dòng đúng một trong hai cột; mỗi bước ký một lần.
+ */
+export const signoffs = pgTable(
+  'signoffs',
   {
     id: serial('id').primaryKey(),
-    reviewId: integer('review_id')
+    runId: integer('run_id')
       .notNull()
-      .references(() => levelReviews.id),
+      .references(() => levelRuns.id),
+    stageKey: text('stage_key'),
+    reviewId: integer('review_id').references(() => levelReviews.id),
     step: integer('step').notNull(),
     role: text('role').$type<TaskRole>().notNull(),
     userId: integer('user_id')
@@ -466,7 +453,12 @@ export const reviewSignatures = pgTable(
       .references(() => users.id),
     at: ts('at').notNull(),
   },
-  (t) => [uniqueIndex('review_signatures_step_uq').on(t.reviewId, t.step)],
+  (t) => [
+    check('signoffs_one_of', sql`(${t.stageKey} is not null and ${t.reviewId} is null) or (${t.stageKey} is null and ${t.reviewId} is not null)`),
+    uniqueIndex('signoffs_stage_step_uq').on(t.runId, t.stageKey, t.step).where(sql`${t.stageKey} is not null`),
+    uniqueIndex('signoffs_review_step_uq').on(t.reviewId, t.step).where(sql`${t.reviewId} is not null`),
+    index('signoffs_run_idx').on(t.runId),
+  ],
 );
 
 export const auditLogs = pgTable('audit_logs', {

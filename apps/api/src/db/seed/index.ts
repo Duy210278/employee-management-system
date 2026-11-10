@@ -23,8 +23,8 @@ import {
   runJournal,
   runPauses,
   runTasks,
+  signoffs as signoffRows,
   salesMonthly,
-  stageSignoffs,
   staff,
   stores,
   taskConfirmations,
@@ -329,7 +329,7 @@ async function seedProgress(tx: Tx, p: ProgressInput): Promise<void> {
   if (events.length) await tx.insert(taskEvents).values(events);
 
   // Ký cuối giai đoạn (mục 10.2) cho giai đoạn đã qua hạn ký và đủ mục bắt buộc; giai đoạn vừa kết thúc để trống cho CHT ký thử
-  const signoffs: (typeof stageSignoffs.$inferInsert)[] = [];
+  const signoffs: (typeof signoffRows.$inferInsert)[] = [];
   for (const stage of p.level.stages) {
     if (stage.offsetEnd + p.signOff >= p.day) continue;
     const complete = stage.items.filter((i) => i.required).every((i) => i.dueOffset < p.day && !leaveKeys.has(i.key));
@@ -338,7 +338,7 @@ async function seedProgress(tx: Tx, p: ProgressInput): Promise<void> {
       signoffs.push({ runId: p.runId, stageKey: stage.key, step, role, userId: filler(role).userId, at: at(addDays(p.start, stage.offsetEnd), '17:00') });
     });
   }
-  if (signoffs.length) await tx.insert(stageSignoffs).values(signoffs);
+  if (signoffs.length) await tx.insert(signoffRows).values(signoffs);
 }
 
 /** Xóa sạch, chạy migration, nạp lại dữ liệu mẫu */

@@ -26,7 +26,7 @@
      user_changes                          -> audit_logs (entity = 'user')
      task_date_changes                     -> task_events (action = 'date_change', cột data)
      user_store_scopes + user_area_scopes  -> user_scopes
-     stage_signoffs + review_signatures    -> signoffs (kind = 'stage' | 'review')
+     stage_signoffs + review_signatures    -> signoffs (stage_key hoặc review_id, đúng một trong hai)
      system_settings                       -> bỏ (chỉ lưu ngày giả lập của đồng hồ demo, đã bỏ)
    credentials giữ lại cho tới khi đăng nhập bằng SSO của dự án lớn; khi có SSO thì bỏ bảng này,
    các cột requested_* và đổi khóa nhận diện sang employee_code.
@@ -35,9 +35,6 @@
      level_runs: bỏ criteria_line (lấy qua versions.criteria_line theo version_id).
      task_events: thêm cột data (JSON) để chứa ngày cũ, ngày mới, lý do khi đổi hạn.
 
-   Giá trị của signoffs.ref:
-     kind = 'stage'  -> mã giai đoạn (stage_key cũ)
-     kind = 'review' -> số vòng của phiếu đánh giá (level_reviews.round) của cùng run_id
    ============================================================================ */
 
 SET ANSI_NULLS ON;
@@ -303,20 +300,6 @@ CREATE TABLE lotrinh.task_events (
 );
 CREATE INDEX ix_task_events_task ON lotrinh.task_events(task_id);
 
-/* Chữ ký theo chuỗi ký: cuối giai đoạn (kind = 'stage', ref = mã giai đoạn)
-   hoặc phiếu đánh giá tổng kết (kind = 'review', ref = số vòng của phiếu) */
-CREATE TABLE lotrinh.signoffs (
-  id      INT IDENTITY(1,1) NOT NULL CONSTRAINT pk_signoffs PRIMARY KEY,
-  run_id  INT NOT NULL CONSTRAINT fk_signoffs_run REFERENCES lotrinh.level_runs(id),
-  kind    NVARCHAR(10) NOT NULL CONSTRAINT ck_signoffs_kind CHECK (kind IN (N'stage', N'review')),
-  ref     NVARCHAR(100) NOT NULL,
-  step    INT NOT NULL,
-  [role]  NVARCHAR(10) NOT NULL CONSTRAINT ck_signoffs_role CHECK ([role] IN (N'nv', N'buddy', N'cht', N'qlkv', N'bp')),
-  user_id INT NOT NULL CONSTRAINT fk_signoffs_user REFERENCES lotrinh.users(id),
-  [at]    DATETIMEOFFSET(3) NOT NULL
-);
-CREATE UNIQUE INDEX uq_signoffs_step ON lotrinh.signoffs(run_id, kind, ref, step);
-
 /* Tạm dừng lượt: CHT đề xuất, QLKV hoặc BP Đào tạo duyệt */
 CREATE TABLE lotrinh.run_pauses (
   id             INT IDENTITY(1,1) NOT NULL CONSTRAINT pk_run_pauses PRIMARY KEY,
@@ -415,6 +398,23 @@ CREATE TABLE lotrinh.level_reviews (
   created_at       DATETIMEOFFSET(3) NOT NULL CONSTRAINT df_level_reviews_created_at DEFAULT SYSDATETIMEOFFSET()
 );
 CREATE UNIQUE INDEX uq_level_reviews_run_round ON lotrinh.level_reviews(run_id, [round]);
+
+/* Chữ ký theo chuỗi ký: cuối giai đoạn (stage_key) hoặc phiếu đánh giá tổng kết (review_id).
+   Mỗi dòng đúng một trong hai cột; mỗi bước ký một lần. */
+CREATE TABLE lotrinh.signoffs (
+  id        INT IDENTITY(1,1) NOT NULL CONSTRAINT pk_signoffs PRIMARY KEY,
+  run_id    INT NOT NULL CONSTRAINT fk_signoffs_run REFERENCES lotrinh.level_runs(id),
+  stage_key NVARCHAR(100) NULL,
+  review_id INT NULL CONSTRAINT fk_signoffs_review REFERENCES lotrinh.level_reviews(id),
+  step      INT NOT NULL,
+  [role]    NVARCHAR(10) NOT NULL CONSTRAINT ck_signoffs_role CHECK ([role] IN (N'nv', N'buddy', N'cht', N'qlkv', N'bp')),
+  user_id   INT NOT NULL CONSTRAINT fk_signoffs_user REFERENCES lotrinh.users(id),
+  [at]      DATETIMEOFFSET(3) NOT NULL,
+  CONSTRAINT ck_signoffs_one_of CHECK ((stage_key IS NOT NULL AND review_id IS NULL) OR (stage_key IS NULL AND review_id IS NOT NULL))
+);
+CREATE UNIQUE INDEX uq_signoffs_stage_step  ON lotrinh.signoffs(run_id, stage_key, step) WHERE stage_key IS NOT NULL;
+CREATE UNIQUE INDEX uq_signoffs_review_step ON lotrinh.signoffs(review_id, step) WHERE review_id IS NOT NULL;
+CREATE INDEX ix_signoffs_run ON lotrinh.signoffs(run_id);
 
 /* ---------- 5. Nhật ký hệ thống (gồm lịch sử thay đổi tài khoản: entity = 'user') ---------- */
 
