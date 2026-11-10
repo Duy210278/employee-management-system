@@ -19,7 +19,8 @@ import { badRequest, conflict, forbidden, notFound } from '../../common/errors';
 import type { SessionUser } from '../../common/session';
 import type { Db, Tx } from '../../db/client';
 import { DB } from '../../db/db.provider';
-import { areas, levelRuns, runPauses, runTasks, staff, stores, taskEvents, userAreaScopes, users, userStoreScopes } from '../../db/schema';
+import { areas, levelRuns, runPauses, runTasks, staff, stores, taskEvents, users } from '../../db/schema';
+import { areaScopeRows, storeScopeRows } from '../../db/scopes';
 import { AccessService } from '../access/access.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { activeAssignmentsOf, applyHandover, assignmentCandidates, reassign } from './assignments';
@@ -67,8 +68,8 @@ export class RunManageService {
         .innerJoin(areas, eq(areas.id, stores.areaId))
         .where(eq(stores.active, true))
         .orderBy(asc(stores.name)),
-      this.db.select().from(userStoreScopes),
-      this.db.select().from(userAreaScopes),
+      storeScopeRows(this.db),
+      areaScopeRows(this.db),
       this.db.select({ id: users.id, role: users.role }).from(users).where(eq(users.status, 'active')).orderBy(asc(users.fullName)),
     ]);
     const out = [];

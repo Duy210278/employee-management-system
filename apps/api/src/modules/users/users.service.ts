@@ -23,7 +23,8 @@ import { badRequest, conflict, notFound, staleData } from '../../common/errors';
 import type { SessionUser } from '../../common/session';
 import type { Db, Tx } from '../../db/client';
 import { DB } from '../../db/db.provider';
-import { areas, credentials, staff, stores, userAreaScopes, users, userStoreScopes } from '../../db/schema';
+import { areas, credentials, staff, stores, users, userScopes } from '../../db/schema';
+import { areaScopeRows, replaceScopes, storeScopeRows } from '../../db/scopes';
 import { logUserChanges, userChangeHistory } from '../audit/user-changes';
 import { AccessService } from '../access/access.service';
 import { NotificationsService } from '../notifications/notifications.service';
@@ -101,15 +102,15 @@ export class UsersService {
     const [storeScopes, areaScopes] = ids.length
       ? await Promise.all([
           this.db
-            .select({ userId: userStoreScopes.userId, id: stores.id, name: stores.name })
-            .from(userStoreScopes)
-            .innerJoin(stores, eq(stores.id, userStoreScopes.storeId))
-            .where(inArray(userStoreScopes.userId, ids)),
+            .select({ userId: userScopes.userId, id: stores.id, name: stores.name })
+            .from(userScopes)
+            .innerJoin(stores, eq(stores.id, userScopes.storeId))
+            .where(inArray(userScopes.userId, ids)),
           this.db
-            .select({ userId: userAreaScopes.userId, id: areas.id, name: areas.name })
-            .from(userAreaScopes)
-            .innerJoin(areas, eq(areas.id, userAreaScopes.areaId))
-            .where(inArray(userAreaScopes.userId, ids)),
+            .select({ userId: userScopes.userId, id: areas.id, name: areas.name })
+            .from(userScopes)
+            .innerJoin(areas, eq(areas.id, userScopes.areaId))
+            .where(inArray(userScopes.userId, ids)),
         ])
       : [[], []];
     return rows.map(({ u, reqStoreName, reqAreaName, staffId }) => ({
@@ -199,11 +200,8 @@ export class UsersService {
     return { stores: s.map((x) => x.name).join(', '), areas: a.map((x) => x.name).join(', ') };
   }
 
-  private async replaceScopes(tx: Tx, userId: number, storeIds: number[], areaIds: number[]) {
-    await tx.delete(userStoreScopes).where(eq(userStoreScopes.userId, userId));
-    await tx.delete(userAreaScopes).where(eq(userAreaScopes.userId, userId));
-    if (storeIds.length) await tx.insert(userStoreScopes).values(storeIds.map((storeId) => ({ userId, storeId })));
-    if (areaIds.length) await tx.insert(userAreaScopes).values(areaIds.map((areaId) => ({ userId, areaId })));
+  private replaceScopes(tx: Tx, userId: number, storeIds: number[], areaIds: number[]) {
+    return replaceScopes(tx, userId, storeIds, areaIds);
   }
 
   async approve(user: SessionUser, id: number, body: ApproveUserBodyT): Promise<UserDetailResponse> {
@@ -288,12 +286,12 @@ export class UsersService {
       const handed = await applyHandover(tx, affected, body.handover, today, id);
 
       const [oldStores, oldAreas] = await Promise.all([
-        tx.select({ id: userStoreScopes.storeId }).from(userStoreScopes).where(eq(userStoreScopes.userId, id)),
-        tx.select({ id: userAreaScopes.areaId }).from(userAreaScopes).where(eq(userAreaScopes.userId, id)),
+        storeScopeRows(tx).where(eq(userScopes.userId, id)),
+        areaScopeRows(tx).where(eq(userScopes.userId, id)),
       ]);
       const old = await this.scopeNames(
-        oldStores.map((s) => s.id),
-        oldAreas.map((a) => a.id),
+        oldStores.map((s) => s.storeId),
+        oldAreas.map((a) => a.areaId),
       );
 
       await tx

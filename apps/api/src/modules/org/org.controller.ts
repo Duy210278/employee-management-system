@@ -6,7 +6,7 @@ import { CurrentUser, type SessionUser } from '../../common/session';
 import { ZodPipe } from '../../common/zod.pipe';
 import type { Db } from '../../db/client';
 import { DB } from '../../db/db.provider';
-import { areas, staff, stores, userAreaScopes, users, userStoreScopes } from '../../db/schema';
+import { areas, staff, stores, users, userScopes } from '../../db/schema';
 import { AccessService } from '../access/access.service';
 
 /**
@@ -31,14 +31,16 @@ export class OrgController {
       this.db.select().from(areas).orderBy(asc(areas.name)),
       this.db.select({ s: stores, areaName: areas.name }).from(stores).innerJoin(areas, eq(areas.id, stores.areaId)).orderBy(asc(stores.name)),
       this.db
-        .select({ areaId: userAreaScopes.areaId, name: users.fullName })
-        .from(userAreaScopes)
-        .innerJoin(users, eq(users.id, userAreaScopes.userId))
+        .select({ areaId: areas.id, name: users.fullName })
+        .from(userScopes)
+        .innerJoin(areas, eq(areas.id, userScopes.areaId))
+        .innerJoin(users, eq(users.id, userScopes.userId))
         .where(and(eq(users.role, 'qlkv'), eq(users.status, 'active'))),
       this.db
-        .select({ storeId: userStoreScopes.storeId, name: users.fullName })
-        .from(userStoreScopes)
-        .innerJoin(users, eq(users.id, userStoreScopes.userId))
+        .select({ storeId: stores.id, name: users.fullName })
+        .from(userScopes)
+        .innerJoin(stores, eq(stores.id, userScopes.storeId))
+        .innerJoin(users, eq(users.id, userScopes.userId))
         .where(and(eq(users.role, 'cht'), eq(users.status, 'active'))),
       this.db.select({ storeId: staff.storeId, n: sql<number>`count(*)::int` }).from(staff).where(eq(staff.active, true)).groupBy(staff.storeId),
     ]);

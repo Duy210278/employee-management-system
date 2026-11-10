@@ -71,6 +71,20 @@
       "when": 1794280339819,
       "tag": "0009_gop_task_date_changes",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1794280474270,
+      "tag": "0010_tao_user_scopes",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1794280474930,
+      "tag": "0011_bo_scopes_cu",
+      "breakpoints": true
     }
   ]
 }

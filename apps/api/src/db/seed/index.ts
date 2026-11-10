@@ -29,9 +29,8 @@ import {
   stores,
   taskConfirmations,
   taskEvents,
-  userAreaScopes,
   users,
-  userStoreScopes,
+  userScopes,
   versions,
 } from '../schema';
 import {
@@ -103,8 +102,7 @@ export async function seedDatabase(db: Db, today: IsoDate): Promise<void> {
     for (const u of pendingStore) await tx.update(users).set({ requestedStoreId: storeId.get(u.stores![0])! }).where(eq(users.id, user(u.key).id));
     const storeScopes = SEED_USERS.filter((u) => u.status === 'active').flatMap((u) => (u.stores ?? []).map((s) => ({ userId: user(u.key).id, storeId: storeId.get(s)! })));
     const areaScopes = SEED_USERS.flatMap((u) => (u.areas ?? []).map((a) => ({ userId: user(u.key).id, areaId: areaId.get(a)! })));
-    if (storeScopes.length) await tx.insert(userStoreScopes).values(storeScopes);
-    if (areaScopes.length) await tx.insert(userAreaScopes).values(areaScopes);
+    if (storeScopes.length || areaScopes.length) await tx.insert(userScopes).values([...storeScopes, ...areaScopes]);
 
     const adminId = user('admin').id;
     const [version] = await tx

@@ -25,7 +25,8 @@ import { badRequest, conflict, forbidden, notFound } from '../../common/errors';
 import type { SessionUser } from '../../common/session';
 import type { Db } from '../../db/client';
 import { DB } from '../../db/db.provider';
-import { areas, levelRuns, runEvaluations, runJournal, runTasks, staff, stores, userAreaScopes, users, userStoreScopes, versions } from '../../db/schema';
+import { areas, levelRuns, runEvaluations, runJournal, runTasks, staff, stores, users, userScopes, versions } from '../../db/schema';
+import { areaScopeRows, storeScopeRows } from '../../db/scopes';
 import { AccessService } from '../access/access.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { createRun, findVersionForDate, PUBLISHED } from '../runs/run-factory';
@@ -66,7 +67,7 @@ export class ChtService {
     const [account] = await this.db.select().from(users).where(eq(users.id, userId));
     if (!account) throw notFound('USER_NOT_FOUND', 'Không tìm thấy tài khoản');
     const [storeScopes, active, storeRows, areaScopes, staffRow, version] = await Promise.all([
-      this.db.select({ id: userStoreScopes.storeId }).from(userStoreScopes).where(eq(userStoreScopes.userId, userId)),
+      storeScopeRows(this.db).where(eq(userScopes.userId, userId)),
       this.db.select().from(users).where(eq(users.status, 'active')).orderBy(asc(users.fullName)),
       this.db
         .select({ id: stores.id, name: stores.name, areaId: stores.areaId, areaName: areas.name })
@@ -74,7 +75,7 @@ export class ChtService {
         .innerJoin(areas, eq(areas.id, stores.areaId))
         .where(eq(stores.active, true))
         .orderBy(asc(stores.name)),
-      this.db.select().from(userAreaScopes),
+      areaScopeRows(this.db),
       this.db.select({ s: staff, storeName: stores.name }).from(staff).innerJoin(stores, eq(stores.id, staff.storeId)).where(eq(staff.userId, userId)),
       findVersionForDate(this.db, today),
     ]);
@@ -122,7 +123,7 @@ export class ChtService {
     for (const st of storeRows) if (await this.canAssignAt(user, st)) assignable.push(st);
     return {
       today,
-      user: { id: account.id, fullName: account.fullName, employeeCode: account.employeeCode, role: account.role, status: account.status, storeIds: storeScopes.map((x) => x.id) },
+      user: { id: account.id, fullName: account.fullName, employeeCode: account.employeeCode, role: account.role, status: account.status, storeIds: storeScopes.map((x) => x.storeId) },
       staff: staffInfo,
       openChtRun,
       tracks: (source.content.chtTracks ?? []).map((t) => ({ key: t.key, name: t.name, title: t.title, days: t.totalDays, items: t.stages.reduce((a, x) => a + x.items.length, 0) })),

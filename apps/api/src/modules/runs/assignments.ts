@@ -11,7 +11,7 @@ import {
 import { and, asc, eq, inArray, isNull } from 'drizzle-orm';
 import { badRequest, conflict } from '../../common/errors';
 import type { DbLike } from '../../db/client';
-import { levelRuns, runAssignments, staff, stores, users, userStoreScopes } from '../../db/schema';
+import { levelRuns, runAssignments, staff, stores, users, userScopes } from '../../db/schema';
 import { OPEN_RUN_STATUSES } from './task-views';
 
 /** Phân công đang hiệu lực của một tài khoản trên các lượt Level còn mở */
@@ -84,9 +84,9 @@ export async function applyHandover(
 export async function assignmentCandidates(db: DbLike): Promise<Record<AssignmentRole, PersonOption[]>> {
   const active = await db.select().from(users).where(eq(users.status, 'active')).orderBy(asc(users.fullName));
   const storeRows = await db
-    .select({ userId: userStoreScopes.userId, name: stores.name })
-    .from(userStoreScopes)
-    .innerJoin(stores, eq(stores.id, userStoreScopes.storeId));
+    .select({ userId: userScopes.userId, name: stores.name })
+    .from(userScopes)
+    .innerJoin(stores, eq(stores.id, userScopes.storeId));
   const ownStore = await db.select({ userId: staff.userId, name: stores.name }).from(staff).innerJoin(stores, eq(stores.id, staff.storeId));
   const storeOf = (id: number) =>
     [...storeRows.filter((s) => s.userId === id).map((s) => s.name), ...ownStore.filter((s) => s.userId === id).map((s) => s.name)].join(', ');

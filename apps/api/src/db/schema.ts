@@ -3,6 +3,7 @@ import { sql } from 'drizzle-orm';
 import {
   bigserial,
   boolean,
+  check,
   date,
   doublePrecision,
   index,
@@ -87,30 +88,22 @@ export const notifications = pgTable(
   (t) => [index('notifications_user_idx').on(t.userId, t.readAt)],
 );
 
-export const userStoreScopes = pgTable(
-  'user_store_scopes',
+/** Phạm vi dữ liệu: CHT theo cửa hàng (store_id), QLKV theo khu vực (area_id); mỗi dòng đúng một trong hai */
+export const userScopes = pgTable(
+  'user_scopes',
   {
+    id: serial('id').primaryKey(),
     userId: integer('user_id')
       .notNull()
       .references(() => users.id),
-    storeId: integer('store_id')
-      .notNull()
-      .references(() => stores.id),
+    storeId: integer('store_id').references(() => stores.id),
+    areaId: integer('area_id').references(() => areas.id),
   },
-  (t) => [primaryKey({ columns: [t.userId, t.storeId] })],
-);
-
-export const userAreaScopes = pgTable(
-  'user_area_scopes',
-  {
-    userId: integer('user_id')
-      .notNull()
-      .references(() => users.id),
-    areaId: integer('area_id')
-      .notNull()
-      .references(() => areas.id),
-  },
-  (t) => [primaryKey({ columns: [t.userId, t.areaId] })],
+  (t) => [
+    check('user_scopes_one_of', sql`(${t.storeId} is not null and ${t.areaId} is null) or (${t.storeId} is null and ${t.areaId} is not null)`),
+    uniqueIndex('user_scopes_store_uq').on(t.userId, t.storeId).where(sql`${t.storeId} is not null`),
+    uniqueIndex('user_scopes_area_uq').on(t.userId, t.areaId).where(sql`${t.areaId} is not null`),
+  ],
 );
 
 export const credentials = pgTable('credentials', {

@@ -5,7 +5,8 @@ import { forbidden } from '../../common/errors';
 import type { SessionUser } from '../../common/session';
 import type { Db } from '../../db/client';
 import { DB } from '../../db/db.provider';
-import { levelRuns, runAssignments, staff, stores, userAreaScopes, userStoreScopes } from '../../db/schema';
+import { levelRuns, runAssignments, staff, stores, userScopes } from '../../db/schema';
+import { areaScopeRows, storeScopeRows } from '../../db/scopes';
 import type { RunContext } from '../runs/run-context.service';
 import { defineAbilityFor, type Action, type AppAbility, type StaffRecord, type SubjectName, type UserScopes } from './ability';
 
@@ -24,10 +25,10 @@ export class AccessService {
     if (!entry) {
       entry = (async () => {
         const [storeRows, areaRows] = await Promise.all([
-          this.db.select({ id: userStoreScopes.storeId }).from(userStoreScopes).where(eq(userStoreScopes.userId, user.id)),
-          this.db.select({ id: userAreaScopes.areaId }).from(userAreaScopes).where(eq(userAreaScopes.userId, user.id)),
+          storeScopeRows(this.db).where(eq(userScopes.userId, user.id)),
+          areaScopeRows(this.db).where(eq(userScopes.userId, user.id)),
         ]);
-        const scopes = { storeIds: storeRows.map((r) => r.id), areaIds: areaRows.map((r) => r.id) };
+        const scopes = { storeIds: storeRows.map((r) => r.storeId), areaIds: areaRows.map((r) => r.areaId) };
         return { ability: defineAbilityFor(user, scopes), scopes };
       })();
       this.cache.set(user, entry);

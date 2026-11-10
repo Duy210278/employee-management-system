@@ -34,10 +34,9 @@ import {
   stores,
   taskConfirmations,
   taskEvents,
-  userAreaScopes,
   users,
-  userStoreScopes,
 } from '../../db/schema';
+import { areaScopeRows, storeScopeRows } from '../../db/scopes';
 import { AccessService } from '../access/access.service';
 import { AlertsService } from '../alerts/alerts.service';
 import { createRun, findVersionForDate } from '../runs/run-factory';
@@ -149,8 +148,8 @@ export class StaffService {
     const [storeList, active, storeScopes, areaScopes, linked, version] = await Promise.all([
       this.storesInScope(user),
       this.db.select().from(users).where(eq(users.status, 'active')).orderBy(asc(users.fullName)),
-      this.db.select().from(userStoreScopes),
-      this.db.select().from(userAreaScopes),
+      storeScopeRows(this.db),
+      areaScopeRows(this.db),
       this.db.select({ userId: staff.userId, storeName: stores.name }).from(staff).innerJoin(stores, eq(stores.id, staff.storeId)),
       findVersionForDate(this.db, await this.clock.today()),
     ]);
