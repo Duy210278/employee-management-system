@@ -354,3 +354,48 @@ export async function isDatabaseEmpty(db: Db): Promise<boolean> {
   const rows = await db.select({ id: users.id }).top(1).from(users);
   return rows.length === 0;
 }
+
+export interface MinimalBp {
+  fullName: string;
+  employeeCode: string;
+  email: string;
+  /** Bỏ trống khi đăng nhập qua Web A (không cần mật khẩu nội bộ) */
+  password?: string;
+}
+
+/**
+ * Nạp tối thiểu cho CSDL thật: chỉ phiên bản lộ trình v2.1 (4 Level NVBH và 2 checklist CHT) và tùy chọn
+ * một tài khoản BP Đào tạo. Không nạp nhân viên mẫu. Chạy lại không làm gì nếu đã có phiên bản.
+ */
+export async function seedMinimal(db: Db, opts: { effectiveFrom: IsoDate; bp?: MinimalBp }): Promise<{ created: boolean; bpId: number | null }> {
+  const [existing] = await db.select({ id: versions.id }).top(1).from(versions);
+  if (existing) return { created: false, bpId: null };
+  const content = loadSeedContent();
+  return db.transaction(async (tx) => {
+    let bpId: number | null = null;
+    if (opts.bp) {
+      const [found] = await tx.select({ id: users.id }).from(users).where(eq(users.employeeCode, opts.bp.employeeCode));
+      if (found) bpId = found.id;
+      else {
+        const [u] = await tx
+          .insert(users)
+          .output({ id: users.id })
+          .values({ fullName: opts.bp.fullName, employeeCode: opts.bp.employeeCode, email: opts.bp.email, role: 'bp', status: 'active' });
+        bpId = u!.id;
+        if (opts.bp.password) await tx.insert(credentials).values({ userId: bpId, passwordHash: await bcrypt.hash(opts.bp.password, 10) });
+      }
+    }
+    await tx.insert(versions).values({
+      code: '2.1',
+      criteriaLine: '2.1',
+      status: 'active',
+      effectiveFrom: opts.effectiveFrom,
+      changeNote: 'Bản khởi tạo từ Checklist Onboarding v2.1 (N2) và giao diện tham chiếu (N3)',
+      content,
+      createdBy: bpId,
+      approvedBy: bpId,
+      approvedAt: bpId ? new Date() : null,
+    });
+    return { created: true, bpId };
+  });
+}

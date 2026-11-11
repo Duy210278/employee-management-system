@@ -16,6 +16,16 @@ const EnvSchema = z.object({
     .default('false')
     .transform((v) => v === 'true'),
   STORAGE_DIR: z.string().default('./storage'),
+  /** Cho phép xóa sạch CSDL không phải *_test (db:reset, "Khôi phục dữ liệu mẫu"); chỉ bật trên máy dev */
+  ALLOW_RESET: z
+    .string()
+    .default('false')
+    .transform((v) => v === 'true'),
+  /** Tự chạy migration khi API khởi động; đặt false khi DBA tự chạy script */
+  AUTO_MIGRATE: z
+    .string()
+    .default('true')
+    .transform((v) => v !== 'false'),
   /** Trang Swagger /api/docs; đặt false để tắt */
   API_DOCS: z
     .string()

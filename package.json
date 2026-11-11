@@ -16,6 +16,7 @@
     "db:generate": "pnpm -F @lotrinh/api db:generate",
     "db:migrate": "pnpm -F @lotrinh/api db:migrate",
     "db:seed": "pnpm -F @lotrinh/shared build && pnpm -F @lotrinh/api db:seed",
+    "db:seed:minimal": "pnpm -F @lotrinh/shared build && pnpm -F @lotrinh/api db:seed:minimal",
     "db:reset": "pnpm -F @lotrinh/shared build && pnpm -F @lotrinh/api db:reset"
   },
   "devDependencies": {

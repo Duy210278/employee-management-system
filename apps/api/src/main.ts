@@ -19,7 +19,8 @@ const log = new Logger('Bootstrap');
 async function prepareDatabase(): Promise<void> {
   const { db, close } = createDb(env().DATABASE_URL);
   try {
-    await runMigrations(db);
+    if (env().AUTO_MIGRATE) await runMigrations(db);
+    else log.log('AUTO_MIGRATE=false: bỏ qua migration, CSDL do DBA cập nhật');
     if (env().DEMO_MODE && (await isDatabaseEmpty(db))) {
       const today = todayIn(env().TZ);
       await seedDatabase(db, today);
