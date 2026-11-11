@@ -6,12 +6,14 @@ import { SESSION_HOURS } from '../../common/session';
 import { AuthController } from './auth.controller';
 import { AuthGuard } from './auth.guard';
 import { AuthService } from './auth.service';
+import { IdentityService } from '../../adapters/identity/identity.service';
+import { UserSyncService } from './user-sync.service';
 
 @Global()
 @Module({
   imports: [JwtModule.register({ secret: env().JWT_SECRET, signOptions: { expiresIn: `${SESSION_HOURS}h` } })],
   controllers: [AuthController],
-  providers: [AuthService, { provide: APP_GUARD, useClass: AuthGuard }],
-  exports: [AuthService],
+  providers: [AuthService, IdentityService, UserSyncService, { provide: APP_GUARD, useClass: AuthGuard }],
+  exports: [AuthService, IdentityService, UserSyncService],
 })
 export class AuthModule {}

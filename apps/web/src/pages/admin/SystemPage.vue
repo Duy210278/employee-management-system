@@ -16,6 +16,7 @@ const armed = ref(false);
 const busy = ref(false);
 
 const JOBS: [JobName, string][] = [
+  ['host-sync', 'Đồng bộ nhân sự từ hệ thống chính'],
   ['daily-digest', 'Bản tin sáng'],
   ['escalation', 'Báo QLKV việc quá hạn lâu'],
   ['run-start-reminder', 'Nhắc lượt sắp bắt đầu'],

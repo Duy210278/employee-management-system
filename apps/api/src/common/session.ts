@@ -10,7 +10,7 @@ export interface SessionUser {
   role: AccountRole;
   status: UserStatus;
   fullName: string;
-  email: string;
+  email: string | null;
   canBuddy: boolean;
   lastSeenAt: Date | null;
 }

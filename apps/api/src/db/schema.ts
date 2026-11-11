@@ -64,9 +64,11 @@ export const users = lotrinh.table(
   {
     id: int('id').identity().primaryKey(),
     employeeCode: str('employee_code', 30),
+    /** Mã người dùng ở dự án lớn (Web A) khi đăng nhập qua cookie dùng chung; null với tài khoản nội bộ */
+    externalId: str('external_id', 100),
     fullName: str('full_name', 200).notNull(),
-    /** Tên đăng nhập (tới khi chuyển sang SSO) */
-    email: str('email', 255).notNull().unique('users_email_uq'),
+    /** Tên đăng nhập ở chế độ nội bộ; người dùng từ Web A có thể không có email */
+    email: str('email', 255),
     phone: str('phone', 30),
     role: str('role', 10).$type<AccountRole>().notNull(),
     status: str('status', 10).$type<UserStatus>().notNull().default('pending'),
@@ -85,6 +87,8 @@ export const users = lotrinh.table(
   },
   (t) => [
     uniqueIndex('users_employee_code_uq').on(t.employeeCode).where(sql`${t.employeeCode} is not null`),
+    uniqueIndex('users_external_id_uq').on(t.externalId).where(sql`${t.externalId} is not null`),
+    uniqueIndex('users_email_uq').on(t.email).where(sql`${t.email} is not null`),
     check('users_role_ck', oneOf(t.role, ACCOUNT_ROLES)),
     check('users_status_ck', oneOf(t.status, USER_STATUSES)),
     check('users_requested_role_ck', oneOf(t.requestedRole, ACCOUNT_ROLES)),

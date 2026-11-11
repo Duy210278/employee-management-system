@@ -74,11 +74,11 @@ export class DemoController {
     return rows
       .map((u) => ({
         id: u.id,
-        email: u.email,
+        email: u.email ?? '',
         fullName: u.fullName,
         role: u.role,
         status: u.status,
-        note: notes.get(u.email) ?? '',
+        note: (u.email && notes.get(u.email)) || '',
         runLabel: runLabel.get(u.id) ?? null,
       }))
       .sort((a, b) => ROLE_ORDER[a.role] - ROLE_ORDER[b.role] || a.id - b.id);
@@ -88,6 +88,8 @@ export class DemoController {
   @Post('login-as')
   @HttpCode(200)
   async loginAs(@Body(new ZodPipe(LoginAsBody)) body: { userId: number }, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    // Lấy người dùng từ Web A thì đổi người ở Web A, không đăng nhập thay ở module
+    if (env().AUTH_MODE !== 'local') throw new NotFoundException();
     const user = await this.auth.findActiveUser(body.userId);
     await this.auth.startSession(res, user.id);
     await this.audit.log({ userId: user.id, action: 'auth.login_demo', entity: 'users', entityId: String(user.id), ip: req.ip });

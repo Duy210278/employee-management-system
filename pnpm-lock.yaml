@@ -50,6 +50,9 @@ importers:
       drizzle-orm:
         specifier: 1.0.0-rc.5
         version: 1.0.0-rc.5(@types/mssql@9.1.11)(@types/pg@8.23.1)(mssql@11.0.2)(pg@8.23.1)(zod@3.25.76)
+      jose:
+        specifier: 5.9.6
+        version: 5.9.6
       mssql:
         specifier: 11.0.2
         version: 11.0.2
@@ -2047,6 +2050,9 @@ packages:
   jest-worker@27.5.1:
     resolution: {integrity: sha512-7vuh85V5cdDofPyxn58nrPjBktZo0u9x1g8WtjQol+jZDaE+fhN+cIvTj11GndBnMnyfrUOG1sZQxCdjKh+DKg==}
     engines: {node: '>= 10.13.0'}
+
+  jose@5.9.6:
+    resolution: {integrity: sha512-AMlnetc9+CV9asI19zHmrgS/WYsWUwCn2R7RzlbJWD7F9eWYUTGyBmU9o6PxngtLGOiDGPRu+Uc4fhKzbpteZQ==}
 
   js-md4@0.3.2:
     resolution: {integrity: sha512-/GDnfQYsltsjRswQhN9fhv3EMw2sCpUdrdxyWDOUK7eyD++r3gRhzgiQgc/x4MAv2i1iuQ4lxO5mvqM3vj4bwA==}
@@ -4842,6 +4848,8 @@ snapshots:
       '@types/node': 22.20.5
       merge-stream: 2.0.0
       supports-color: 8.1.1
+
+  jose@5.9.6: {}
 
   js-md4@0.3.2: {}
 

@@ -174,7 +174,7 @@ export class StaffService {
       buddies: active.filter((u) => u.canBuddy || u.role === 'cht').map((u) => opt(u)),
       chts: active.filter((u) => u.role === 'cht').map((u) => opt(u)),
       qlkvs: active.filter((u) => u.role === 'qlkv').map((u) => opt(u)),
-      accounts: active.filter((u) => u.role === 'nv' && !storeOfUser.has(u.id)).map((u) => opt(u, u.email)),
+      accounts: active.filter((u) => u.role === 'nv' && !storeOfUser.has(u.id)).map((u) => opt(u, u.email ?? u.employeeCode ?? undefined)),
       levels: version.content.levels.map((l) => ({ key: l.key, name: l.name, durationLabel: l.durationLabel })),
     };
   }

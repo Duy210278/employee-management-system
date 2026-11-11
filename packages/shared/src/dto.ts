@@ -27,7 +27,8 @@ export interface MeResponse {
   user: {
     id: number;
     fullName: string;
-    email: string;
+    /** Người dùng từ dự án lớn có thể không có email */
+    email: string | null;
     role: AccountRole;
     status: UserStatus;
     canBuddy: boolean;
@@ -518,7 +519,7 @@ export interface UserListItem {
   id: number;
   fullName: string;
   employeeCode: string | null;
-  email: string;
+  email: string | null;
   phone: string | null;
   role: AccountRole;
   status: UserStatus;
@@ -680,7 +681,7 @@ export interface AuditLogResponse {
   actions: { value: string; label: string }[];
 }
 
-export type JobName = 'version-activate' | 'daily-digest' | 'escalation' | 'alerts-refresh' | 'run-start-reminder';
+export type JobName = 'host-sync' | 'version-activate' | 'daily-digest' | 'escalation' | 'alerts-refresh' | 'run-start-reminder';
 
 export interface JobResult {
   name: JobName;

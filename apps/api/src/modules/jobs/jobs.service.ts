@@ -10,9 +10,14 @@ import { NotificationsService } from '../notifications/notifications.service';
 import { PUBLISHED } from '../runs/run-factory';
 import { RunContextService, type RunContext } from '../runs/run-context.service';
 import { TaskQueryService } from '../runs/task-query.service';
+import { readIdentity, type ExternalIdentity } from '../../adapters/identity/identity.service';
+import { env } from '../../config';
+import { UserSyncService } from '../auth/user-sync.service';
 import { buildTaskViews, OPEN_RUN_STATUSES } from '../runs/task-views';
 
 export const JOB_LABEL: Record<JobName, string> = {
+  // Chạy trước để bản tin, cảnh báo dùng vai trò, phạm vi mới nhất
+  'host-sync': 'Đồng bộ nhân sự từ hệ thống chính',
   'version-activate': 'Kích hoạt phiên bản theo ngày hiệu lực',
   'daily-digest': 'Bản tin sáng',
   escalation: 'Báo QLKV việc quá hạn lâu',
@@ -43,6 +48,7 @@ export class JobsService implements OnApplicationBootstrap, OnModuleDestroy {
     private readonly taskQuery: TaskQueryService,
     private readonly notifications: NotificationsService,
     private readonly alerts: AlertsService,
+    private readonly userSync: UserSyncService,
   ) {}
 
   onApplicationBootstrap() {
@@ -88,6 +94,8 @@ export class JobsService implements OnApplicationBootstrap, OnModuleDestroy {
   private async execute(name: JobName, today: IsoDate): Promise<JobResult> {
     const done = (created: number, message: string): JobResult => ({ name, label: JOB_LABEL[name], date: today, created, message });
     switch (name) {
+      case 'host-sync':
+        return this.hostSync(done);
       case 'version-activate':
         return this.versionActivate(today, done);
       case 'daily-digest':
@@ -99,6 +107,33 @@ export class JobsService implements OnApplicationBootstrap, OnModuleDestroy {
       case 'run-start-reminder':
         return this.runStartReminder(today, done);
     }
+  }
+
+  /** Đồng bộ hàng loạt từ danh sách nhân sự của Web A (chỉ khi AUTH_MODE=external và có HOST_DIRECTORY_URL) */
+  private async hostSync(done: (created: number, message: string) => JobResult): Promise<JobResult> {
+    const e = env();
+    if (e.AUTH_MODE !== 'external' || !e.HOST_DIRECTORY_URL) return done(0, 'Không lấy người dùng từ hệ thống chính, bỏ qua');
+    let records: ExternalIdentity[];
+    try {
+      const res = await fetch(e.HOST_DIRECTORY_URL, {
+        headers: { accept: 'application/json', ...(e.HOST_DIRECTORY_TOKEN ? { authorization: `Bearer ${e.HOST_DIRECTORY_TOKEN}` } : {}) },
+        signal: AbortSignal.timeout(30_000),
+      });
+      if (!res.ok) return done(0, `Hệ thống chính trả lỗi ${res.status}, chưa đồng bộ`);
+      const body = (await res.json()) as unknown;
+      const rows = (Array.isArray(body) ? body : ((body as { items?: unknown[] })?.items ?? [])) as Record<string, unknown>[];
+      records = rows.flatMap((r) => {
+        try {
+          return [readIdentity(r)];
+        } catch {
+          return [];
+        }
+      });
+    } catch (err) {
+      return done(0, `Không gọi được danh sách nhân sự: ${(err as Error).message}`);
+    }
+    const r = await this.userSync.syncDirectory(records);
+    return done(r.created, `${r.seen} người: thêm ${r.created}, cập nhật ${r.updated}, chuyển nghỉ ${r.left}, bỏ qua ${r.skipped}`);
   }
 
   private async openRuns(today: IsoDate): Promise<{ contexts: RunContext[]; views: Map<number, TaskView[]> }> {
