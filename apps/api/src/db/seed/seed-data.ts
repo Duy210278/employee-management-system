@@ -1,7 +1,6 @@
 import type { AccountRole, UserStatus } from '@lotrinh/shared';
 
-/** Dữ liệu mẫu cho bản demo (mục 14.12). Mật khẩu chung cho mọi tài khoản mẫu. */
-export const SEED_PASSWORD = 'Demo@123';
+/** Dữ liệu mẫu cho bản demo (mục 14.12). */
 
 export const SEED_AREAS = [{ code: 'HN1', name: 'Hà Nội 1' }];
 
@@ -22,7 +21,7 @@ export interface SeedUser {
   canBuddy?: boolean;
   stores?: string[];
   areas?: string[];
-  /** Tình huống mẫu, hiện ở màn đăng nhập nhanh */
+  /** Tình huống mẫu cho kiểm thử */
   note: string;
 }
 
@@ -41,7 +40,7 @@ export const SEED_USERS: SeedUser[] = [
   { key: 'linh', email: 'linh@upharma.local', fullName: 'Hoàng Thùy Linh', employeeCode: 'NV204', role: 'nv', status: 'active', note: 'NV Level 1 ngày thứ 62: đến kỳ phiếu đánh giá' },
   { key: 'nam', email: 'nam@upharma.local', fullName: 'Đặng Văn Nam', employeeCode: 'NV205', role: 'nv', status: 'active', note: 'NV Level 2 ngày thứ 139, có mục đã báo xong chờ CHT xác nhận' },
   { key: 'hanh', email: 'hanh@upharma.local', fullName: 'Bùi Thị Hạnh', employeeCode: 'NV206', role: 'nv', status: 'active', note: 'NV mới, tài khoản đã duyệt nhưng chưa có hồ sơ: dùng để demo "Thêm nhân viên"' },
-  { key: 'moi', email: 'moi@upharma.local', fullName: 'Lý Thu Trang', employeeCode: 'NV207', role: 'nv', status: 'pending', stores: ['NTA'], note: 'Tự đăng ký, đang chờ BP Đào tạo duyệt' },
+  { key: 'moi', email: 'moi@upharma.local', fullName: 'Lý Thu Trang', employeeCode: 'NV207', role: 'nv', status: 'active', stores: ['NTA'], note: 'Tài khoản mẫu chưa có hồ sơ nhân viên' },
 ];
 
 /** Lần vào cuối cách hôm nay bao nhiêu ngày (mặc định 1); null là chưa đăng nhập lần nào */

@@ -9,7 +9,6 @@ import type {
   StaffListResponse,
   StaffProfileResponse,
   TodayResponse,
-  UpdateUserBodyT,
   UserDetailResponse,
   UserListResponse,
   VersionDetailResponse,
@@ -171,21 +170,11 @@ describe('gán checklist CHT', () => {
 
   it('NVBH thăng chức: đổi vai trò Thảo sang CHT rồi gán checklist thăng tiến → lượt NVBH đóng "Thăng chức CHT", dùng chung hồ sơ', async () => {
     const thaoId = await userId('thao@upharma.local');
+    const host = await harness.as('thao', { role: 'cht', stores: ['NTB'] });
+    await host.get(`${API}/me`).expect(200);
     const d = (await admin.get(`${API}/users/${thaoId}`).expect(200)).body as UserDetailResponse;
     const ntb = d.options.stores.find((s) => s.name === 'Nhà thuốc B')!.id;
-    const body: UpdateUserBodyT = {
-      fullName: d.user.fullName,
-      employeeCode: d.user.employeeCode,
-      phone: '',
-      role: 'cht',
-      storeIds: [ntb],
-      areaIds: [],
-      canBuddy: true,
-      status: 'active',
-      rowVersion: d.user.rowVersion,
-      handover: [],
-    };
-    await admin.put(`${API}/users/${thaoId}`).send(body).expect(200);
+    expect(d.user).toMatchObject({ role: 'cht', stores: [{ id: ntb }] });
 
     const opt = (await admin.get(`${API}/cht/form-options/${thaoId}`).expect(200)).body as ChtFormOptions;
     expect(opt).toMatchObject({ suggestedTrack: 'cht_thang_tien', staff: { storeName: 'Nhà thuốc B', currentRun: { track: 'nvbh', levelKey: 3 } } });

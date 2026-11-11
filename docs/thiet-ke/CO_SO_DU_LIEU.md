@@ -41,7 +41,7 @@ Khi sửa `schema.ts`, chạy `pnpm db:generate` để sinh migration mới rồ
 | `system_settings` | Bỏ. Bảng chỉ lưu ngày giả lập của đồng hồ demo, nay đã bỏ |
 | Cột `level_runs.criteria_line` | Bỏ. Dòng tiêu chí lấy từ `versions.criteria_line` theo `version_id` |
 
-Bảng `credentials` giữ lại tới khi tích hợp SSO.
+Đăng nhập SSO dùng cookie của hệ thống chính; module không lưu mật khẩu. Danh tính, vai trò, phạm vi và trạng thái đồng bộ từ hệ thống chính; riêng quyền Buddy do BP Đào tạo quản lý trong module.
 
 ### Quy ước chung
 
@@ -53,7 +53,7 @@ Bảng `credentials` giữ lại tới khi tích hợp SSO.
 | Chữ | `nvarchar(n)` có độ dài tối đa cho chuỗi ngắn, `nvarchar(max)` cho văn bản dài. Luôn dùng `nvarchar` để lưu tiếng Việt. |
 | JSON | Lưu trong `nvarchar(max)` kèm CHECK `ISJSON(...) = 1`. Drizzle tự chuyển giữa chuỗi và đối tượng. |
 | Kiểu khác | Đúng/sai: `bit` (1/0). Số thực: `float`. |
-| Khóa chính | `int identity` (số nguyên tự tăng); riêng `audit_logs` dùng `bigint identity`, `credentials` dùng `user_id`. |
+| Khóa chính | `int identity` (số nguyên tự tăng); riêng `audit_logs` dùng `bigint identity`. |
 | Giá trị liệt kê | Lưu dạng `nvarchar`, có CHECK `IN (...)` cho mọi cột trạng thái và vai trò (mục 5, 6.2). Danh sách trong CHECK sinh từ cùng hằng TypeScript mà Zod dùng. CHECK cho qua `NULL` ở cột không bắt buộc. Không có CHECK: `notifications.type`, `task_events.action`, `audit_logs.action`. |
 | Giá trị mặc định | drizzle-kit sinh chuỗi mặc định không có tiền tố `N` (vd. `'pending'`). Giá trị không dấu thì không sao; giá trị có dấu phải viết `` sql`N'...'` ``. |
 | Khóa ngoại | Mọi khóa ngoại là `NO ACTION`: không có xóa dây chuyền, muốn xóa phải xóa bảng con trước. |
@@ -69,7 +69,6 @@ Bảng `credentials` giữ lại tới khi tích hợp SSO.
 ```mermaid
 erDiagram
   areas ||--o{ stores : "có"
-  users ||--o| credentials : "mật khẩu"
   users ||--o{ user_scopes : "phạm vi"
   stores |o--o{ user_scopes : "cửa hàng (CHT)"
   areas |o--o{ user_scopes : "khu vực (QLKV)"
@@ -126,43 +125,28 @@ Ký hiệu: **PK** khóa chính, **FK** khóa ngoại, **UQ** duy nhất. Với 
 | area_id | int | ✓ | | FK → `areas.id` |
 | active | bit | ✓ | `1` | |
 
-#### `users` – Tài khoản đăng nhập
+#### `users` – Danh tính hệ thống chính
 
 | Cột | Kiểu | Bắt buộc | Mặc định | Ý nghĩa |
 |---|---|---|---|---|
 | id | int identity | PK | | |
 | employee_code | nvarchar(30) | UQ | | Mã nhân viên |
+| external_id | nvarchar(100) | UQ có điều kiện | | Mã người dùng hệ thống chính |
 | full_name | nvarchar(200) | ✓ | | Họ tên |
-| email | nvarchar(255) | ✓, UQ | | Email đăng nhập (tên đăng nhập tới khi chuyển sang SSO) |
+| email | nvarchar(255) | | UQ có điều kiện | Email từ hệ thống chính |
 | phone | nvarchar(30) | | | |
 | role | nvarchar(10) | ✓ | | Vai trò tài khoản: `nv`, `cht`, `qlkv`, `bp` (CHECK) |
-| status | nvarchar(10) | ✓ | `'pending'` | `pending`, `active`, `locked`, `left`, `rejected` (CHECK) |
-| can_buddy | bit | ✓ | `0` | Quyền bổ sung: được làm Buddy |
-| requested_role | nvarchar(10) | | | Vai trò người đăng ký đề nghị (mục 5.1); cùng danh sách với `role` (CHECK) |
-| requested_store_id | int | | | FK → `stores.id`, nhà thuốc đề nghị |
-| requested_area_id | int | | | FK → `areas.id`, khu vực đề nghị (QLKV) |
-| review_note | nvarchar(max) | | | Lý do từ chối đăng ký |
-| reviewed_by | int | | | Người duyệt / từ chối (không khai báo FK) |
-| reviewed_at | datetimeoffset(3) | | | |
+| status | nvarchar(10) | ✓ | `'active'` | `active`, `left` (CHECK; đồng bộ hệ thống chính) |
+| can_buddy | bit | ✓ | `0` | Quyền Buddy do BP Đào tạo quản lý trong module |
 | row_version | int | ✓ | `0` | Chống ghi đè |
 | last_seen_at | datetimeoffset(3) | | | Lần vào cuối (dùng cho cảnh báo "không đăng nhập N ngày") |
 | created_at | datetimeoffset(3) | ✓ | `SYSDATETIMEOFFSET()` | |
 
-Lịch sử sửa tài khoản (mục 5.3) ghi vào `audit_logs` (mục 3.7).
-
-#### `credentials` – Mật khẩu
-
-| Cột | Kiểu | Bắt buộc | Mặc định | Ý nghĩa |
-|---|---|---|---|---|
-| user_id | int | PK | | FK → `users.id` (một tài khoản một dòng) |
-| password_hash | nvarchar(200) | ✓ | | Băm bằng bcrypt |
-| password_changed_at | datetimeoffset(3) | ✓ | `SYSDATETIMEOFFSET()` | |
-
-Mật khẩu đăng nhập nội bộ; bỏ bảng này khi chuyển sang SSO. Phiên đăng nhập dùng JWT trong cookie (khóa `JWT_SECRET`), **không** lưu bảng phiên.
+Lịch sử đồng bộ danh tính và thay đổi quyền Buddy ghi vào `audit_logs` (mục 3.7).
 
 #### `user_scopes` – Phạm vi quản lý
 
-Gom hai bảng cũ `user_store_scopes` và `user_area_scopes`. Mỗi dòng là một cửa hàng hoặc một khu vực mà tài khoản phụ trách.
+Gom hai bảng cũ `user_store_scopes` và `user_area_scopes`. Mỗi dòng là một cửa hàng hoặc một khu vực do hệ thống chính đồng bộ.
 
 | Cột | Kiểu | Bắt buộc | Ý nghĩa |
 |---|---|---|---|
@@ -518,7 +502,7 @@ Lưu bằng `upsert()`.
 
 Chỉ mục: `audit_logs_entity_idx (entity, entity_id)`, `audit_logs_at_idx (at)`.
 
-Ghi tự động cho mọi yêu cầu ghi dữ liệu (không phải GET) thành công, trừ đánh dấu đã đọc thông báo; trường mật khẩu được bỏ khỏi `payload`. Đăng nhập, đăng ký, khôi phục dữ liệu mẫu ghi riêng theo tên sự kiện. Chỉ BP ĐT xem; không sửa, không xóa. Nhãn tiếng Việt cho `action` nằm ở [audit.controller.ts](../../apps/api/src/modules/audit/audit.controller.ts).
+Ghi tự động cho mọi yêu cầu ghi dữ liệu (không phải GET) thành công, trừ đánh dấu đã đọc thông báo. Đăng nhập SSO ghi sự kiện `auth.sso`; khôi phục dữ liệu mẫu ghi riêng theo tên sự kiện. Chỉ BP ĐT xem; không sửa, không xóa. Nhãn tiếng Việt cho `action` nằm ở [audit.controller.ts](../../apps/api/src/modules/audit/audit.controller.ts).
 
 **Lịch sử sửa tài khoản (mục 5.3)**, trước đây là bảng `user_changes`. Mỗi trường bị sửa là một dòng:
 
@@ -584,8 +568,8 @@ Mọi cột trong bảng dưới có CHECK `IN (...)` trừ `notifications.type`
 
 | Cột | Giá trị |
 |---|---|
-| `users.role`, `users.requested_role` | `nv` Nhân viên · `cht` Cửa hàng trưởng · `qlkv` QLKV · `bp` BP Đào tạo |
-| `users.status` | `pending` Chờ duyệt · `active` Hoạt động · `locked` Tạm khóa · `left` Đã nghỉ · `rejected` Bị từ chối |
+| `users.role` | `nv` Nhân viên · `cht` Cửa hàng trưởng · `qlkv` QLKV · `bp` BP Đào tạo |
+| `users.status` | `active` Hoạt động · `left` Đã nghỉ |
 | Vai trò trên đầu việc (`task_confirmations.role`, `proxy_role`; `task_events.role`, `proxy_role`; `signoffs.role`) | `nv`, `buddy`, `cht`, `qlkv`, `bp` (Buddy là vai trò phân công, không phải vai trò tài khoản) |
 | `run_assignments.role` | `buddy`, `cht`, `qlkv`, `trainer` |
 | `level_runs.track` | `nvbh`, `cht_moi_tuyen`, `cht_thang_tien` |
@@ -600,13 +584,13 @@ Mọi cột trong bảng dưới có CHECK `IN (...)` trừ `notifications.type`
 | `level_reviews.result` | `pass`, `extend`, `fail` |
 | `sales_monthly.source` | `manual`, `pos` |
 | `run_evaluations.risk` | `low`, `medium`, `high` |
-| `notifications.type` | `digest` bản tin sáng · `report_done` chờ xác nhận · `help` cần hỗ trợ · `rework` làm lại · `stage_sign` ký giai đoạn · `review_sign` ký phiếu · `escalation` leo thang · `run_start` sắp bắt đầu · `pause`, `pause_request` tạm dừng · `assignment` phân công · `transfer` chuyển cửa hàng · `registration` đăng ký mới · `account` tài khoản · `version_pending`, `version_returned`, `version_active`, `version_rescheduled` phiên bản |
+| `notifications.type` | `digest` bản tin sáng · `report_done` chờ xác nhận · `help` cần hỗ trợ · `rework` làm lại · `stage_sign` ký giai đoạn · `review_sign` ký phiếu · `escalation` leo thang · `run_start` sắp bắt đầu · `pause`, `pause_request` tạm dừng · `assignment` phân công · `transfer` chuyển cửa hàng · `account` tài khoản · `version_pending`, `version_returned`, `version_active`, `version_rescheduled` phiên bản |
 
 ---
 
 ## 6. Ràng buộc và chỉ mục
 
-Số lượng theo migration khởi tạo: 4 ràng buộc UNIQUE, 16 unique index (12 có điều kiện), 12 index thường, 38 CHECK, 47 khóa ngoại; cộng 2 trigger ở migration viết tay.
+Các chỉ mục dưới đây phản ánh schema hiện tại sau migration SSO-only.
 
 ### 6.1 Duy nhất và chỉ mục
 
@@ -616,8 +600,9 @@ SQL Server coi `NULL` là một giá trị trong ràng buộc UNIQUE thường (
 |---|---|---|---|
 | areas | areas_code_uq | UQ | code |
 | stores | stores_code_uq | UQ | code |
-| users | users_email_uq | UQ | email |
+| users | users_email_uq | UQ có điều kiện | email `WHERE email IS NOT NULL` |
 | users | users_employee_code_uq | UQ có điều kiện | employee_code `WHERE employee_code IS NOT NULL` |
+| users | users_external_id_uq | UQ có điều kiện | external_id `WHERE external_id IS NOT NULL` |
 | user_scopes | user_scopes_store_uq | UQ có điều kiện | user_id, store_id `WHERE store_id IS NOT NULL` |
 | user_scopes | user_scopes_area_uq | UQ có điều kiện | user_id, area_id `WHERE area_id IS NOT NULL` |
 | notifications | notifications_dedupe_uq | UQ có điều kiện | dedupe_key `WHERE dedupe_key IS NOT NULL` |
@@ -650,18 +635,18 @@ SQL Server coi `NULL` là một giá trị trong ràng buộc UNIQUE thường (
 
 | Loại | Ràng buộc |
 |---|---|
-| Giá trị liệt kê, `cột IN (...)` (danh sách ở mục 5) | `users_role_ck`, `users_requested_role_ck`, `users_status_ck`, `versions_status_ck`, `versions_change_kind_ck`, `level_runs_track_ck`, `level_runs_status_ck`, `run_assignments_role_ck`, `run_tasks_status_ck`, `task_confirmations_role_ck`, `task_confirmations_proxy_ck`, `task_events_role_ck`, `task_events_proxy_ck`, `run_pauses_status_ck`, `run_evaluations_risk_ck`, `sales_monthly_source_ck`, `level_reviews_result_ck`, `level_reviews_status_ck`, `signoffs_role_ck` |
+| Giá trị liệt kê, `cột IN (...)` (danh sách ở mục 5) | `users_role_ck`, `users_status_ck`, `versions_status_ck`, `versions_change_kind_ck`, `level_runs_track_ck`, `level_runs_status_ck`, `run_assignments_role_ck`, `run_tasks_status_ck`, `task_confirmations_role_ck`, `task_confirmations_proxy_ck`, `task_events_role_ck`, `task_events_proxy_ck`, `run_pauses_status_ck`, `run_evaluations_risk_ck`, `sales_monthly_source_ck`, `level_reviews_result_ck`, `level_reviews_status_ck`, `signoffs_role_ck` |
 | Level 1–4 | `staff_level_ck` (`current_level BETWEEN 1 AND 4`), `level_runs_level_ck` (`level_key BETWEEN 1 AND 4`) |
 | Khoảng ngày | `versions_effective_ck` (`effective_to >= effective_from` khi cả hai có giá trị), `level_runs_dates_ck` (`planned_end >= start_date`), `run_assignments_dates_ck` (`to_date IS NULL` hoặc `to_date >= from_date`), `run_tasks_dates_ck` (`due_date >= open_date`), `run_pauses_dates_ck` (`to_date >= from_date`) |
 | Trạng thái kéo theo cột | `run_tasks_done_ck` (`done` phải có `done_date`), `run_tasks_na_ck` (`na` phải có `na_reason`) |
 | Đúng một trong hai cột | `user_scopes_one_of` (`store_id` hoặc `area_id`), `signoffs_one_of` (`stage_key` hoặc `review_id`) |
 | JSON hợp lệ, `ISJSON(...) = 1` | `versions_content_json_ck`, `level_runs_meta_json_ck`, `run_evaluations_ratings_json_ck`, `observations_scores_json_ck`, `level_reviews_criteria_json_ck`, `level_reviews_notes_json_ck`; cho phép `NULL`: `task_events_data_json_ck`, `audit_logs_payload_json_ck` |
 
-CHECK `IN (...)` cho qua `NULL`, nên cột không bắt buộc (`requested_role`, `change_kind`, `proxy_role`, `risk`, `result`) vẫn để trống được.
+CHECK `IN (...)` cho qua `NULL`, nên cột không bắt buộc (`change_kind`, `proxy_role`, `risk`, `result`) vẫn để trống được.
 
 ### 6.3 Khóa ngoại và trigger
 
-- 47 khóa ngoại, đều `NO ACTION` (không xóa dây chuyền). Cột trỏ tới bảng khác nhưng **không** khai báo khóa ngoại: `users.reviewed_by`, `versions.parent_id`, `audit_logs.entity_id`, `refId` trong `task_events.data`.
+- Các khóa ngoại dùng `NO ACTION` (không xóa dây chuyền). Cột trỏ tới bảng khác nhưng **không** khai báo khóa ngoại: `versions.parent_id`, `audit_logs.entity_id`, `refId` trong `task_events.data`.
 - Hai trigger trên `versions` (R03): xem mục 3.2.
 
 ### 6.4 Thay cho tính năng PostgreSQL
@@ -730,7 +715,7 @@ Chạy ở thư mục gốc dự án; kết nối lấy từ `DATABASE_URL` tron
 |---|---|
 | `pnpm db:migrate` | Chạy các migration chưa chạy (API cũng tự chạy khi khởi động) |
 | `pnpm db:seed` | Nạp dữ liệu mẫu (phiên bản v2.1, tài khoản demo, nhân viên và lượt mẫu) nếu cơ sở dữ liệu còn trống; đã có dữ liệu thì bỏ qua |
-| `pnpm db:reset` | Xóa sạch: bỏ khóa ngoại, mọi bảng trong schema `lotrinh` và `drizzle`, rồi bỏ hai schema. Sau đó chạy lại migration và nạp dữ liệu mẫu theo hôm nay. Mật khẩu chung `Demo@123` |
+| `pnpm db:reset` | Xóa sạch: bỏ khóa ngoại, mọi bảng trong schema `lotrinh` và `drizzle`, rồi bỏ hai schema. Sau đó chạy lại migration và nạp dữ liệu mẫu theo hôm nay. Đăng nhập qua SSO của hệ thống chính. |
 | `pnpm db:generate` | Sinh migration mới từ thay đổi trong `schema.ts` (drizzle-kit, dialect `mssql`, chỉ schema `lotrinh`). Kết quả là một thư mục `<thời điểm>_<tên>/` mới trong `apps/api/src/db/migrations/` |
 
 Tạo cơ sở dữ liệu `lotrinh`, `lotrinh_test` và tài khoản `lotrinh_app` lần đầu bằng [scripts/setup-sqlserver.sql](../../scripts/setup-sqlserver.sql), chạy bằng tài khoản `sa`:

@@ -15,17 +15,12 @@ beforeAll(async () => {
 
 afterAll(() => harness.close());
 
-describe('đăng nhập', () => {
-  it('sai mật khẩu bị từ chối; tài khoản chờ duyệt không đăng nhập được', async () => {
+describe('xác thực SSO', () => {
+  it('không có cookie của hệ thống chính thì không vào được API; endpoint đăng nhập riêng đã bỏ', async () => {
     const http = harness.anonymous();
-    const wrong = await http.post(`${API}/auth/login`).send({ email: 'lan@upharma.local', password: 'sai' }).expect(401);
-    expect(wrong.body.code).toBe('INVALID_CREDENTIALS');
-    const pending = await http.post(`${API}/auth/login`).send({ email: 'moi@upharma.local', password: 'Demo@123' }).expect(403);
-    expect(pending.body.message).toContain('chờ BP Đào tạo duyệt');
-  });
-
-  it('chưa đăng nhập thì không gọi được API nghiệp vụ', async () => {
-    await harness.anonymous().get(`${API}/me/today`).expect(401);
+    await http.get(`${API}/me/today`).expect(401);
+    await http.post(`${API}/auth/login`).set('Origin', 'http://127.0.0.1').send({ email: 'lan@upharma.local', password: 'sai' }).expect(404);
+    await http.post(`${API}/auth/register`).set('Origin', 'http://127.0.0.1').send({}).expect(404);
   });
 });
 

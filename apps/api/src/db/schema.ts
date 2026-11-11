@@ -64,23 +64,15 @@ export const users = lotrinh.table(
   {
     id: int('id').identity().primaryKey(),
     employeeCode: str('employee_code', 30),
-    /** Mã người dùng ở dự án lớn (Web A) khi đăng nhập qua cookie dùng chung; null với tài khoản nội bộ */
+    /** Mã người dùng ở hệ thống chính */
     externalId: str('external_id', 100),
     fullName: str('full_name', 200).notNull(),
-    /** Tên đăng nhập ở chế độ nội bộ; người dùng từ Web A có thể không có email */
+    /** Email người dùng từ hệ thống chính */
     email: str('email', 255),
     phone: str('phone', 30),
     role: str('role', 10).$type<AccountRole>().notNull(),
-    status: str('status', 10).$type<UserStatus>().notNull().default('pending'),
+    status: str('status', 10).$type<UserStatus>().notNull().default('active'),
     canBuddy: bit('can_buddy').notNull().default(false),
-    /** Thông tin người đăng ký đề nghị (mục 5.1); BP ĐT chốt vai trò, phạm vi khi duyệt */
-    requestedRole: str('requested_role', 10).$type<AccountRole>(),
-    requestedStoreId: int('requested_store_id').references(() => stores.id),
-    requestedAreaId: int('requested_area_id').references(() => areas.id),
-    /** Lý do từ chối đăng ký (mục 5.4 điều 5) */
-    reviewNote: text('review_note'),
-    reviewedBy: int('reviewed_by'),
-    reviewedAt: ts('reviewed_at'),
     rowVersion: int('row_version').notNull().default(0),
     lastSeenAt: ts('last_seen_at'),
     createdAt: ts('created_at').notNull().default(NOW),
@@ -91,7 +83,6 @@ export const users = lotrinh.table(
     uniqueIndex('users_email_uq').on(t.email).where(sql`${t.email} is not null`),
     check('users_role_ck', oneOf(t.role, ACCOUNT_ROLES)),
     check('users_status_ck', oneOf(t.status, USER_STATUSES)),
-    check('users_requested_role_ck', oneOf(t.requestedRole, ACCOUNT_ROLES)),
   ],
 );
 
@@ -136,15 +127,6 @@ export const userScopes = lotrinh.table(
     uniqueIndex('user_scopes_area_uq').on(t.userId, t.areaId).where(sql`${t.areaId} is not null`),
   ],
 );
-
-/** Mật khẩu đăng nhập nội bộ; bỏ khi chuyển sang SSO */
-export const credentials = lotrinh.table('credentials', {
-  userId: int('user_id')
-    .primaryKey()
-    .references(() => users.id),
-  passwordHash: str('password_hash', 200).notNull(),
-  passwordChangedAt: ts('password_changed_at').notNull().default(NOW),
-});
 
 // ---------- 13.2 Phiên bản (nội dung lưu một tài liệu JSON bất biến) ----------
 

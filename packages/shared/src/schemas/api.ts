@@ -1,19 +1,12 @@
 import { z } from 'zod';
 import { isIsoDate } from '../dates';
-import { ACCOUNT_ROLES, ASSIGNMENT_ROLES, TASK_ROLES } from '../roles';
+import { ASSIGNMENT_ROLES, TASK_ROLES } from '../roles';
 import { CHT_TRACKS, VersionContentSchema } from './version';
 
 /** Dữ liệu vào của API, dùng chung cho form giao diện và kiểm tra ở server. */
 
 const rowVersion = z.number({ required_error: 'Thiếu rowVersion' }).int().min(0);
 const note = z.string().trim().max(1000, 'Ghi chú tối đa 1000 ký tự');
-
-export const LoginBody = z.object({
-  email: z.string().trim().toLowerCase().email('Email không hợp lệ'),
-  password: z.string().min(1, 'Nhập mật khẩu'),
-});
-
-export const LoginAsBody = z.object({ userId: z.number().int().positive() });
 
 export const ConfirmBody = z.object({
   role: z.enum(TASK_ROLES).optional(),
@@ -110,72 +103,16 @@ export const SignReviewBody = z.object({ step: z.number().int().min(0) });
 
 // ---------- Quản trị người dùng (mục 5) ----------
 
-const email = z.string().trim().toLowerCase().email('Email không hợp lệ');
-const fullName = z.string().trim().min(2, 'Nhập họ tên').max(100);
-const employeeCode = z.string().trim().max(30, 'Mã nhân viên tối đa 30 ký tự');
-const phone = z
-  .string()
-  .trim()
-  .max(20)
-  .regex(/^[0-9+ .-]*$/, 'Số điện thoại chỉ gồm chữ số')
-  .default('');
-const password = z.string().min(8, 'Mật khẩu tối thiểu 8 ký tự').max(100);
 const id = z.number().int().positive();
-
-/** Đăng ký tài khoản (mục 5.1): vai trò, nhà thuốc, khu vực chỉ là đề nghị; BP ĐT chốt khi duyệt */
-export const RegisterBody = z
-  .object({
-    fullName,
-    employeeCode: employeeCode.min(1, 'Nhập mã nhân viên'),
-    email,
-    phone,
-    password,
-    requestedRole: z.enum(['nv', 'cht', 'qlkv'], { errorMap: () => ({ message: 'Chọn vai trò đề nghị' }) }),
-    storeId: id.nullable().optional(),
-    areaId: id.nullable().optional(),
-  })
-  .superRefine((b, ctx) => {
-    if (b.requestedRole !== 'qlkv' && !b.storeId) ctx.addIssue({ code: 'custom', path: ['storeId'], message: 'Chọn nhà thuốc đang làm việc' });
-    if (b.requestedRole === 'qlkv' && !b.areaId) ctx.addIssue({ code: 'custom', path: ['areaId'], message: 'Chọn khu vực phụ trách' });
-  });
-
-const scopeFields = {
-  role: z.enum(ACCOUNT_ROLES),
-  storeIds: z.array(id).default([]),
-  areaIds: z.array(id).default([]),
-  canBuddy: z.boolean().default(false),
-};
-
-/** Mục 5.3: CHT bắt buộc ≥ 1 cửa hàng; QLKV bắt buộc ≥ 1 khu vực */
-function scopeRule(b: { role: string; storeIds: number[]; areaIds: number[] }, ctx: z.RefinementCtx) {
-  if (b.role === 'cht' && !b.storeIds.length) ctx.addIssue({ code: 'custom', path: ['storeIds'], message: 'Cửa hàng trưởng phải được gán ít nhất 1 cửa hàng' });
-  if (b.role === 'qlkv' && !b.areaIds.length) ctx.addIssue({ code: 'custom', path: ['areaIds'], message: 'QLKV phải được gán ít nhất 1 khu vực' });
-}
-
-export const ApproveUserBody = z.object(scopeFields).superRefine(scopeRule);
-export const RejectUserBody = z.object({ note: z.string().trim().min(1, 'Nhập lý do từ chối').max(1000) });
 
 /** Người thay cho một phân công khi khóa, cho nghỉ hoặc đổi vai trò tài khoản (mục 5.4 điều 3, R20) */
 export const HandoverItem = z.object({ runId: id, role: z.enum(ASSIGNMENT_ROLES), userId: id });
 
-export const UpdateUserBody = z
-  .object({
-    fullName,
-    employeeCode: employeeCode.nullable(),
-    phone,
-    ...scopeFields,
-    status: z.enum(['active', 'locked', 'left']),
-    rowVersion,
-    handover: z.array(HandoverItem).default([]),
-  })
-  .superRefine(scopeRule);
-
-export const CreateUserBody = z
-  .object({ fullName, employeeCode: employeeCode.nullable().default(null), email, phone, password, ...scopeFields })
-  .superRefine(scopeRule);
-
-/** Nhập tài khoản hàng loạt (mục 5.6): commit = false chỉ xem trước */
-export const ImportUsersBody = z.object({ csv: z.string().min(1, 'Chọn tệp CSV').max(500_000, 'Tệp quá lớn'), commit: z.boolean().default(false) });
+export const UpdateUserBody = z.object({
+  canBuddy: z.boolean(),
+  rowVersion,
+  handover: z.array(HandoverItem).default([]),
+});
 
 export const AreaBody = z.object({
   code: z.string().trim().min(1, 'Nhập mã khu vực').max(20),
@@ -248,10 +185,7 @@ export type CreateChtRunBodyT = z.infer<typeof CreateChtRunBody>;
 export type ChtJournalBodyT = z.infer<typeof ChtJournalBody>;
 export type ChtEvaluationBodyT = z.infer<typeof ChtEvaluationBody>;
 
-export type RegisterBodyT = z.infer<typeof RegisterBody>;
-export type ApproveUserBodyT = z.infer<typeof ApproveUserBody>;
 export type UpdateUserBodyT = z.infer<typeof UpdateUserBody>;
-export type CreateUserBodyT = z.infer<typeof CreateUserBody>;
 export type HandoverItemT = z.infer<typeof HandoverItem>;
 export type AreaBodyT = z.infer<typeof AreaBody>;
 export type StoreBodyT = z.infer<typeof StoreBody>;
@@ -265,7 +199,6 @@ export type ObservationBodyT = z.infer<typeof ObservationBody>;
 export type SaveReviewBodyT = z.infer<typeof SaveReviewBody>;
 export type SaveDraftBodyT = z.infer<typeof SaveDraftBody>;
 export type ApproveBodyT = z.infer<typeof ApproveBody>;
-export type LoginBodyT = z.infer<typeof LoginBody>;
 export type ConfirmBodyT = z.infer<typeof ConfirmBody>;
 export type ConfirmManyBodyT = z.infer<typeof ConfirmManyBody>;
 export type UndoBodyT = z.infer<typeof UndoBody>;

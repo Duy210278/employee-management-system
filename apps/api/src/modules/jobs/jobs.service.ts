@@ -109,10 +109,10 @@ export class JobsService implements OnApplicationBootstrap, OnModuleDestroy {
     }
   }
 
-  /** Đồng bộ hàng loạt từ danh sách nhân sự của Web A (chỉ khi AUTH_MODE=external và có HOST_DIRECTORY_URL) */
+  /** Đồng bộ hàng loạt từ danh sách nhân sự của hệ thống chính khi có HOST_DIRECTORY_URL */
   private async hostSync(done: (created: number, message: string) => JobResult): Promise<JobResult> {
     const e = env();
-    if (e.AUTH_MODE !== 'external' || !e.HOST_DIRECTORY_URL) return done(0, 'Không lấy người dùng từ hệ thống chính, bỏ qua');
+    if (!e.HOST_DIRECTORY_URL) return done(0, 'Chưa cấu hình danh sách nhân sự của hệ thống chính, bỏ qua');
     let records: ExternalIdentity[];
     try {
       const res = await fetch(e.HOST_DIRECTORY_URL, {

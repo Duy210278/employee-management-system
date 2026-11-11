@@ -39,25 +39,11 @@ export interface MeResponse {
   isBuddyNow: boolean;
   clock: ClockView;
   demoMode: boolean;
-  /** local: đăng nhập riêng · external: người dùng lấy từ hệ thống chính (Web A), vai trò và phạm vi quản lý ở đó */
-  authMode: 'local' | 'external';
 }
 
 export interface AuthConfigResponse {
-  authMode: 'local' | 'external';
   loginUrl: string | null;
   logoutUrl: string | null;
-}
-
-export interface DemoAccount {
-  id: number;
-  email: string;
-  fullName: string;
-  role: AccountRole;
-  status: UserStatus;
-  note: string;
-  /** Lộ trình đang học để chọn tài khoản cho nhanh: "Level 1", "CHT mới tuyển"; null khi không có lượt đang mở */
-  runLabel: string | null;
 }
 
 export interface StaffSummary {
@@ -537,9 +523,6 @@ export interface UserListItem {
   staffId: number | null;
   lastSeenAt: string | null;
   createdAt: string;
-  /** Đề nghị lúc đăng ký (chỉ với tài khoản tự đăng ký) */
-  requested: { role: AccountRole; storeId: number | null; storeName: string | null; areaId: number | null; areaName: string | null } | null;
-  reviewNote: string | null;
 }
 
 export interface UserListResponse {
@@ -578,29 +561,6 @@ export interface UserDetailResponse {
   options: OrgOptions;
   /** Là BP ĐT hoạt động cuối cùng (R19) */
   isLastBp: boolean;
-}
-
-export interface ImportRowView {
-  line: number;
-  employeeCode: string;
-  fullName: string;
-  email: string;
-  phone: string;
-  role: string;
-  storeCode: string;
-  areaCode: string;
-  canBuddy: boolean;
-  errors: string[];
-}
-
-export interface ImportUsersResponse {
-  rows: ImportRowView[];
-  valid: number;
-  invalid: number;
-  /** Số tài khoản đã tạo khi commit = true */
-  imported: number | null;
-  /** Mật khẩu ban đầu của tài khoản được nhập */
-  initialPassword: string;
 }
 
 export interface OrgResponse {
@@ -697,11 +657,6 @@ export interface JobResult {
   date: IsoDate;
   created: number;
   message: string;
-}
-
-export interface RegisterOptions {
-  areas: { id: number; name: string }[];
-  stores: { id: number; name: string; areaId: number; areaName: string }[];
 }
 
 // ---------- Onboarding Cửa hàng trưởng ----------

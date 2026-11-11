@@ -7,19 +7,15 @@ import AccountDetailPage from './pages/admin/AccountDetailPage.vue';
 import AccountsPage from './pages/admin/AccountsPage.vue';
 import AdminLayout from './pages/admin/AdminLayout.vue';
 import AuditPage from './pages/admin/AuditPage.vue';
-import ImportPage from './pages/admin/ImportPage.vue';
 import OrgPage from './pages/admin/OrgPage.vue';
 import SystemPage from './pages/admin/SystemPage.vue';
 import AlertsPage from './pages/AlertsPage.vue';
 import DesignPage from './pages/design/DesignPage.vue';
 import FrameworkPage from './pages/FrameworkPage.vue';
 import InboxPage from './pages/InboxPage.vue';
-import LoginPage from './pages/LoginPage.vue';
 import NoAccessPage from './pages/NoAccessPage.vue';
 import NotificationsPage from './pages/NotificationsPage.vue';
-import PendingPage from './pages/PendingPage.vue';
 import PlaceholderPage from './pages/PlaceholderPage.vue';
-import RegisterPage from './pages/RegisterPage.vue';
 import StaffCreatePage from './pages/staff/StaffCreatePage.vue';
 import StaffListPage from './pages/staff/StaffListPage.vue';
 import StaffProfilePage from './pages/staff/StaffProfilePage.vue';
@@ -43,10 +39,7 @@ declare module 'vue-router' {
 export const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
-    { path: '/dang-nhap', name: 'login', component: LoginPage, meta: { public: true } },
     { path: '/chua-co-quyen', name: 'no-access', component: NoAccessPage, meta: { public: true } },
-    { path: '/dang-ky', name: 'register', component: RegisterPage, meta: { public: true } },
-    { path: '/cho-duyet', name: 'pending', component: PendingPage, meta: { public: true } },
     {
       path: '/',
       component: AppShell,
@@ -81,7 +74,6 @@ export const router = createRouter({
             { path: 'tai-khoan', name: 'accounts', component: AccountsPage, meta: { title: 'Tài khoản và vai trò', desc: 'Duyệt đăng ký, tạo tài khoản, gán vai trò, phạm vi và quyền bổ sung' } },
             { path: 'tai-khoan/:id(\\d+)', name: 'account', component: AccountDetailPage },
             { path: 'danh-muc', name: 'org', component: OrgPage, meta: { title: 'Cửa hàng, khu vực', desc: 'Danh mục cửa hàng, khu vực dùng cho hồ sơ nhân viên và tài khoản' } },
-            { path: 'nhap-csv', name: 'import', component: ImportPage, meta: { title: 'Nhập tài khoản', desc: 'Nhập nhiều tài khoản cùng lúc từ tệp CSV' } },
             { path: 'nhat-ky', name: 'audit', component: AuditPage, meta: { title: 'Nhật ký hệ thống', desc: 'Mọi thao tác ghi dữ liệu, theo người thao tác và thời điểm' } },
             { path: 'he-thong', name: 'admin', component: SystemPage, meta: { title: 'Công cụ demo', desc: 'Chạy job ngay, khôi phục dữ liệu mẫu' } },
           ],
@@ -92,34 +84,26 @@ export const router = createRouter({
   ],
 });
 
-/** Mã lỗi khi lấy người dùng từ Web A mà người đó không vào được module: hiện trang "chưa được cấp quyền" */
+/** Mã lỗi khi người dùng không được phép vào module */
 const NO_ACCESS_CODES = new Set(['NO_MODULE_ACCESS', 'NOT_PROVISIONED', 'ACCOUNT_INACTIVE', 'IDENTITY_CONFLICT']);
-const LOCAL_AUTH_PAGES = new Set(['login', 'register', 'pending']);
 
-/** Mọi trang (trừ đăng nhập, đăng ký) cần phiên hợp lệ; thông tin người dùng nạp một lần rồi dùng chung */
+/** Mọi trang nghiệp vụ cần danh tính hợp lệ từ hệ thống chính */
 router.beforeEach(async (to) => {
-  if (to.meta.public) {
-    // Lấy người dùng từ Web A thì không có trang đăng nhập, đăng ký riêng
-    if (LOCAL_AUTH_PAGES.has(String(to.name)) && (await fetchAuthConfig().catch(() => null))?.authMode === 'external') return '/';
-    return true;
-  }
+  if (to.meta.public) return true;
   try {
     await queryClient.fetchQuery({ queryKey: ['me'], queryFn: fetchMe, staleTime: 30_000 });
     return true;
   } catch (err) {
     if (!(err instanceof ApiError)) throw err;
     const config = await fetchAuthConfig().catch(() => null);
-    if (config?.authMode === 'external') {
-      if (err.status === 401 && config.loginUrl) {
-        // Về trang đăng nhập của Web A, đăng nhập xong quay lại đúng trang đang mở
-        const sep = config.loginUrl.includes('?') ? '&' : '?';
-        window.location.href = `${config.loginUrl}${sep}returnTo=${encodeURIComponent(window.location.href)}`;
-        return false;
-      }
-      if (err.status === 401 || (err.status === 403 && NO_ACCESS_CODES.has(err.code))) return { name: 'no-access', query: { code: err.code, msg: err.message } };
-      throw err;
+    if (err.status === 401 && config?.loginUrl) {
+      const sep = config.loginUrl.includes('?') ? '&' : '?';
+      window.location.href = `${config.loginUrl}${sep}returnTo=${encodeURIComponent(window.location.href)}`;
+      return false;
     }
-    if (err.status === 401) return { name: 'login' };
+    if (err.status === 401 || (err.status === 403 && NO_ACCESS_CODES.has(err.code))) {
+      return { name: 'no-access', query: { code: err.code, msg: err.message } };
+    }
     throw err;
   }
 });

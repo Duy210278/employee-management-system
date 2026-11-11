@@ -31,8 +31,7 @@ const EnvSchema = z.object({
   PUBLIC_URL: z.string().url().optional(),
 
   // ---------- Danh tính ----------
-  /** local: đăng nhập nội bộ bằng email, mật khẩu · external: lấy người dùng từ cookie dùng chung của dự án lớn (Web A) */
-  AUTH_MODE: z.enum(['local', 'external']).default('local'),
+  /** Danh tính chỉ được xác thực bằng cookie dùng chung của hệ thống chính */
   /** Cách đọc cookie Web A: jwt (tự kiểm chữ ký) hoặc introspect (gọi API người dùng hiện tại của Web A) */
   HOST_AUTH_MODE: z.enum(['jwt', 'introspect']).default('jwt'),
   HOST_COOKIE_NAME: z.string().default('hostsid'),
@@ -81,15 +80,13 @@ export function env(): Env {
       throw new Error(`Cấu hình .env không hợp lệ: ${issues}. Xem .env.example`);
     }
     const e = parsed.data;
-    if (e.AUTH_MODE === 'external') {
-      if (e.HOST_AUTH_MODE === 'jwt' && !e.HOST_JWT_SECRET && !e.HOST_JWKS_URL) throw new Error('AUTH_MODE=external, HOST_AUTH_MODE=jwt cần HOST_JWT_SECRET hoặc HOST_JWKS_URL');
-      if (e.HOST_AUTH_MODE === 'introspect' && !e.HOST_ME_URL) throw new Error('HOST_AUTH_MODE=introspect cần HOST_ME_URL');
-      for (const key of ['HOST_CLAIM_MAP', 'HOST_ROLE_MAP'] as const) {
-        try {
-          JSON.parse(e[key]);
-        } catch {
-          throw new Error(`${key} phải là JSON hợp lệ`);
-        }
+    if (e.HOST_AUTH_MODE === 'jwt' && !e.HOST_JWT_SECRET && !e.HOST_JWKS_URL) throw new Error('HOST_AUTH_MODE=jwt cần HOST_JWT_SECRET hoặc HOST_JWKS_URL');
+    if (e.HOST_AUTH_MODE === 'introspect' && !e.HOST_ME_URL) throw new Error('HOST_AUTH_MODE=introspect cần HOST_ME_URL');
+    for (const key of ['HOST_CLAIM_MAP', 'HOST_ROLE_MAP'] as const) {
+      try {
+        JSON.parse(e[key]);
+      } catch {
+        throw new Error(`${key} phải là JSON hợp lệ`);
       }
     }
     cached = e;

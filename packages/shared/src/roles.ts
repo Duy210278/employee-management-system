@@ -26,15 +26,12 @@ export const ROLE_SHORT: Record<TaskRole, string> = {
   bp: 'BP ĐT',
 };
 
-export const USER_STATUSES = ['pending', 'active', 'locked', 'left', 'rejected'] as const;
+export const USER_STATUSES = ['active', 'left'] as const;
 export type UserStatus = (typeof USER_STATUSES)[number];
 
 export const USER_STATUS_LABEL: Record<UserStatus, string> = {
-  pending: 'Chờ duyệt',
   active: 'Hoạt động',
-  locked: 'Tạm khóa',
   left: 'Đã nghỉ',
-  rejected: 'Bị từ chối',
 };
 
 export const ASSIGNMENT_LABEL: Record<AssignmentRole, string> = { buddy: 'Buddy', cht: 'Cửa hàng trưởng', qlkv: 'QLKV', trainer: 'Người phụ trách Đào tạo' };

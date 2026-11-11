@@ -11,13 +11,11 @@ import {
   type Level,
   type TaskRole,
 } from '@lotrinh/shared';
-import bcrypt from 'bcryptjs';
 import { eq } from 'drizzle-orm';
 import { createRun } from '../../modules/runs/run-factory';
 import { dropAll, runMigrations, type Db, type Tx } from '../client';
 import {
   areas,
-  credentials,
   levelRuns,
   observations,
   runJournal,
@@ -43,7 +41,6 @@ import {
   SEED_AREAS,
   SEED_OBSERVATIONS,
   SEED_SALES,
-  SEED_PASSWORD,
   SEED_STAFF,
   SEED_STORES,
   SEED_USERS,
@@ -64,8 +61,6 @@ export function loadSeedContent() {
 /** Nạp dữ liệu mẫu vào cơ sở dữ liệu trống. Ngày bắt đầu Level tính lùi từ `today`. */
 export async function seedDatabase(db: Db, today: IsoDate): Promise<void> {
   const content = loadSeedContent();
-  const passwordHash = await bcrypt.hash(SEED_PASSWORD, 10);
-
   await db.transaction(async (tx) => {
     const areaRows = await tx.insert(areas).output().values(SEED_AREAS);
     const areaId = new Map(areaRows.map((a) => [a.code, a.id]));
@@ -86,7 +81,6 @@ export async function seedDatabase(db: Db, today: IsoDate): Promise<void> {
           role: u.role,
           status: u.status,
           canBuddy: !!u.canBuddy,
-          requestedRole: u.status === 'pending' ? u.role : null,
           // Lần vào cuối: mặc định hôm qua; một số người để trống hoặc lâu ngày để có cảnh báo "không đăng nhập" (mục 11.6)
           lastSeenAt: u.status === 'active' && LAST_SEEN_DAYS_AGO[u.key] !== null ? at(addDays(today, -(LAST_SEEN_DAYS_AGO[u.key] ?? 1)), '20:00') : null,
         })),
@@ -98,9 +92,6 @@ export async function seedDatabase(db: Db, today: IsoDate): Promise<void> {
       if (!row) throw new Error(`Thiếu tài khoản mẫu ${key}`);
       return row;
     };
-    await tx.insert(credentials).values(userRows.map((u) => ({ userId: u.id, passwordHash })));
-    const pendingStore = SEED_USERS.filter((u) => u.status === 'pending' && u.stores?.length);
-    for (const u of pendingStore) await tx.update(users).set({ requestedStoreId: storeId.get(u.stores![0])! }).where(eq(users.id, user(u.key).id));
     const storeScopes = SEED_USERS.filter((u) => u.status === 'active').flatMap((u) => (u.stores ?? []).map((s) => ({ userId: user(u.key).id, storeId: storeId.get(s)! })));
     const areaScopes = SEED_USERS.flatMap((u) => (u.areas ?? []).map((a) => ({ userId: user(u.key).id, areaId: areaId.get(a)! })));
     if (storeScopes.length || areaScopes.length) await tx.insert(userScopes).values([...storeScopes, ...areaScopes]);
@@ -359,8 +350,6 @@ export interface MinimalBp {
   fullName: string;
   employeeCode: string;
   email: string;
-  /** Bỏ trống khi đăng nhập qua Web A (không cần mật khẩu nội bộ) */
-  password?: string;
 }
 
 /**
@@ -382,7 +371,6 @@ export async function seedMinimal(db: Db, opts: { effectiveFrom: IsoDate; bp?: M
           .output({ id: users.id })
           .values({ fullName: opts.bp.fullName, employeeCode: opts.bp.employeeCode, email: opts.bp.email, role: 'bp', status: 'active' });
         bpId = u!.id;
-        if (opts.bp.password) await tx.insert(credentials).values({ userId: bpId, passwordHash: await bcrypt.hash(opts.bp.password, 10) });
       }
     }
     await tx.insert(versions).values({

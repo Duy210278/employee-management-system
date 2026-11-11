@@ -3,7 +3,6 @@ import {
   diffDays,
   type AuditLogResponse,
   type CreateStaffBodyT,
-  type DemoAccount,
   type InboxResponse,
   type StaffFormOptions,
   type StaffListResponse,
@@ -102,7 +101,7 @@ describe('thêm nhân viên và bắt đầu Level 1 (kịch bản 5.6 bước 2
     expect(options.stores.map((s) => s.name)).toEqual(['Nhà thuốc A']);
     expect(options.chts.find((c) => c.id === options.stores[0].defaultChtId)?.fullName).toBe('Phạm Thu Hà');
     expect(options.qlkvs.find((c) => c.id === options.stores[0].defaultQlkvId)?.fullName).toBe('Ngô Quang Huy');
-    expect(options.accounts.map((a) => a.fullName)).toEqual(['Bùi Thị Hạnh']);
+    expect(options.accounts.map((a) => a.fullName)).toEqual(['Bùi Thị Hạnh', 'Lý Thu Trang']);
   });
 
   it('Level 1 bắt buộc có Buddy; không thêm được cho cửa hàng ngoài phạm vi; NV không được thêm', async () => {
@@ -156,12 +155,6 @@ describe('công cụ demo', () => {
     expect((await listOf(await as('admin'))).items).toHaveLength(8);
   });
 
-  it('danh sách tài khoản mẫu kèm lộ trình đang học để đổi tài khoản cho nhanh', async () => {
-    const accounts = (await harness.anonymous().get(`${API}/demo/accounts`).expect(200)).body as DemoAccount[];
-    const labelOf = (key: string) => accounts.find((a) => a.email === `${key}@upharma.local`)?.runLabel;
-    expect([labelOf('lan'), labelOf('nam'), labelOf('hung'), labelOf('phuong')]).toEqual(['Level 1', 'Level 2', 'Level 3', 'CHT mới tuyển']);
-    expect([labelOf('admin'), labelOf('ha'), labelOf('hanh')]).toEqual([null, null, null]);
-  });
 });
 
 describe('xóa hồ sơ nhân viên (chỉ BP Đào tạo)', () => {

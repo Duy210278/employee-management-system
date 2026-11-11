@@ -94,8 +94,7 @@ export class UserSyncService {
           email: identity.email,
           role,
           status: 'active',
-          canBuddy: identity.canBuddy ?? false,
-          reviewedAt: now,
+          canBuddy: false,
         });
       await replaceScopes(tx, row!.id, storeIds, areaIds);
       await logUserChanges(tx, [{ userId: row!.id, changedBy: null, field: 'created', newValue: `${ROLE_LABEL[role]} · đồng bộ từ hệ thống chính`, at: now }]);
@@ -127,10 +126,6 @@ export class UserSyncService {
     if (existing.status !== status) {
       patch.status = status;
       change('status', USER_STATUS_LABEL[existing.status], USER_STATUS_LABEL[status]);
-    }
-    if (identity.canBuddy !== undefined && existing.canBuddy !== identity.canBuddy) {
-      patch.canBuddy = identity.canBuddy;
-      change('canBuddy', existing.canBuddy ? 'Có' : 'Không', identity.canBuddy ? 'Có' : 'Không');
     }
     if (Object.keys(patch).length) await tx.update(users).set(patch).where(eq(users.id, existing.id));
 

@@ -1,5 +1,7 @@
 # Tài liệu thiết kế hệ thống "Lộ trình Upharma"
 
+> **Cập nhật tích hợp SSO:** các phần mô tả đăng nhập, đăng ký và chờ BP Đào tạo duyệt trong bản thiết kế ban đầu đã được thay thế. Module chỉ nhận cookie từ hệ thống chính; hệ thống chính quản lý danh tính, vai trò, phạm vi và trạng thái. BP Đào tạo vẫn quản lý riêng quyền Buddy trong module. Xem [kế hoạch tích hợp](../ke-hoach/KE_HOACH_TICH_HOP_DU_AN_LON.md) và [hướng dẫn chạy thử cookie](../../README.md#chạy-bản-demo).
+
 Quản lý khung năng lực, checklist onboarding và lộ trình 4 Level cho nhân viên bán hàng nhà thuốc
 
 | Thông tin | Nội dung |

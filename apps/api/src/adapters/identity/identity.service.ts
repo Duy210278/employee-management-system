@@ -69,7 +69,7 @@ export function readIdentity(raw: Record<string, unknown>, claimMap: Partial<Rec
 }
 
 /**
- * Đọc người dùng hiện tại từ cookie dùng chung của Web A (chỉ dùng khi AUTH_MODE=external).
+ * Đọc người dùng hiện tại từ cookie dùng chung của hệ thống chính.
  * jwt: tự kiểm chữ ký, hạn, iss, aud. introspect: gọi HOST_ME_URL kèm cookie, cache 60 giây.
  */
 @Injectable()

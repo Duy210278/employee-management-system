@@ -16,9 +16,9 @@ import {
   type TodayResponse,
 } from '@lotrinh/shared';
 import { and, desc, eq, inArray, isNull } from 'drizzle-orm';
-import { env } from '../../config';
 import { toActor, type SessionUser } from '../../common/session';
 import { ClockService } from '../../adapters/clock/clock.service';
+import { env } from '../../config';
 import { DB } from '../../db/db.provider';
 import { AccessService } from '../access/access.service';
 import { ReviewsService } from '../reviews/reviews.service';
@@ -108,7 +108,6 @@ export class MeService {
       isBuddyNow: buddyOf.length > 0,
       clock: await this.clock.view(),
       demoMode: env().DEMO_MODE,
-      authMode: env().AUTH_MODE,
     };
   }
 

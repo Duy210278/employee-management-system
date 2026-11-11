@@ -30,10 +30,20 @@ pnpm start
 
 Mở http://localhost:3000. Lần chạy đầu, API tự tạo bảng (migration) và nạp dữ liệu mẫu nếu cơ sở dữ liệu còn trống. Giữ cửa sổ terminal mở trong buổi demo; `Ctrl+C` để dừng.
 
-Màn đăng nhập có ô **đăng nhập nhanh** (bản demo): chọn tài khoản mẫu trong danh sách thả xuống, theo nhóm vai trò, rồi bấm "Vào". Mật khẩu chung `Demo@123`; sau khi vào có thể đổi tài khoản ở thanh trên cùng.
-Đăng nhập BP Đào tạo (Ngô Quốc Bảo) để khôi phục dữ liệu mẫu (tab Quản trị). Ứng dụng luôn dùng ngày thật; dữ liệu mẫu được dựng lùi từ hôm nay nên luôn có đủ tình huống đúng hạn, sắp đến hạn, quá hạn.
+Ứng dụng xác thực bằng cookie SSO từ hệ thống chính, không có đăng nhập độc lập. Để kiểm thử tích hợp trên máy, đặt các biến `HOST_*`, `PUBLIC_URL` và `BASE_PATH=/lo-trinh` trong `.env`, build/chạy module, rồi khởi động Web A giả:
 
-**Tài liệu API (Swagger):** http://localhost:3000/api/docs (JSON OpenAPI ở `/api/docs/json`). Liệt kê mọi API theo nhóm, body mẫu lấy từ schema Zod dùng chung. Muốn thử: gọi `POST /api/v1/auth/login` ngay trên trang (cookie tự lưu), rồi gọi các API khác. Đặt `API_DOCS=false` trong `.env` để tắt.
+```bash
+pnpm build
+pnpm start
+# terminal khác
+pnpm -F @lotrinh/api fake-host
+```
+
+Mở http://localhost:8080/dang-nhap, chọn tài khoản mẫu, sau đó truy cập http://localhost:8080/cookie-test. Trang cho biết trình duyệt không thể đọc cookie `HttpOnly`, Web A có nhận cookie hay không và module có xác thực được cookie qua `/lo-trinh` proxy hay không. `HOST_JWT_SECRET` trong `.env` phải khớp `FAKE_HOST_SECRET` của fake host (mặc định là giá trị mẫu trong `.env.example`). Dữ liệu mẫu chỉ là danh tính thử; tài khoản Buddy được BP Đào tạo quản lý trong module, còn vai trò/phạm vi do hệ thống chính đồng bộ.
+
+Đăng nhập bằng BP Đào tạo (Ngô Quốc Bảo) để khôi phục dữ liệu mẫu (tab Quản trị). Ứng dụng luôn dùng ngày thật; dữ liệu mẫu được dựng lùi từ hôm nay nên luôn có đủ tình huống đúng hạn, sắp đến hạn, quá hạn.
+
+**Tài liệu API (Swagger):** http://localhost:8080/lo-trinh/api/docs (JSON OpenAPI ở `/lo-trinh/api/docs/json`). Liệt kê API theo nhóm; cần đăng nhập Web A giả trước khi gọi API được bảo vệ. Đặt `API_DOCS=false` trong `.env` để tắt.
 
 ## Chạy khi phát triển
 
@@ -70,7 +80,7 @@ Mở http://localhost:5173 (Vite, tự nạp lại khi sửa mã; `/api` đượ
 | linh@upharma.local | NV Level 1, ngày thứ 62 | Đã xong checklist, đủ doanh số và Rubric: demo phiếu đánh giá, lên Level 2; giai đoạn cuối chờ CHT Bình ký |
 | nam@upharma.local | NV Level 2, ngày thứ 139 | Có doanh số 4 tháng, 4 ca Rubric (1 ca lỗi an toàn thuốc: cảnh báo đỏ) |
 | hanh@upharma.local | NV, chưa có hồ sơ | Dùng để demo "Thêm nhân viên" |
-| moi@upharma.local | Chờ duyệt | Tự đăng ký (Nhà thuốc A), chưa đăng nhập được: demo duyệt hoặc từ chối |
+| moi@upharma.local | NV | Tài khoản mẫu chưa có hồ sơ nhân viên |
 | phuong@upharma.local | CHT Nhà thuốc C, mới tuyển | Đang onboarding tuần đầu (ngày D+2), Đào tạo là BP ĐT, QLKV Huy; tab "Lộ trình của tôi" |
 | minh@upharma.local | CHT Nhà thuốc D | Chưa gán checklist: demo "Gán checklist CHT" ở Quản trị |
 

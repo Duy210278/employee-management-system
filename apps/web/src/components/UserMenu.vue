@@ -3,14 +3,14 @@ import { ROLE_LABEL, type MeResponse } from '@lotrinh/shared';
 import { useQueryClient } from '@tanstack/vue-query';
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { sessionApi, useDemoAccounts } from '@/api/queries';
+import { sessionApi } from '@/api/queries';
 import { useTheme, type ThemePref } from '@/composables/theme';
 import { useToast } from '@/composables/toast';
 import Avatar from './Avatar.vue';
 import Icon from './Icon.vue';
 import SegControl from './SegControl.vue';
 
-/** Khối người dùng góc phải thanh trên: tên, vai trò; bấm mở menu đổi tài khoản (bản demo) và đăng xuất */
+/** Khối người dùng góc phải thanh trên: tên, vai trò, giao diện và đăng xuất SSO */
 const props = defineProps<{ me: MeResponse }>();
 const router = useRouter();
 const route = useRoute();
@@ -20,8 +20,6 @@ const open = ref(false);
 const root = ref<HTMLElement | null>(null);
 const button = ref<HTMLButtonElement | null>(null);
 
-const { data: accounts } = useDemoAccounts(computed(() => props.me.demoMode && props.me.authMode === 'local'));
-const activeAccounts = computed(() => (accounts.value ?? []).filter((a) => a.status === 'active'));
 const roleLabel = computed(() => ROLE_LABEL[props.me.user.role]);
 const theme = useTheme();
 const THEME_OPTIONS: { value: ThemePref; label: string }[] = [
@@ -53,29 +51,17 @@ watch(
   () => close(),
 );
 
-async function switchAccount(event: Event) {
-  const userId = Number((event.target as HTMLSelectElement).value);
-  if (!userId || userId === props.me.user.id) return;
+async function logout() {
+  let logoutUrl: string | null = null;
   try {
-    await sessionApi.loginAs(userId);
-    qc.clear();
-    close();
-    await router.push('/');
-    toast.show(`Đã chuyển sang ${activeAccounts.value.find((a) => a.id === userId)?.fullName ?? 'tài khoản khác'}`);
+    const res = await sessionApi.logout();
+    logoutUrl = res.logoutUrl;
   } catch (err) {
     toast.show((err as Error).message);
   }
-}
-
-async function logout() {
-  const res = await sessionApi.logout().catch(() => null);
   qc.clear();
-  // Lấy người dùng từ Web A: đăng xuất ở Web A (phiên thật nằm ở đó)
-  if (props.me.authMode === 'external') {
-    window.location.href = res?.logoutUrl ?? '/';
-    return;
-  }
-  await router.push('/dang-nhap');
+  if (logoutUrl) window.location.href = logoutUrl;
+  else await router.push('/chua-co-quyen?code=SSO_REQUIRED');
 }
 </script>
 
@@ -96,12 +82,6 @@ async function logout() {
           <div class="sm mut">{{ roleLabel }}</div>
           <div v-if="me.user.email" class="sm mut">{{ me.user.email }}</div>
         </div>
-      </div>
-      <div v-if="me.demoMode && me.authMode === 'local' && activeAccounts.length" class="um-sec">
-        <label class="sm mut b" for="acctSw">Đổi tài khoản (bản demo)</label>
-        <select id="acctSw" :value="me.user.id" @change="switchAccount">
-          <option v-for="a in activeAccounts" :key="a.id" :value="a.id">{{ [a.fullName, ROLE_LABEL[a.role], a.runLabel].filter(Boolean).join(' · ') }}</option>
-        </select>
       </div>
       <div class="um-sec">
         <span class="sm mut b">Giao diện</span>

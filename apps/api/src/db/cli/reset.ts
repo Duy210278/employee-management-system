@@ -8,7 +8,7 @@ async function main() {
   try {
     const today = todayIn(env().TZ);
     await resetDatabase(db, today);
-    console.log(`Đã xóa sạch và nạp lại dữ liệu mẫu (mốc ngày ${today}). Mật khẩu chung: Demo@123`);
+    console.log(`Đã xóa sạch và nạp lại dữ liệu mẫu (mốc ngày ${today}).`);
   } finally {
     await close();
   }

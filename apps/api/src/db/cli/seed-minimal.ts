@@ -6,14 +6,14 @@ import { seedMinimal } from '../seed';
 /**
  * Nạp tối thiểu cho CSDL thật (không có nhân viên mẫu): pnpm db:seed:minimal
  * Biến môi trường tùy chọn: SEED_EFFECTIVE_FROM (mặc định 2025-01-01, ngày hiệu lực v2.1),
- * SEED_BP_CODE, SEED_BP_NAME, SEED_BP_EMAIL, SEED_BP_PASSWORD (tài khoản BP Đào tạo đầu tiên).
+ * SEED_BP_CODE, SEED_BP_NAME, SEED_BP_EMAIL (tài khoản BP Đào tạo ban đầu để liên kết khi SSO).
  */
 async function main() {
   const effectiveFrom = process.env.SEED_EFFECTIVE_FROM || '2025-01-01';
   if (!isIsoDate(effectiveFrom)) throw new Error('SEED_EFFECTIVE_FROM phải có dạng YYYY-MM-DD');
   const code = process.env.SEED_BP_CODE;
   const bp = code
-    ? { employeeCode: code, fullName: process.env.SEED_BP_NAME || code, email: process.env.SEED_BP_EMAIL || `${code.toLowerCase()}@lotrinh.local`, password: process.env.SEED_BP_PASSWORD || undefined }
+    ? { employeeCode: code, fullName: process.env.SEED_BP_NAME || code, email: process.env.SEED_BP_EMAIL || `${code.toLowerCase()}@lotrinh.local` }
     : undefined;
   const { db, close } = createDb(env().DATABASE_URL);
   try {

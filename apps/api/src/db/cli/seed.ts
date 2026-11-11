@@ -12,7 +12,7 @@ async function main() {
     }
     const today = todayIn(env().TZ);
     await seedDatabase(db, today);
-    console.log(`Đã nạp dữ liệu mẫu (mốc ngày ${today}). Mật khẩu chung: Demo@123`);
+    console.log(`Đã nạp dữ liệu mẫu (mốc ngày ${today}).`);
   } finally {
     await close();
   }

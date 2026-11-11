@@ -13,12 +13,11 @@ const { data: me } = useMe();
 const hasInbox = computed(() => !!me.value && (me.value.user.role !== 'nv' || me.value.isBuddyNow));
 const { data: inbox } = useInbox(hasInbox);
 const badge = computed(() => (inbox.value ? inbox.value.stats.waiting + inbox.value.stats.overdue : 0));
-// Huy hiệu đỏ: số nhân sự có cảnh báo đỏ (mục 4.1), số đăng ký chờ duyệt (BP ĐT), thông báo chưa đọc
+// Huy hiệu đỏ: số nhân sự có cảnh báo đỏ (mục 4.1), thông báo chưa đọc
 const isManager = computed(() => !!me.value && me.value.user.role !== 'nv');
 const { data: alerts } = useAlerts(isManager);
 const redStaff = computed(() => new Set((alerts.value?.items ?? []).filter((a) => a.severity === 'red').map((a) => a.staffId)).size);
 const { data: users } = useUsers(computed(() => me.value?.user.role === 'bp'));
-const pendingUsers = computed(() => users.value?.items.filter((u) => u.status === 'pending').length ?? 0);
 const { data: notes } = useNotifications(computed(() => !!me.value));
 const bellLabel = computed(() => (notes.value?.unread ? `Thông báo, ${notes.value.unread} chưa đọc` : 'Thông báo'));
 const route = useRoute();
@@ -61,12 +60,9 @@ const tabs = computed<Tab[]>(() => {
         to: '/quan-tri',
         label: 'Quản trị',
         icon: 'settings',
-        badge: pendingUsers.value,
         children: [
-          { to: '/quan-tri/tai-khoan', label: 'Tài khoản và vai trò', badge: pendingUsers.value },
+          { to: '/quan-tri/tai-khoan', label: 'Tài khoản và vai trò' },
           { to: '/quan-tri/danh-muc', label: 'Cửa hàng, khu vực' },
-          // Lấy người dùng từ hệ thống chính thì không nhập tài khoản ở đây
-          ...(m.authMode === 'local' ? [{ to: '/quan-tri/nhap-csv', label: 'Nhập tài khoản' }] : []),
           { to: '/quan-tri/nhat-ky', label: 'Nhật ký hệ thống' },
           ...(m.demoMode ? [{ to: '/quan-tri/he-thong', label: 'Công cụ demo' }] : []),
         ],

@@ -1,6 +1,7 @@
 import type { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
-import { addDays, todayIn, type ClockView, type DemoAccount, type IsoDate, type RunTasksResponse, type TodayResponse } from '@lotrinh/shared';
+import { addDays, todayIn, type AccountRole, type ClockView, type IsoDate, type RunTasksResponse, type TodayResponse } from '@lotrinh/shared';
+import { SignJWT } from 'jose';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { configureApp } from '../src/app.setup';
@@ -8,6 +9,7 @@ import { ClockService } from '../src/adapters/clock/clock.service';
 import { createDb } from '../src/db/client';
 import { resetDatabase } from '../src/db/seed';
 import { JobsService } from '../src/modules/jobs/jobs.service';
+import { SEED_USERS } from '../src/db/seed/seed-data';
 
 export const API = '/api/v1';
 export type Agent = ReturnType<typeof request.agent>;
@@ -35,8 +37,8 @@ export interface TestApp {
   shiftDays(days: number): Promise<IsoDate>;
   /** Đưa đồng hồ test về ngày thật */
   resetClock(): Promise<void>;
-  /** Phiên đăng nhập của tài khoản mẫu, ví dụ as('lan') */
-  as(key: string): Promise<Agent>;
+  /** Danh tính SSO của tài khoản mẫu, ví dụ as('lan') */
+  as(key: string, changes?: { role?: AccountRole; stores?: string[]; areas?: string[]; active?: boolean }): Promise<Agent>;
   anonymous(): ReturnType<typeof request>;
   close(): Promise<void>;
 }
@@ -51,8 +53,6 @@ export async function setupApp(): Promise<TestApp> {
   const app = moduleRef.createNestApplication();
   configureApp(app);
   await app.init();
-  const accounts: DemoAccount[] = (await request(app.getHttpServer()).get(`${API}/demo/accounts`).expect(200)).body;
-
   const jobs = app.get(JobsService);
 
   return {
@@ -68,11 +68,27 @@ export async function setupApp(): Promise<TestApp> {
       clock.offset = 0;
       await jobs.runAll(await clock.today());
     },
-    async as(key) {
+    async as(key, changes = {}) {
       const agent = request.agent(app.getHttpServer());
-      const account = accounts.find((a) => a.email === `${key}@upharma.local`);
-      if (!account) throw new Error(`Không có tài khoản mẫu ${key}`);
-      await agent.post(`${API}/demo/login-as`).send({ userId: account.id }).expect(200);
+      const person = SEED_USERS.find((u) => u.key === key && u.status === 'active');
+      if (!person) throw new Error(`Không có tài khoản mẫu đang hoạt động ${key}`);
+      const title = { bp: 'DAO_TAO', qlkv: 'QLKV', cht: 'CHT', nv: 'NVBH' }[changes.role ?? person.role];
+      const token = await new SignJWT({
+        employeeCode: person.employeeCode,
+        name: person.fullName,
+        email: person.email,
+        titles: [title],
+        stores: changes.stores ?? person.stores ?? [],
+        areas: changes.areas ?? person.areas ?? [],
+        active: changes.active ?? true,
+      })
+        .setProtectedHeader({ alg: 'HS256' })
+        .setSubject(`test-${person.employeeCode}`)
+        .setIssuedAt()
+        .setExpirationTime('1h')
+        .sign(new TextEncoder().encode(process.env.HOST_JWT_SECRET));
+      agent.set('Cookie', `hostsid=${token}`);
+      agent.set('Origin', 'http://127.0.0.1');
       return agent;
     },
     anonymous: () => request(app.getHttpServer()),

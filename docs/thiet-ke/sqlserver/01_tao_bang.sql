@@ -31,8 +31,7 @@
      user_store_scopes + user_area_scopes  -> user_scopes
      stage_signoffs + review_signatures    -> signoffs (stage_key hoặc review_id, đúng một trong hai)
      system_settings                       -> bỏ (chỉ lưu ngày giả lập của đồng hồ demo, đã bỏ)
-   credentials giữ lại cho tới khi đăng nhập bằng SSO của dự án lớn; khi có SSO thì bỏ bảng này,
-   các cột requested_* và đổi khóa nhận diện sang employee_code.
+   Danh tính, vai trò, phạm vi và trạng thái đồng bộ từ hệ thống chính. Quyền Buddy do BP Đào tạo quản lý trong module.
 
    Khác bản PostgreSQL ở các cột:
      level_runs: bỏ criteria_line (lấy qua versions.criteria_line theo version_id).
@@ -68,33 +67,21 @@ CREATE TABLE lotrinh.stores (
 CREATE TABLE lotrinh.users (
   id                 INT IDENTITY(1,1) NOT NULL CONSTRAINT pk_users PRIMARY KEY,
   employee_code      NVARCHAR(30)  NULL,
+  external_id        NVARCHAR(100) NULL,
   full_name          NVARCHAR(200) NOT NULL,
-  email              NVARCHAR(255) NOT NULL CONSTRAINT uq_users_email UNIQUE,   -- tên đăng nhập
+  email              NVARCHAR(255) NULL,
   phone              NVARCHAR(30)  NULL,
   [role]             NVARCHAR(10)  NOT NULL CONSTRAINT ck_users_role CHECK ([role] IN (N'nv', N'cht', N'qlkv', N'bp')),
-  [status]           NVARCHAR(10)  NOT NULL CONSTRAINT df_users_status DEFAULT N'pending'
-                     CONSTRAINT ck_users_status CHECK ([status] IN (N'pending', N'active', N'locked', N'left', N'rejected')),
+  [status]           NVARCHAR(10)  NOT NULL CONSTRAINT df_users_status DEFAULT N'active'
+                     CONSTRAINT ck_users_status CHECK ([status] IN (N'active', N'left')),
   can_buddy          BIT NOT NULL CONSTRAINT df_users_can_buddy DEFAULT 0,
-  -- Người đăng ký đề nghị vai trò, phạm vi; BP Đào tạo chốt khi duyệt
-  requested_role     NVARCHAR(10) NULL CONSTRAINT ck_users_requested_role CHECK (requested_role IN (N'nv', N'cht', N'qlkv', N'bp')),
-  requested_store_id INT NULL CONSTRAINT fk_users_requested_store REFERENCES lotrinh.stores(id),
-  requested_area_id  INT NULL CONSTRAINT fk_users_requested_area REFERENCES lotrinh.areas(id),
-  review_note        NVARCHAR(MAX) NULL,       -- lý do từ chối đăng ký
-  reviewed_by        INT NULL CONSTRAINT fk_users_reviewed_by REFERENCES lotrinh.users(id),
-  reviewed_at        DATETIMEOFFSET(3) NULL,
   row_version        INT NOT NULL CONSTRAINT df_users_row_version DEFAULT 0,
   last_seen_at       DATETIMEOFFSET(3) NULL,
   created_at         DATETIMEOFFSET(3) NOT NULL CONSTRAINT df_users_created_at DEFAULT SYSDATETIMEOFFSET()
 );
 CREATE UNIQUE INDEX uq_users_employee_code ON lotrinh.users(employee_code) WHERE employee_code IS NOT NULL;
-
-/* Mật khẩu đăng nhập nội bộ; bỏ khi chuyển sang SSO */
-CREATE TABLE lotrinh.credentials (
-  user_id             INT NOT NULL CONSTRAINT pk_credentials PRIMARY KEY
-                      CONSTRAINT fk_credentials_user REFERENCES lotrinh.users(id),
-  password_hash       NVARCHAR(200) NOT NULL,
-  password_changed_at DATETIMEOFFSET(3) NOT NULL CONSTRAINT df_credentials_changed_at DEFAULT SYSDATETIMEOFFSET()
-);
+CREATE UNIQUE INDEX uq_users_external_id ON lotrinh.users(external_id) WHERE external_id IS NOT NULL;
+CREATE UNIQUE INDEX uq_users_email ON lotrinh.users(email) WHERE email IS NOT NULL;
 
 /* Phạm vi dữ liệu của tài khoản: CHT theo cửa hàng, QLKV theo khu vực. Mỗi dòng đúng một trong hai cột. */
 CREATE TABLE lotrinh.user_scopes (

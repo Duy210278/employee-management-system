@@ -15,7 +15,6 @@ import { API, setupApp, type TestApp } from './helpers';
 const DIRECTORY_PORT = vi.hoisted(() => {
   const port = 45000 + Math.floor(Math.random() * 1000);
   Object.assign(process.env, {
-    AUTH_MODE: 'external',
     HOST_AUTH_MODE: 'jwt',
     HOST_COOKIE_NAME: 'hostsid',
     HOST_JWT_SECRET: 'khoa-thu-cua-web-a-0123456789',
@@ -63,7 +62,7 @@ class Browser {
         .anonymous()
         .put(`${API}${path}`)
         .set('Cookie', this.cookie())
-        .set('Origin', `http://127.0.0.1:${addr?.port}`)
+        .set('Origin', 'http://127.0.0.1')
         .set('Host', `127.0.0.1:${addr?.port}`)
         .send(body),
     );
@@ -71,7 +70,7 @@ class Browser {
   async post(path: string, body: object = {}, origin: string | null = 'same') {
     const addr = this.harness.app.getHttpServer().address() as AddressInfo | null;
     const req = this.harness.anonymous().post(`${API}${path}`).set('Cookie', this.cookie());
-    if (origin === 'same') req.set('Origin', `http://127.0.0.1:${addr?.port}`).set('Host', `127.0.0.1:${addr?.port}`);
+    if (origin === 'same') req.set('Origin', 'http://127.0.0.1').set('Host', `127.0.0.1:${addr?.port}`);
     else if (origin) req.set('Origin', origin);
     return this.keep(await req.send(body));
   }
@@ -97,16 +96,15 @@ afterAll(async () => {
 describe('đăng nhập qua cookie dùng chung của Web A', () => {
   it('cấu hình cho giao diện; không có cookie Web A → 401 SSO_REQUIRED; đăng nhập riêng không còn', async () => {
     expect((await harness.anonymous().get(`${API}/auth/config`).expect(200)).body).toEqual({
-      authMode: 'external',
-      loginUrl: 'http://web-a.test/dang-nhap',
-      logoutUrl: 'http://web-a.test/dang-xuat',
+    loginUrl: 'http://web-a.test/dang-nhap',
+    logoutUrl: 'http://web-a.test/dang-xuat',
     });
     const res = await new Browser(harness, null).get('/me');
     expect(res.status).toBe(401);
     expect(res.body.code).toBe('SSO_REQUIRED');
     const anon = new Browser(harness, null);
     expect((await anon.post('/auth/login', { email: 'lan@upharma.local', password: 'Demo@123' })).status).toBe(404);
-    expect((await anon.post('/demo/login-as', { userId: 1 })).status).toBe(404);
+    expect((await anon.post('/demo/login-as', { userId: 1 }, 'same')).status).toBe(404);
     // Thiếu Origin thì bị chặn CSRF trước cả khi tới route
     expect((await anon.post('/auth/login', {}, null)).status).toBe(403);
   });
@@ -190,24 +188,20 @@ describe('đăng nhập qua cookie dùng chung của Web A', () => {
 });
 
 describe('quản trị tài khoản khi Web A là nguồn chuẩn', () => {
-  it('BP không tạo, không duyệt tài khoản; sửa tài khoản chỉ đổi được quyền Buddy, vai trò giữ theo Web A', async () => {
+  it('BP không tạo tài khoản; quyền Buddy do module quản lý còn vai trò giữ theo Web A', async () => {
     const admin = new Browser(harness, await hostToken({ sub: 'a-admin', employeeCode: 'BP001', name: 'Ngô Quốc Bảo', titles: ['DAO_TAO'] }));
     await admin.get('/me');
     const created = await admin.post('/users', { fullName: 'Người Thử', email: 'thu@x.vn', phone: '', role: 'nv', storeIds: [], areaIds: [], canBuddy: false, password: 'Abcdef12' });
-    expect(created.status).toBe(403);
-    expect(created.body.code).toBe('MANAGED_BY_HOST');
+    expect(created.status).toBe(404);
     const [mai] = await db.select().from(users).where(eq(users.employeeCode, 'NV203'));
-    const detail = (await admin.get(`/users/${mai!.id}`)).body as { user: { fullName: string; employeeCode: string | null; phone: string | null; role: string; status: string; canBuddy: boolean; rowVersion: number } };
+    const detail = (await admin.get(`/users/${mai!.id}`)).body as { user: { fullName: string; role: string; canBuddy: boolean; rowVersion: number } };
     const u = detail.user;
     const res = await admin.harnessPut(`/users/${mai!.id}`, {
       fullName: 'Tên Bị Sửa',
-      employeeCode: u.employeeCode,
-      phone: u.phone ?? '',
       role: 'qlkv',
       storeIds: [],
       areaIds: [1],
       canBuddy: true,
-      status: 'active',
       rowVersion: u.rowVersion,
       handover: [],
     });
@@ -228,7 +222,7 @@ describe('đồng bộ hàng loạt từ danh sách nhân sự Web A', () => {
     expect(result.message).toMatch(/^4 người: thêm 2, cập nhật 1, chuyển nghỉ \d+, bỏ qua 1$/);
     const [ql] = await db.select().from(users).where(eq(users.employeeCode, 'QL009'));
     expect(ql).toMatchObject({ role: 'qlkv', status: 'active', externalId: 'a-qlkv2' });
-    expect((await db.select().from(users).where(eq(users.employeeCode, 'NV909')))[0]).toMatchObject({ role: 'nv', canBuddy: true });
+    expect((await db.select().from(users).where(eq(users.employeeCode, 'NV909')))[0]).toMatchObject({ role: 'nv', canBuddy: false });
     // Lan và Đỗ Văn Mới đã đồng bộ khi vào module nhưng không có trong danh sách → Đã nghỉ
     const gone = await db.select({ code: users.employeeCode, status: users.status }).from(users).where(and(eq(users.status, 'left')));
     expect(gone.map((g) => g.code)).toEqual(expect.arrayContaining(['NV201', 'NV901']));

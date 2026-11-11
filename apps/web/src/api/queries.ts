@@ -5,20 +5,15 @@ import type {
   ChtJournalBodyT,
   ChtOnboardingResponse,
   CreateChtRunBodyT,
-  ApproveUserBodyT,
   AreaBodyT,
   AssignmentRole,
   AuditLogResponse,
   ConfirmManyResult,
-  CreateUserBodyT,
-  ImportUsersResponse,
   JobName,
   JobResult,
   NotificationsResponse,
   OrgResponse,
   PauseBodyT,
-  RegisterBodyT,
-  RegisterOptions,
   RunManageResponse,
   StopStaffBodyT,
   DeleteStaffBodyT,
@@ -28,7 +23,6 @@ import type {
   UserDetailResponse,
   UserListResponse,
   CreateStaffBodyT,
-  DemoAccount,
   FrameworkResponse,
   InboxResponse,
   AuthConfigResponse,
@@ -57,14 +51,7 @@ import { useToast } from '@/composables/toast';
 import { api, API_BASE, ApiError } from './client';
 
 export const queryClient = new QueryClient({
-  queryCache: new QueryCache({
-    onError: (err) => {
-      if (err instanceof ApiError && err.status === 401 && location.pathname !== '/dang-nhap') {
-        queryClient.clear();
-        location.assign('/dang-nhap');
-      }
-    },
-  }),
+  queryCache: new QueryCache(),
   defaultOptions: {
     queries: { retry: false, refetchOnWindowFocus: true, staleTime: 10_000 },
   },
@@ -72,7 +59,7 @@ export const queryClient = new QueryClient({
 
 export const fetchMe = () => api.get<MeResponse>('/me');
 
-/** Cách đăng nhập (đọc một lần): local có trang đăng nhập riêng, external chuyển sang trang đăng nhập của Web A */
+/** Địa chỉ đăng nhập/đăng xuất của hệ thống chính */
 let authConfigPromise: Promise<AuthConfigResponse> | null = null;
 export const fetchAuthConfig = () => (authConfigPromise ??= api.get<AuthConfigResponse>('/auth/config').catch((err) => {
   authConfigPromise = null;
@@ -83,8 +70,6 @@ export const useMe = () => useQuery({ queryKey: ['me'], queryFn: fetchMe, staleT
 export const useToday = () => useQuery({ queryKey: ['today'], queryFn: () => api.get<TodayResponse>('/me/today') });
 export const useInbox = (enabled: Ref<boolean>) =>
   useQuery({ queryKey: ['inbox'], queryFn: () => api.get<InboxResponse>('/me/inbox'), enabled });
-export const useDemoAccounts = (enabled: Ref<boolean>) =>
-  useQuery({ queryKey: ['demo-accounts'], queryFn: () => api.get<DemoAccount[]>('/demo/accounts'), enabled, staleTime: 60_000 });
 export const useOverview = (runId: Ref<number | null>) =>
   useQuery({
     queryKey: computed(() => ['overview', runId.value]),
@@ -130,7 +115,6 @@ export const useUser = (id: Ref<number | null>) =>
     staleTime: 0,
   });
 export const useOrg = () => useQuery({ queryKey: ['org'], queryFn: () => api.get<OrgResponse>('/org') });
-export const useRegisterOptions = () => useQuery({ queryKey: ['register-options'], queryFn: () => api.get<RegisterOptions>('/auth/register-options'), staleTime: 60_000 });
 export const useAuditLogs = (params: Ref<Record<string, string | number>>) =>
   useQuery({
     queryKey: computed(() => ['audit', params.value]),
@@ -200,8 +184,6 @@ export const taskApi = {
 };
 
 export const sessionApi = {
-  login: (email: string, password: string) => api.post<{ ok: true }>('/auth/login', { email, password }),
-  loginAs: (userId: number) => api.post<{ ok: true }>('/demo/login-as', { userId }),
   logout: () => api.post<{ ok: true; logoutUrl: string | null }>('/auth/logout'),
   ack: (runId: number) => api.post<{ ok: true }>(`/runs/${runId}/ack`),
   resetDemo: () => api.post<{ ok: true; today: string }>('/demo/reset'),
@@ -245,12 +227,7 @@ export const runApi = {
 };
 
 export const userApi = {
-  register: (body: RegisterBodyT) => api.post<{ ok: true }>('/auth/register', body),
-  create: (body: CreateUserBodyT) => api.post<{ id: number }>('/users', body),
   update: (id: number, body: UpdateUserBodyT) => api.put<UserDetailResponse>(`/users/${id}`, body),
-  approve: (id: number, body: ApproveUserBodyT) => api.post<UserDetailResponse>(`/users/${id}/approve`, body),
-  reject: (id: number, note: string) => api.post<UserDetailResponse>(`/users/${id}/reject`, { note }),
-  importCsv: (csv: string, commit: boolean) => api.post<ImportUsersResponse>('/users/import', { csv, commit }),
 };
 
 export const orgApi = {

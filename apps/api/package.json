@@ -13,7 +13,8 @@
     "db:migrate": "tsx src/db/cli/migrate.ts",
     "db:seed": "tsx src/db/cli/seed.ts",
     "db:seed:minimal": "tsx src/db/cli/seed-minimal.ts",
-    "db:reset": "tsx src/db/cli/reset.ts"
+    "db:reset": "tsx src/db/cli/reset.ts",
+    "fake-host": "tsx scripts/fake-host.ts"
   },
   "dependencies": {
     "@casl/ability": "^6.7.3",
@@ -23,7 +24,6 @@
     "@nestjs/jwt": "^11.0.2",
     "@nestjs/platform-express": "^11.2.7",
     "@nestjs/swagger": "^11.4.7",
-    "bcryptjs": "^3.0.3",
     "cookie-parser": "^1.4.7",
     "dotenv": "^16.6.1",
     "drizzle-orm": "1.0.0-rc.5",

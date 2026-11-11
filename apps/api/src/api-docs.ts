@@ -37,11 +37,9 @@ const METHODS = ['get', 'post', 'put', 'delete', 'patch'] as const;
 /** Kiểu generic của zodToJsonSchema lồng quá sâu với ZodTypeAny (TS2589): gọi qua chữ ký đơn giản */
 const toJsonSchema = zodToJsonSchema as unknown as (schema: ZodTypeAny, options: { target: 'openApi3'; $refStrategy: 'none' }) => SchemaObject;
 
-const DESCRIPTION = `API của bản demo, tiền tố \`/api/v1\`. Lỗi trả về dạng \`{ "code": "...", "message": "..." }\`.
+const DESCRIPTION = `API của module Lộ trình, tiền tố \`/api/v1\`. Lỗi trả về dạng \`{ "code": "...", "message": "..." }\`.
 
-**Đăng nhập trước khi thử:** mở nhóm *Đăng nhập, đăng ký* → \`POST /api/v1/auth/login\` → *Try it out*, gửi
-\`{ "email": "admin@upharma.local", "password": "Demo@123" }\`. Trình duyệt lưu cookie \`${SESSION_COOKIE}\`, các lệnh sau chạy bằng phiên đó.
-Đổi người dùng nhanh (DEMO_MODE): lấy \`id\` ở \`GET /api/v1/demo/accounts\` rồi gọi \`POST /api/v1/demo/login-as\`.
+API xác thực danh tính bằng cookie phiên do hệ thống chính cấp. Trong demo tích hợp, đăng nhập ở Web A giả lập trước rồi vào Lộ trình qua tab dùng chung domain.
 
 Cấu trúc body lấy từ schema Zod dùng chung (\`packages/shared/src/schemas\`), cùng schema máy chủ dùng để kiểm tra dữ liệu.`;
 

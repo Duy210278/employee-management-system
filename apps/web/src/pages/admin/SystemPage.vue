@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ROLE_LABEL, type JobName, type JobResult } from '@lotrinh/shared';
+import { type JobName, type JobResult } from '@lotrinh/shared';
 import { useQueryClient } from '@tanstack/vue-query';
-import { computed, ref } from 'vue';
-import { demoApi, sessionApi, useDemoAccounts, useMe, useMutate } from '@/api/queries';
+import { ref } from 'vue';
+import { demoApi, sessionApi, useMe, useMutate } from '@/api/queries';
 import { useToast } from '@/composables/toast';
 import { fmtDate } from '@/format';
 
@@ -11,7 +11,6 @@ const { data: me } = useMe();
 const qc = useQueryClient();
 const toast = useToast();
 const mutate = useMutate();
-const { data: accounts } = useDemoAccounts(computed(() => !!me.value?.demoMode));
 const armed = ref(false);
 const busy = ref(false);
 
@@ -81,22 +80,6 @@ async function reset() {
           </ul>
         </div>
 
-        <div class="card">
-          <div class="stg"><b>Tài khoản mẫu</b><span class="sm mut">Mật khẩu chung: <span class="mono">Demo@123</span></span></div>
-          <table class="rt">
-            <thead>
-              <tr><th>Họ tên</th><th>Email</th><th>Vai trò</th><th>Tình huống mẫu</th></tr>
-            </thead>
-            <tbody>
-              <tr v-for="a in accounts" :key="a.id">
-                <td data-l="Họ tên"><b>{{ a.fullName }}</b> <span v-if="a.status !== 'active'" class="pill warn">Chờ duyệt</span></td>
-                <td data-l="Email" class="sm">{{ a.email }}</td>
-                <td data-l="Vai trò">{{ ROLE_LABEL[a.role] }}</td>
-                <td data-l="Tình huống" class="sm mut">{{ a.note }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
       </template>
     </template>
   </div>

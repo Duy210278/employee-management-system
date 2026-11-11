@@ -6,7 +6,6 @@ import {
   runTitle,
   UpdateUserBody,
   USER_STATUS_LABEL,
-  type AccountRole,
   type AssignmentView,
   type UserDetailResponse,
 } from '@lotrinh/shared';
@@ -14,16 +13,15 @@ import { useQueryClient } from '@tanstack/vue-query';
 import { computed, reactive, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { ApiError } from '@/api/client';
-import { useMe, userApi, useStaffProfile, useUser } from '@/api/queries';
+import { userApi, useStaffProfile, useUser } from '@/api/queries';
 import Avatar from '@/components/Avatar.vue';
 import ChtRunForm from '@/components/cht/ChtRunForm.vue';
 import StaffRunForm from '@/components/StaffRunForm.vue';
 import { usePageHeader } from '@/composables/pageHeader';
 import { useToast } from '@/composables/toast';
 import { fmtDateTime } from '@/format';
-import ScopePicker from './ScopePicker.vue';
 
-/** Chi tiết tài khoản (mục 5.3, 5.4): thông tin, vai trò, phạm vi, quyền bổ sung, trạng thái, lịch sử; chuyển giao khi khóa (R20) */
+/** Chi tiết tài khoản đồng bộ từ hệ thống chính; BP Đào tạo quản lý riêng quyền Buddy trong module */
 const route = useRoute();
 const qc = useQueryClient();
 const toast = useToast();
@@ -31,26 +29,13 @@ const id = computed(() => Number(route.params.id));
 const { data: d, isLoading, error } = useUser(id);
 const busy = ref(false);
 
-const info = reactive({ fullName: '', employeeCode: '', phone: '', status: 'active' as 'active' | 'locked' | 'left' });
-const { data: me } = useMe();
-/** Người dùng lấy từ hệ thống chính: chỉ sửa quyền Buddy */
-const hostManaged = computed(() => me.value?.authMode === 'external');
-const scope = ref({ role: 'nv' as AccountRole, storeIds: [] as number[], areaIds: [] as number[], canBuddy: false });
+const canBuddy = ref(false);
 const handover = reactive<Record<string, number>>({});
-const rejectNote = ref('');
 usePageHeader(() => (d.value ? { title: d.value.user.fullName, crumbs: [{ label: 'Quản trị', to: '/quan-tri' }, { label: 'Tài khoản và vai trò', to: '/quan-tri/tai-khoan' }] } : null));
 
 function load(v: UserDetailResponse) {
   const u = v.user;
-  Object.assign(info, { fullName: u.fullName, employeeCode: u.employeeCode ?? '', phone: u.phone ?? '', status: ['locked', 'left'].includes(u.status) ? u.status : 'active' });
-  // Tài khoản chờ duyệt: điền sẵn theo đề nghị lúc đăng ký
-  const r = u.status === 'pending' ? u.requested : null;
-  scope.value = {
-    role: r?.role ?? u.role,
-    storeIds: r ? (r.role === 'cht' && r.storeId ? [r.storeId] : []) : u.stores.map((s) => s.id),
-    areaIds: r ? (r.role === 'qlkv' && r.areaId ? [r.areaId] : []) : u.areas.map((a) => a.id),
-    canBuddy: u.canBuddy,
-  };
+  canBuddy.value = u.canBuddy;
   for (const k of Object.keys(handover)) delete handover[k];
 }
 watch(d, (v) => v && load(v), { immediate: true });
@@ -58,10 +43,9 @@ watch(d, (v) => v && load(v), { immediate: true });
 const key = (a: AssignmentView) => `${a.runId}:${a.role}`;
 /** Phân công không còn hợp lệ với tài khoản sau khi sửa (cùng quy tắc với máy chủ) */
 const affected = computed(() =>
-  (d.value?.assignments ?? []).filter((a) => !canHoldAssignment(a.role, { role: scope.value.role, status: info.status, canBuddy: scope.value.canBuddy })),
+  (d.value?.assignments ?? []).filter((a) => !canHoldAssignment(a.role, { role: d.value!.user.role, status: d.value!.user.status, canBuddy: canBuddy.value })),
 );
 const candidates = (a: AssignmentView) => (d.value?.candidates[a.role] ?? []).filter((c) => c.id !== id.value && !(a.role === 'buddy' && c.id === a.staffUserId));
-const isReviewed = computed(() => !!d.value && !['pending', 'rejected'].includes(d.value.user.status));
 
 // Lộ trình và checklist của tài khoản NV (mục 9.1): chưa có hồ sơ thì gán checklist ngay tại đây
 const isActiveNv = computed(() => d.value?.user.role === 'nv' && d.value.user.status === 'active');
@@ -80,7 +64,7 @@ const runText = computed(() => {
   return `${name} · ${day} · ${r.progress.done}/${r.progress.total} mục (${Math.round(r.progress.pct * 100)}%)`;
 });
 const accountForForm = computed(() =>
-  d.value ? { id: d.value.user.id, fullName: d.value.user.fullName, employeeCode: d.value.user.employeeCode, storeId: d.value.user.requested?.storeId ?? null } : undefined,
+  d.value ? { id: d.value.user.id, fullName: d.value.user.fullName, employeeCode: d.value.user.employeeCode, storeId: d.value.user.stores[0]?.id ?? null } : undefined,
 );
 
 async function act(fn: () => Promise<UserDetailResponse>, done: string) {
@@ -102,19 +86,12 @@ function save() {
   const missing = affected.value.filter((a) => !handover[key(a)]);
   if (missing.length) return toast.show(`Chọn người thay cho ${missing.length} phân công ở khung "Chuyển giao"`);
   const parsed = UpdateUserBody.safeParse({
-    ...info,
-    employeeCode: info.employeeCode || null,
-    ...scope.value,
+    canBuddy: canBuddy.value,
     rowVersion: d.value!.user.rowVersion,
     handover: affected.value.map((a) => ({ runId: a.runId, role: a.role, userId: handover[key(a)] })),
   });
   if (!parsed.success) return toast.show(parsed.error.issues[0]?.message ?? 'Kiểm tra lại thông tin');
-  void act(() => userApi.update(id.value, parsed.data), 'Đã lưu tài khoản');
-}
-const approve = () => act(() => userApi.approve(id.value, scope.value), `Đã duyệt, vai trò ${ROLE_LABEL[scope.value.role]}`);
-function reject() {
-  if (!rejectNote.value.trim()) return toast.show('Nhập lý do từ chối');
-  void act(() => userApi.reject(id.value, rejectNote.value.trim()), 'Đã từ chối đăng ký');
+  void act(() => userApi.update(id.value, parsed.data), 'Đã cập nhật quyền Buddy');
 }
 </script>
 
@@ -135,31 +112,9 @@ function reject() {
               </div>
             </div>
           </div>
-          <span class="pill" :class="{ ok: d.user.status === 'active', warn: d.user.status === 'pending' || d.user.status === 'locked', bad: d.user.status === 'rejected' }">
+          <span class="pill" :class="{ ok: d.user.status === 'active', bad: d.user.status === 'left' }">
             {{ USER_STATUS_LABEL[d.user.status] }}
           </span>
-        </div>
-        <div v-if="d.user.status === 'rejected'" class="alert bad"><div><b>Lý do từ chối:</b> {{ d.user.reviewNote }}</div></div>
-      </div>
-
-      <!-- Duyệt đăng ký (mục 5.1) -->
-      <div v-if="d.user.status === 'pending' && !hostManaged" class="grid g2 start">
-        <div class="card pad stack hl">
-          <div class="h2">Duyệt đăng ký</div>
-          <div class="sm">
-            Đề nghị: <b>{{ ROLE_LABEL[d.user.requested?.role ?? d.user.role] }}</b>
-            <template v-if="d.user.requested?.storeName"> · {{ d.user.requested.storeName }}</template>
-            <template v-if="d.user.requested?.areaName"> · {{ d.user.requested.areaName }}</template>
-            · mã NV {{ d.user.employeeCode }}<template v-if="d.user.phone"> · {{ d.user.phone }}</template>
-          </div>
-          <ScopePicker v-model="scope" :options="d.options" />
-          <div><button class="btn pri" type="button" :disabled="busy" @click="approve">Duyệt tài khoản</button></div>
-        </div>
-        <div class="card pad stack">
-          <div class="h2">Từ chối</div>
-          <div class="sm mut">Không xóa bản ghi; tài khoản chuyển "Bị từ chối" kèm lý do, người đăng ký thấy lý do khi đăng nhập.</div>
-          <textarea v-model="rejectNote" rows="3" placeholder="Lý do từ chối (bắt buộc)" aria-label="Lý do từ chối"></textarea>
-          <div><button class="btn bad" type="button" :disabled="busy" @click="reject">Từ chối đăng ký</button></div>
         </div>
       </div>
 
@@ -212,27 +167,13 @@ function reject() {
         <div v-else class="sm mut">Đang tải…</div>
       </div>
 
-      <!-- Sửa tài khoản (mục 5.3) -->
-      <form v-if="isReviewed" class="card pad stack" @submit.prevent="save">
-        <div class="h2">Thông tin và quyền</div>
-        <div v-if="hostManaged" class="alert info"><div>Họ tên, mã nhân viên, vai trò, nơi làm việc và trạng thái được đồng bộ từ hệ thống chính. Ở đây chỉ bật, tắt quyền làm Buddy.</div></div>
-        <fieldset class="form plain" :disabled="hostManaged">
-          <label class="f">Họ và tên<input v-model="info.fullName" required /></label>
-          <label class="f">Mã nhân viên<input v-model="info.employeeCode" /></label>
-          <label class="f">Điện thoại<input v-model="info.phone" /></label>
-          <label class="f">
-            Trạng thái
-            <select v-model="info.status">
-              <option value="active">Hoạt động</option>
-              <option value="locked">Tạm khóa</option>
-              <option value="left">Đã nghỉ</option>
-            </select>
-          </label>
-        </fieldset>
-        <ScopePicker v-model="scope" :options="d.options" :lock-scope="hostManaged" />
-        <div v-if="d.isLastBp" class="alert info">
-          <div>Đây là tài khoản BP Đào tạo hoạt động cuối cùng: không hạ quyền hoặc khóa được cho tới khi có BP Đào tạo khác (R19).</div>
-        </div>
+      <form v-if="d.user.status !== 'left'" class="card pad stack" @submit.prevent="save">
+        <div class="h2">Quyền Buddy</div>
+        <div class="sm mut">BP Đào tạo quản lý quyền Buddy tại module. Danh tính, vai trò, phạm vi và trạng thái đồng bộ từ hệ thống chính.</div>
+        <label class="rowf">
+          <input v-model="canBuddy" type="checkbox" />
+          <span>Được phân công làm Buddy</span>
+        </label>
 
         <!-- Chuyển giao (mục 5.4 điều 3, R20) -->
         <div v-if="affected.length" class="card pad stack hl-warn">
@@ -253,7 +194,7 @@ function reject() {
         </div>
 
         <div class="rowf">
-          <button class="btn pri" type="submit" :disabled="busy">Lưu thay đổi</button>
+          <button class="btn pri" type="submit" :disabled="busy || canBuddy === d.user.canBuddy">Lưu quyền Buddy</button>
           <button class="btn" type="button" :disabled="busy" @click="load(d)">Hoàn tác</button>
         </div>
       </form>

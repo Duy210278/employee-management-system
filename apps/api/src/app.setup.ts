@@ -20,7 +20,7 @@ const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
  * nên lệnh ghi phải đến từ chính trang của mình (Origin, hoặc Referer khi thiếu Origin, trùng PUBLIC_URL hoặc Host).
  */
 export function sameOriginWrites(req: Request, res: Response, next: NextFunction): void {
-  if (env().AUTH_MODE !== 'external' || SAFE_METHODS.has(req.method)) return next();
+  if (SAFE_METHODS.has(req.method)) return next();
   let origin = req.headers.origin;
   if (!origin && req.headers.referer) {
     try {

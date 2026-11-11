@@ -24,9 +24,8 @@ interface SessionPayload {
 }
 
 /**
- * Bước 1 của phân quyền (mục 14.8): xác định người dùng của request, tài khoản phải đang Hoạt động.
- * local: phiên do module cấp khi đăng nhập bằng email, mật khẩu.
- * external: người dùng do cookie dùng chung của Web A xác nhận. Phiên module (lt_session) chỉ là bộ đệm ngắn hạn,
+ * Xác định người dùng từ cookie dùng chung của Web A; tài khoản phải đang Hoạt động.
+ * Phiên module (lt_session) chỉ là bộ đệm ngắn hạn,
  * gắn với đúng cookie Web A đã dùng: đổi người ở Web A, đăng xuất Web A hoặc quá HOST_RECHECK_MINUTES thì đọc lại
  * cookie và đồng bộ lại vai trò, phạm vi.
  */
@@ -50,7 +49,7 @@ export class AuthGuard implements CanActivate {
     if (this.reflector.getAllAndOverride<boolean>(IS_PUBLIC, [context.getHandler(), context.getClass()])) return true;
     const req = context.switchToHttp().getRequest<Request>();
     const res = context.switchToHttp().getResponse<Response>();
-    const user = env().AUTH_MODE === 'external' ? await this.externalUser(req, res) : await this.localUser(req);
+    const user = await this.externalUser(req, res);
     req.user = user;
     // Lần vào cuối theo đồng hồ nghiệp vụ, để cảnh báo "không đăng nhập quá 5 ngày" khớp với "hôm nay" của nghiệp vụ
     const now = await this.clock.now();
@@ -84,15 +83,6 @@ export class AuthGuard implements CanActivate {
       .from(users)
       .where(eq(users.id, userId));
     return user && user.status === 'active' ? user : null;
-  }
-
-  private async localUser(req: Request): Promise<SessionUser> {
-    if (!req.cookies?.[SESSION_COOKIE]) throw unauthorized('NO_SESSION', 'Chưa đăng nhập');
-    const payload = await this.session(req);
-    if (!payload) throw unauthorized('SESSION_EXPIRED', 'Phiên đăng nhập đã hết hạn. Đăng nhập lại.');
-    const user = await this.loadActive(payload.sub);
-    if (!user) throw unauthorized('ACCOUNT_INACTIVE', 'Tài khoản không còn hoạt động. Đăng nhập lại.');
-    return user;
   }
 
   private async externalUser(req: Request, res: Response): Promise<SessionUser> {
