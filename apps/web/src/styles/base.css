@@ -2769,3 +2769,11 @@ table.te td:has(> input[type='checkbox']) {
     grid-column: 1 / -1;
   }
 }
+
+/* Nhóm trường dùng fieldset để khóa cả nhóm (disabled) mà không đổi giao diện */
+fieldset.plain {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}

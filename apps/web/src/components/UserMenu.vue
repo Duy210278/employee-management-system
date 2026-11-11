@@ -20,7 +20,7 @@ const open = ref(false);
 const root = ref<HTMLElement | null>(null);
 const button = ref<HTMLButtonElement | null>(null);
 
-const { data: accounts } = useDemoAccounts(computed(() => props.me.demoMode));
+const { data: accounts } = useDemoAccounts(computed(() => props.me.demoMode && props.me.authMode === 'local'));
 const activeAccounts = computed(() => (accounts.value ?? []).filter((a) => a.status === 'active'));
 const roleLabel = computed(() => ROLE_LABEL[props.me.user.role]);
 const theme = useTheme();
@@ -68,8 +68,13 @@ async function switchAccount(event: Event) {
 }
 
 async function logout() {
-  await sessionApi.logout().catch(() => undefined);
+  const res = await sessionApi.logout().catch(() => null);
   qc.clear();
+  // Lấy người dùng từ Web A: đăng xuất ở Web A (phiên thật nằm ở đó)
+  if (props.me.authMode === 'external') {
+    window.location.href = res?.logoutUrl ?? '/';
+    return;
+  }
   await router.push('/dang-nhap');
 }
 </script>
@@ -89,10 +94,10 @@ async function logout() {
         <div>
           <b>{{ me.user.fullName }}</b>
           <div class="sm mut">{{ roleLabel }}</div>
-          <div class="sm mut">{{ me.user.email }}</div>
+          <div v-if="me.user.email" class="sm mut">{{ me.user.email }}</div>
         </div>
       </div>
-      <div v-if="me.demoMode && activeAccounts.length" class="um-sec">
+      <div v-if="me.demoMode && me.authMode === 'local' && activeAccounts.length" class="um-sec">
         <label class="sm mut b" for="acctSw">Đổi tài khoản (bản demo)</label>
         <select id="acctSw" :value="me.user.id" @change="switchAccount">
           <option v-for="a in activeAccounts" :key="a.id" :value="a.id">{{ [a.fullName, ROLE_LABEL[a.role], a.runLabel].filter(Boolean).join(' · ') }}</option>

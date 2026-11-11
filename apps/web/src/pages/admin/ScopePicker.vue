@@ -4,7 +4,8 @@ import { computed } from 'vue';
 
 /** Chọn vai trò, phạm vi (cửa hàng cho CHT, khu vực cho QLKV) và quyền bổ sung (mục 5.3) */
 const model = defineModel<{ role: AccountRole; storeIds: number[]; areaIds: number[]; canBuddy: boolean }>({ required: true });
-const props = defineProps<{ options: OrgOptions; disabled?: boolean }>();
+/** lockScope: vai trò, phạm vi do hệ thống chính quản lý, chỉ còn sửa quyền Buddy */
+const props = defineProps<{ options: OrgOptions; disabled?: boolean; lockScope?: boolean }>();
 // Danh mục đang hoạt động, cộng thêm mục đã gán dù đã ngừng để không mất khi lưu lại
 const stores = computed(() => props.options.stores.filter((x) => x.active || model.value.storeIds.includes(x.id)));
 const areas = computed(() => props.options.areas.filter((x) => x.active || model.value.areaIds.includes(x.id)));
@@ -19,7 +20,7 @@ function toggle(list: 'storeIds' | 'areaIds', id: number) {
   <div class="stack">
     <label class="f w-md">
       Vai trò tài khoản
-      <select v-model="model.role" :disabled="disabled">
+      <select v-model="model.role" :disabled="disabled || lockScope">
         <option v-for="r in ACCOUNT_ROLES" :key="r" :value="r">{{ ROLE_LABEL[r] }}</option>
       </select>
     </label>
@@ -27,7 +28,7 @@ function toggle(list: 'storeIds' | 'areaIds', id: number) {
       <span class="sm b">Cửa hàng phụ trách (ít nhất 1)</span>
       <div class="rowf">
         <label v-for="s in stores" :key="s.id" class="p cb">
-          <input type="checkbox" :checked="model.storeIds.includes(s.id)" :disabled="disabled" @change="toggle('storeIds', s.id)" /> {{ s.name }}
+          <input type="checkbox" :checked="model.storeIds.includes(s.id)" :disabled="disabled || lockScope" @change="toggle('storeIds', s.id)" /> {{ s.name }}
           <span class="mut fw4">· {{ s.areaName }}</span>
         </label>
       </div>
@@ -36,7 +37,7 @@ function toggle(list: 'storeIds' | 'areaIds', id: number) {
       <span class="sm b">Khu vực phụ trách (ít nhất 1)</span>
       <div class="rowf">
         <label v-for="a in areas" :key="a.id" class="p cb">
-          <input type="checkbox" :checked="model.areaIds.includes(a.id)" :disabled="disabled" @change="toggle('areaIds', a.id)" /> {{ a.name }}
+          <input type="checkbox" :checked="model.areaIds.includes(a.id)" :disabled="disabled || lockScope" @change="toggle('areaIds', a.id)" /> {{ a.name }}
         </label>
       </div>
     </div>

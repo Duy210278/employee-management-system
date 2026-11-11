@@ -1,7 +1,7 @@
 import type { MeResponse } from '@lotrinh/shared';
 import { createRouter, createWebHistory } from 'vue-router';
 import { ApiError } from './api/client';
-import { fetchMe, queryClient } from './api/queries';
+import { fetchAuthConfig, fetchMe, queryClient } from './api/queries';
 import AppShell from './components/AppShell.vue';
 import AccountDetailPage from './pages/admin/AccountDetailPage.vue';
 import AccountsPage from './pages/admin/AccountsPage.vue';
@@ -15,6 +15,7 @@ import DesignPage from './pages/design/DesignPage.vue';
 import FrameworkPage from './pages/FrameworkPage.vue';
 import InboxPage from './pages/InboxPage.vue';
 import LoginPage from './pages/LoginPage.vue';
+import NoAccessPage from './pages/NoAccessPage.vue';
 import NotificationsPage from './pages/NotificationsPage.vue';
 import PendingPage from './pages/PendingPage.vue';
 import PlaceholderPage from './pages/PlaceholderPage.vue';
@@ -43,6 +44,7 @@ export const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     { path: '/dang-nhap', name: 'login', component: LoginPage, meta: { public: true } },
+    { path: '/chua-co-quyen', name: 'no-access', component: NoAccessPage, meta: { public: true } },
     { path: '/dang-ky', name: 'register', component: RegisterPage, meta: { public: true } },
     { path: '/cho-duyet', name: 'pending', component: PendingPage, meta: { public: true } },
     {
@@ -90,14 +92,34 @@ export const router = createRouter({
   ],
 });
 
+/** Mã lỗi khi lấy người dùng từ Web A mà người đó không vào được module: hiện trang "chưa được cấp quyền" */
+const NO_ACCESS_CODES = new Set(['NO_MODULE_ACCESS', 'NOT_PROVISIONED', 'ACCOUNT_INACTIVE', 'IDENTITY_CONFLICT']);
+const LOCAL_AUTH_PAGES = new Set(['login', 'register', 'pending']);
+
 /** Mọi trang (trừ đăng nhập, đăng ký) cần phiên hợp lệ; thông tin người dùng nạp một lần rồi dùng chung */
 router.beforeEach(async (to) => {
-  if (to.meta.public) return true;
+  if (to.meta.public) {
+    // Lấy người dùng từ Web A thì không có trang đăng nhập, đăng ký riêng
+    if (LOCAL_AUTH_PAGES.has(String(to.name)) && (await fetchAuthConfig().catch(() => null))?.authMode === 'external') return '/';
+    return true;
+  }
   try {
     await queryClient.fetchQuery({ queryKey: ['me'], queryFn: fetchMe, staleTime: 30_000 });
     return true;
   } catch (err) {
-    if (err instanceof ApiError && err.status === 401) return { name: 'login' };
+    if (!(err instanceof ApiError)) throw err;
+    const config = await fetchAuthConfig().catch(() => null);
+    if (config?.authMode === 'external') {
+      if (err.status === 401 && config.loginUrl) {
+        // Về trang đăng nhập của Web A, đăng nhập xong quay lại đúng trang đang mở
+        const sep = config.loginUrl.includes('?') ? '&' : '?';
+        window.location.href = `${config.loginUrl}${sep}returnTo=${encodeURIComponent(window.location.href)}`;
+        return false;
+      }
+      if (err.status === 401 || (err.status === 403 && NO_ACCESS_CODES.has(err.code))) return { name: 'no-access', query: { code: err.code, msg: err.message } };
+      throw err;
+    }
+    if (err.status === 401) return { name: 'login' };
     throw err;
   }
 });

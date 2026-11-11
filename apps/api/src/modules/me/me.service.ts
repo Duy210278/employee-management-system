@@ -108,6 +108,7 @@ export class MeService {
       isBuddyNow: buddyOf.length > 0,
       clock: await this.clock.view(),
       demoMode: env().DEMO_MODE,
+      authMode: env().AUTH_MODE,
     };
   }
 

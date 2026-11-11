@@ -14,7 +14,7 @@ import { useQueryClient } from '@tanstack/vue-query';
 import { computed, reactive, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { ApiError } from '@/api/client';
-import { userApi, useStaffProfile, useUser } from '@/api/queries';
+import { useMe, userApi, useStaffProfile, useUser } from '@/api/queries';
 import Avatar from '@/components/Avatar.vue';
 import ChtRunForm from '@/components/cht/ChtRunForm.vue';
 import StaffRunForm from '@/components/StaffRunForm.vue';
@@ -32,6 +32,9 @@ const { data: d, isLoading, error } = useUser(id);
 const busy = ref(false);
 
 const info = reactive({ fullName: '', employeeCode: '', phone: '', status: 'active' as 'active' | 'locked' | 'left' });
+const { data: me } = useMe();
+/** Người dùng lấy từ hệ thống chính: chỉ sửa quyền Buddy */
+const hostManaged = computed(() => me.value?.authMode === 'external');
 const scope = ref({ role: 'nv' as AccountRole, storeIds: [] as number[], areaIds: [] as number[], canBuddy: false });
 const handover = reactive<Record<string, number>>({});
 const rejectNote = ref('');
@@ -140,7 +143,7 @@ function reject() {
       </div>
 
       <!-- Duyệt đăng ký (mục 5.1) -->
-      <div v-if="d.user.status === 'pending'" class="grid g2 start">
+      <div v-if="d.user.status === 'pending' && !hostManaged" class="grid g2 start">
         <div class="card pad stack hl">
           <div class="h2">Duyệt đăng ký</div>
           <div class="sm">
@@ -212,7 +215,8 @@ function reject() {
       <!-- Sửa tài khoản (mục 5.3) -->
       <form v-if="isReviewed" class="card pad stack" @submit.prevent="save">
         <div class="h2">Thông tin và quyền</div>
-        <div class="form">
+        <div v-if="hostManaged" class="alert info"><div>Họ tên, mã nhân viên, vai trò, nơi làm việc và trạng thái được đồng bộ từ hệ thống chính. Ở đây chỉ bật, tắt quyền làm Buddy.</div></div>
+        <fieldset class="form plain" :disabled="hostManaged">
           <label class="f">Họ và tên<input v-model="info.fullName" required /></label>
           <label class="f">Mã nhân viên<input v-model="info.employeeCode" /></label>
           <label class="f">Điện thoại<input v-model="info.phone" /></label>
@@ -224,8 +228,8 @@ function reject() {
               <option value="left">Đã nghỉ</option>
             </select>
           </label>
-        </div>
-        <ScopePicker v-model="scope" :options="d.options" />
+        </fieldset>
+        <ScopePicker v-model="scope" :options="d.options" :lock-scope="hostManaged" />
         <div v-if="d.isLastBp" class="alert info">
           <div>Đây là tài khoản BP Đào tạo hoạt động cuối cùng: không hạ quyền hoặc khóa được cho tới khi có BP Đào tạo khác (R19).</div>
         </div>

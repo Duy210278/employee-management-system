@@ -65,7 +65,8 @@ const tabs = computed<Tab[]>(() => {
         children: [
           { to: '/quan-tri/tai-khoan', label: 'Tài khoản và vai trò', badge: pendingUsers.value },
           { to: '/quan-tri/danh-muc', label: 'Cửa hàng, khu vực' },
-          { to: '/quan-tri/nhap-csv', label: 'Nhập tài khoản' },
+          // Lấy người dùng từ hệ thống chính thì không nhập tài khoản ở đây
+          ...(m.authMode === 'local' ? [{ to: '/quan-tri/nhap-csv', label: 'Nhập tài khoản' }] : []),
           { to: '/quan-tri/nhat-ky', label: 'Nhật ký hệ thống' },
           ...(m.demoMode ? [{ to: '/quan-tri/he-thong', label: 'Công cụ demo' }] : []),
         ],

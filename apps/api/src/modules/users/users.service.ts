@@ -19,9 +19,10 @@ import bcrypt from 'bcryptjs';
 import { and, asc, desc, eq, inArray, ne, sql } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/mssql-core';
 import { ClockService } from '../../adapters/clock/clock.service';
-import { badRequest, conflict, notFound, staleData } from '../../common/errors';
+import { badRequest, conflict, forbidden, notFound, staleData } from '../../common/errors';
 import type { SessionUser } from '../../common/session';
 import type { Db, Tx } from '../../db/client';
+import { env } from '../../config';
 import { DB } from '../../db/db.provider';
 import { areas, credentials, staff, stores, users, userScopes } from '../../db/schema';
 import { areaScopeRows, replaceScopes, storeScopeRows } from '../../db/scopes';
@@ -205,7 +206,21 @@ export class UsersService {
     return replaceScopes(tx, userId, storeIds, areaIds);
   }
 
+  /** Lấy người dùng từ Web A: họ tên, mã NV, vai trò, phạm vi, trạng thái do Web A quản lý; module chỉ còn sửa quyền Buddy */
+  private assertLocal(): void {
+    if (env().AUTH_MODE === 'external') throw forbidden('MANAGED_BY_HOST', 'Tài khoản được tạo và duyệt ở hệ thống chính, không làm ở Lộ trình');
+  }
+
+  private async keepHostFields(id: number, body: UpdateUserBodyT): Promise<UpdateUserBodyT> {
+    const row = await this.row(id);
+    const storeIds = (await storeScopeRows(this.db).where(eq(userScopes.userId, id))).map((s) => s.storeId);
+    const areaIds = (await areaScopeRows(this.db).where(eq(userScopes.userId, id))).map((a) => a.areaId);
+    const status = row.status === 'locked' || row.status === 'left' ? row.status : 'active';
+    return { ...body, fullName: row.fullName, employeeCode: row.employeeCode, phone: row.phone ?? '', role: row.role, status, storeIds, areaIds };
+  }
+
   async approve(user: SessionUser, id: number, body: ApproveUserBodyT): Promise<UserDetailResponse> {
+    this.assertLocal();
     await this.assertAdmin(user);
     const scope = this.scopesFor(body.role, body.storeIds, body.areaIds);
     await this.assertScopeIds(scope.storeIds, scope.areaIds);
@@ -245,6 +260,7 @@ export class UsersService {
 
   /** Từ chối không xóa bản ghi, chỉ chuyển "Bị từ chối" kèm lý do (mục 5.4 điều 5, T-U02) */
   async reject(user: SessionUser, id: number, note: string): Promise<UserDetailResponse> {
+    this.assertLocal();
     await this.assertAdmin(user);
     const now = await this.clock.now();
     await this.db.transaction(async (tx) => {
@@ -259,8 +275,9 @@ export class UsersService {
     return this.detail(user, id);
   }
 
-  async update(user: SessionUser, id: number, body: UpdateUserBodyT): Promise<UserDetailResponse> {
+  async update(user: SessionUser, id: number, input: UpdateUserBodyT): Promise<UserDetailResponse> {
     await this.assertAdmin(user);
+    const body = env().AUTH_MODE === 'external' ? await this.keepHostFields(id, input) : input;
     const scope = this.scopesFor(body.role, body.storeIds, body.areaIds);
     await this.assertScopeIds(scope.storeIds, scope.areaIds);
     const now = await this.clock.now();
@@ -337,6 +354,7 @@ export class UsersService {
   }
 
   async create(user: SessionUser, body: CreateUserBodyT): Promise<{ id: number }> {
+    this.assertLocal();
     await this.assertAdmin(user);
     await this.assertUnique(body.email, body.employeeCode);
     const scope = this.scopesFor(body.role, body.storeIds, body.areaIds);
@@ -370,6 +388,7 @@ export class UsersService {
    * chỉ nhập các dòng hợp lệ khi người dùng xác nhận.
    */
   async importCsv(user: SessionUser, csv: string, commit: boolean): Promise<ImportUsersResponse> {
+    this.assertLocal();
     await this.assertAdmin(user);
     const table = parseCsv(csv);
     if (!table.length) throw badRequest('EMPTY_CSV', 'Tệp CSV trống');

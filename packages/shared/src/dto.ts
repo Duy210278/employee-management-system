@@ -39,6 +39,14 @@ export interface MeResponse {
   isBuddyNow: boolean;
   clock: ClockView;
   demoMode: boolean;
+  /** local: đăng nhập riêng · external: người dùng lấy từ hệ thống chính (Web A), vai trò và phạm vi quản lý ở đó */
+  authMode: 'local' | 'external';
+}
+
+export interface AuthConfigResponse {
+  authMode: 'local' | 'external';
+  loginUrl: string | null;
+  logoutUrl: string | null;
 }
 
 export interface DemoAccount {

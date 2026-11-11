@@ -31,6 +31,7 @@ import type {
   DemoAccount,
   FrameworkResponse,
   InboxResponse,
+  AuthConfigResponse,
   MeResponse,
   ObservationBodyT,
   ObservationsResponse,
@@ -70,6 +71,13 @@ export const queryClient = new QueryClient({
 });
 
 export const fetchMe = () => api.get<MeResponse>('/me');
+
+/** Cách đăng nhập (đọc một lần): local có trang đăng nhập riêng, external chuyển sang trang đăng nhập của Web A */
+let authConfigPromise: Promise<AuthConfigResponse> | null = null;
+export const fetchAuthConfig = () => (authConfigPromise ??= api.get<AuthConfigResponse>('/auth/config').catch((err) => {
+  authConfigPromise = null;
+  throw err;
+}));
 
 export const useMe = () => useQuery({ queryKey: ['me'], queryFn: fetchMe, staleTime: 30_000 });
 export const useToday = () => useQuery({ queryKey: ['today'], queryFn: () => api.get<TodayResponse>('/me/today') });
@@ -194,7 +202,7 @@ export const taskApi = {
 export const sessionApi = {
   login: (email: string, password: string) => api.post<{ ok: true }>('/auth/login', { email, password }),
   loginAs: (userId: number) => api.post<{ ok: true }>('/demo/login-as', { userId }),
-  logout: () => api.post<{ ok: true }>('/auth/logout'),
+  logout: () => api.post<{ ok: true; logoutUrl: string | null }>('/auth/logout'),
   ack: (runId: number) => api.post<{ ok: true }>(`/runs/${runId}/ack`),
   resetDemo: () => api.post<{ ok: true; today: string }>('/demo/reset'),
 };

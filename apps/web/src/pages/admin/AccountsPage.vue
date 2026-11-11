@@ -2,7 +2,7 @@
 import { ACCOUNT_ROLES, CreateUserBody, ROLE_LABEL, USER_STATUS_LABEL, USER_STATUSES, type AccountRole, type UserListItem } from '@lotrinh/shared';
 import { computed, reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { useMutate, userApi, useUsers } from '@/api/queries';
+import { useMe, useMutate, userApi, useUsers } from '@/api/queries';
 import SearchInput from '@/components/SearchInput.vue';
 import { useToast } from '@/composables/toast';
 import { fmtDateTime } from '@/format';
@@ -19,6 +19,9 @@ const q = ref('');
 const role = ref('');
 const status = ref('');
 const store = ref(0);
+const { data: me } = useMe();
+/** Người dùng lấy từ hệ thống chính: không tạo, duyệt, nhập tài khoản ở module */
+const hostManaged = computed(() => me.value?.authMode === 'external');
 const items = computed(() => (data.value?.items ?? []).filter((u) => u.status !== 'pending'));
 const pending = computed(() => (data.value?.items ?? []).filter((u) => u.status === 'pending'));
 const filtered = computed(() =>
@@ -76,8 +79,11 @@ async function create() {
   <div v-if="isLoading" class="card empty">Đang tải…</div>
   <div v-else-if="error" class="alert bad"><div>{{ error.message }}</div></div>
   <div v-else-if="data" class="page">
+    <div v-if="hostManaged" class="alert info">
+      <div>Tài khoản, vai trò, nơi làm việc và trạng thái được đồng bộ từ hệ thống chính. Ở đây chỉ xem và bật, tắt quyền làm Buddy.</div>
+    </div>
     <!-- Hàng chờ duyệt (mục 5.2) -->
-    <div v-if="pending.length" class="card clip hl-warn">
+    <div v-if="pending.length && !hostManaged" class="card clip hl-warn">
       <div class="stg"><b>{{ pending.length }} tài khoản đang chờ duyệt</b><span class="sm mut">Duyệt theo đề nghị, hoặc mở chi tiết để chỉnh vai trò, phạm vi</span></div>
       <div v-for="u in pending" :key="u.id" class="item stack tight">
         <div class="rowf sp">
@@ -119,14 +125,14 @@ async function create() {
           <option v-for="s in STATUS_FILTER" :key="s" :value="s">{{ USER_STATUS_LABEL[s] }}</option>
         </select>
       </div>
-      <div class="grp end">
+      <div v-if="!hostManaged" class="grp end">
         <RouterLink class="btn" to="/quan-tri/nhap-csv">Nhập từ CSV</RouterLink>
         <button class="btn pri" type="button" @click="creating = !creating">+ Tạo tài khoản</button>
       </div>
     </div>
     <div class="summary">Đang hiển thị <b>{{ filtered.length }}</b>/{{ data.items.length }} tài khoản</div>
 
-    <form v-if="creating" class="card pad stack hl" @submit.prevent="create">
+    <form v-if="creating && !hostManaged" class="card pad stack hl" @submit.prevent="create">
       <div class="h2">Tạo tài khoản</div>
       <div class="form">
         <label class="f">Họ và tên<input v-model="form.fullName" required /></label>

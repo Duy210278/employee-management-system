@@ -1,5 +1,5 @@
 import { Body, Controller, Get, HttpCode, NotFoundException, Post, Req, Res } from '@nestjs/common';
-import { LoginBody, RegisterBody, type LoginBodyT, type RegisterBodyT, type RegisterOptions } from '@lotrinh/shared';
+import { LoginBody, RegisterBody, type AuthConfigResponse, type LoginBodyT, type RegisterBodyT, type RegisterOptions } from '@lotrinh/shared';
 import type { Request, Response } from 'express';
 import { Public } from '../../common/session';
 import { env } from '../../config';
@@ -17,7 +17,7 @@ export class AuthController {
   /** Giao diện hỏi cách đăng nhập: local (trang đăng nhập riêng) hay external (về trang đăng nhập Web A) */
   @Public()
   @Get('config')
-  config() {
+  config(): AuthConfigResponse {
     const e = env();
     return { authMode: e.AUTH_MODE, loginUrl: e.AUTH_MODE === 'external' ? (e.HOST_LOGIN_URL ?? null) : null, logoutUrl: e.AUTH_MODE === 'external' ? (e.HOST_LOGOUT_URL ?? null) : null };
   }

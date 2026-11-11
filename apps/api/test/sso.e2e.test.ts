@@ -56,6 +56,18 @@ class Browser {
   async get(path: string) {
     return this.keep(await this.harness.anonymous().get(`${API}${path}`).set('Cookie', this.cookie()));
   }
+  async harnessPut(path: string, body: object) {
+    const addr = this.harness.app.getHttpServer().address() as AddressInfo | null;
+    return this.keep(
+      await this.harness
+        .anonymous()
+        .put(`${API}${path}`)
+        .set('Cookie', this.cookie())
+        .set('Origin', `http://127.0.0.1:${addr?.port}`)
+        .set('Host', `127.0.0.1:${addr?.port}`)
+        .send(body),
+    );
+  }
   async post(path: string, body: object = {}, origin: string | null = 'same') {
     const addr = this.harness.app.getHttpServer().address() as AddressInfo | null;
     const req = this.harness.anonymous().post(`${API}${path}`).set('Cookie', this.cookie());
@@ -174,6 +186,33 @@ describe('đăng nhập qua cookie dùng chung của Web A', () => {
     const res = await ha.post('/auth/logout');
     expect(res.body).toEqual({ ok: true, logoutUrl: 'http://web-a.test/dang-xuat' });
     expect(ha.session).toBeNull();
+  });
+});
+
+describe('quản trị tài khoản khi Web A là nguồn chuẩn', () => {
+  it('BP không tạo, không duyệt tài khoản; sửa tài khoản chỉ đổi được quyền Buddy, vai trò giữ theo Web A', async () => {
+    const admin = new Browser(harness, await hostToken({ sub: 'a-admin', employeeCode: 'BP001', name: 'Ngô Quốc Bảo', titles: ['DAO_TAO'] }));
+    await admin.get('/me');
+    const created = await admin.post('/users', { fullName: 'Người Thử', email: 'thu@x.vn', phone: '', role: 'nv', storeIds: [], areaIds: [], canBuddy: false, password: 'Abcdef12' });
+    expect(created.status).toBe(403);
+    expect(created.body.code).toBe('MANAGED_BY_HOST');
+    const [mai] = await db.select().from(users).where(eq(users.employeeCode, 'NV203'));
+    const detail = (await admin.get(`/users/${mai!.id}`)).body as { user: { fullName: string; employeeCode: string | null; phone: string | null; role: string; status: string; canBuddy: boolean; rowVersion: number } };
+    const u = detail.user;
+    const res = await admin.harnessPut(`/users/${mai!.id}`, {
+      fullName: 'Tên Bị Sửa',
+      employeeCode: u.employeeCode,
+      phone: u.phone ?? '',
+      role: 'qlkv',
+      storeIds: [],
+      areaIds: [1],
+      canBuddy: true,
+      status: 'active',
+      rowVersion: u.rowVersion,
+      handover: [],
+    });
+    expect(res.status).toBe(200);
+    expect(res.body.user).toMatchObject({ fullName: u.fullName, role: 'nv', canBuddy: true });
   });
 });
 
