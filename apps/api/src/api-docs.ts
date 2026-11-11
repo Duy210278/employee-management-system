@@ -9,6 +9,7 @@ import { zodToJsonSchema } from 'zod-to-json-schema';
 import { SESSION_COOKIE } from './common/session';
 import { ZodPipe } from './common/zod.pipe';
 import { auditLabel } from './modules/audit/audit.controller';
+import { apiPrefix } from './config';
 
 /** Nhóm API theo controller, theo thứ tự hiển thị */
 const TAGS: [controller: string, tag: string][] = [
@@ -100,8 +101,9 @@ export function buildApiDocument(app: INestApplication): OpenAPIObject {
 
 /** Trang Swagger ở /api/docs (JSON ở /api/docs/json); gọi trước app.listen */
 export function setupApiDocs(app: INestApplication): void {
-  SwaggerModule.setup('api/docs', app, buildApiDocument(app), {
-    jsonDocumentUrl: 'api/docs/json',
+  const docs = apiPrefix().replace(/v1$/, 'docs');
+  SwaggerModule.setup(docs, app, buildApiDocument(app), {
+    jsonDocumentUrl: `${docs}/json`,
     customSiteTitle: 'API · Lộ trình Upharma',
     swaggerOptions: { docExpansion: 'none', filter: true, displayRequestDuration: true, tryItOutEnabled: true },
   });

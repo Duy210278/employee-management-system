@@ -7,6 +7,8 @@ import { ApiError } from '@/api/client';
 import { sessionApi, useDemoAccounts } from '@/api/queries';
 import { useToast } from '@/composables/toast';
 
+const BASE_URL = import.meta.env.BASE_URL;
+
 /** Đăng nhập (mục 5.1); bản demo có thêm đăng nhập nhanh theo tài khoản mẫu (mục 14.7) */
 const router = useRouter();
 const qc = useQueryClient();
@@ -51,7 +53,7 @@ function quick() {
   <div class="auth-page">
     <div class="auth-card">
       <div class="auth-head">
-        <img class="auth-logo" src="/upharma.png" alt="UPharma" width="96" height="96" />
+        <img class="auth-logo" :src="`${BASE_URL}upharma.png`" alt="UPharma" width="96" height="96" />
         <h1 class="auth-title">Chào mừng đến với<br /><span class="up">Lộ trình Upharma</span></h1>
       </div>
       <form class="stack auth-form" @submit.prevent="submit">

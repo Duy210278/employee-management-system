@@ -9,7 +9,7 @@ import type { NextFunction, Request, Response } from 'express';
 import { setupApiDocs } from './api-docs';
 import { AppModule } from './app.module';
 import { configureApp } from './app.setup';
-import { env } from './config';
+import { apiPrefix, env } from './config';
 import { createDb, runMigrations } from './db/client';
 import { isDatabaseEmpty, seedDatabase } from './db/seed';
 
@@ -39,10 +39,14 @@ function serveWeb(app: NestExpressApplication): void {
     log.warn('Chưa có giao diện đã build (apps/web/dist). Chạy "pnpm build", hoặc dùng "pnpm dev" và mở http://localhost:5173');
     return;
   }
-  app.useStaticAssets(dir);
-  // Đường dẫn của giao diện (vd. /hom-nay) không phải file: trả index.html để Vue Router xử lý
+  const base = env().BASE_PATH;
+  const api = `/${apiPrefix()}/`;
+  app.useStaticAssets(dir, base ? { prefix: base } : {});
+  // Đường dẫn của giao diện (vd. /hom-nay hoặc /lo-trinh/hom-nay) không phải file: trả index.html để Vue Router xử lý
   app.use((req: Request, res: Response, next: NextFunction) => {
-    if (req.method !== 'GET' || req.path.startsWith('/api/')) return next();
+    if (req.method !== 'GET' || req.path.startsWith(api) || req.path.startsWith(`${base}/api/docs`)) return next();
+    if (base && req.path === '/') return res.redirect(`${base}/`);
+    if (base && req.path !== base && !req.path.startsWith(`${base}/`)) return next();
     res.sendFile(index);
   });
 }
@@ -58,7 +62,8 @@ async function bootstrap() {
   app.set('trust proxy', 1);
   const { PORT, DEMO_MODE } = env();
   await app.listen(PORT);
-  log.log(`Mở http://localhost:${PORT} (API: /api/v1${env().API_DOCS ? `, tài liệu API: http://localhost:${PORT}/api/docs` : ''}, DEMO_MODE=${DEMO_MODE})`);
+  const base = env().BASE_PATH;
+  log.log(`Mở http://localhost:${PORT}${base}/ (API: /${apiPrefix()}${env().API_DOCS ? `, tài liệu API: http://localhost:${PORT}${base}/api/docs` : ''}, DEMO_MODE=${DEMO_MODE})`);
 }
 
 bootstrap().catch((err) => {

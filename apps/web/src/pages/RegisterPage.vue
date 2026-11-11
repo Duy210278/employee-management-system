@@ -5,6 +5,8 @@ import { useRouter } from 'vue-router';
 import { userApi, useRegisterOptions } from '@/api/queries';
 import { useToast } from '@/composables/toast';
 
+const BASE_URL = import.meta.env.BASE_URL;
+
 /** Đăng ký tài khoản (mục 5.1): vai trò, nhà thuốc, khu vực chỉ là đề nghị, BP Đào tạo chốt khi duyệt */
 const router = useRouter();
 const toast = useToast();
@@ -43,7 +45,7 @@ async function submit() {
   <div class="auth-page">
     <form class="auth-card wide" @submit.prevent="submit">
       <div class="auth-head">
-        <img class="auth-logo" src="/upharma.png" alt="UPharma" width="96" height="96" />
+        <img class="auth-logo" :src="`${BASE_URL}upharma.png`" alt="UPharma" width="96" height="96" />
         <h1 class="auth-title">Đăng ký tài khoản</h1>
         <p class="auth-sub">Sau khi gửi, tài khoản ở trạng thái <b>Chờ duyệt</b>. BP Đào tạo kiểm tra và chốt vai trò, phạm vi trước khi bạn dùng được hệ thống.</p>
       </div>

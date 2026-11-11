@@ -60,7 +60,8 @@ const LABELS: [RegExp, string][] = [
 ];
 
 export function auditLabel(action: string): string {
-  const key = action.replace(' /api/v1/', ' /');
+  // Bỏ tiền tố (/api/v1 hoặc /lo-trinh/api/v1) để nhãn không phụ thuộc BASE_PATH
+  const key = action.replace(/ \S*?\/api\/v1\//, ' /');
   return LABELS.find(([re]) => re.test(key))?.[1] ?? action;
 }
 

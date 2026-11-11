@@ -18,7 +18,7 @@ export class AuditInterceptor implements NestInterceptor {
       tap(() => {
         if (!req.user) return;
         const path: string = req.route?.path ?? req.path;
-        const entity = path.replace(/^\/?api\/v1\//, '').split('/')[0] || null;
+        const entity = path.replace(/^.*?\/?api\/v1\//, '').split('/')[0] || null;
         const body = typeof req.body === 'object' && req.body ? Object.fromEntries(Object.entries(req.body).filter(([k]) => !SECRET_FIELDS.has(k))) : null;
         void this.audit.log({
           userId: req.user.id,

@@ -6,6 +6,8 @@ import Icon, { type IconName } from './Icon.vue';
 import PageHeader from './PageHeader.vue';
 import UserMenu from './UserMenu.vue';
 
+const BASE_URL = import.meta.env.BASE_URL;
+
 const { data: me } = useMe();
 
 const hasInbox = computed(() => !!me.value && (me.value.user.role !== 'nv' || me.value.isBuddyNow));
@@ -93,7 +95,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKey));
   <div class="shell" :class="{ 'nav-open': navOpen }">
     <aside id="side-nav" class="side" aria-label="Điều hướng chính">
       <div class="side-top">
-        <RouterLink to="/" class="brand"><img src="/upharma-mark.png" alt="" width="32" height="32" /><span>Lộ trình Upharma</span></RouterLink>
+        <RouterLink to="/" class="brand"><img :src="`${BASE_URL}upharma-mark.png`" alt="" width="32" height="32" /><span>Lộ trình Upharma</span></RouterLink>
         <button class="side-close" type="button" aria-label="Đóng menu" @click="navOpen = false"><Icon name="close" :size="20" /></button>
       </div>
       <nav class="side-links">
@@ -120,7 +122,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKey));
           <button class="menu-btn" type="button" aria-label="Mở menu" aria-controls="side-nav" :aria-expanded="navOpen" @click="navOpen = true">
             <Icon name="menu" :size="22" />
           </button>
-          <RouterLink to="/" class="brand top-brand"><img src="/upharma-mark.png" alt="" width="32" height="32" /><span>Lộ trình Upharma</span></RouterLink>
+          <RouterLink to="/" class="brand top-brand"><img :src="`${BASE_URL}upharma-mark.png`" alt="" width="32" height="32" /><span>Lộ trình Upharma</span></RouterLink>
           <div class="grow"></div>
           <div v-if="me" class="top-end">
             <RouterLink to="/thong-bao" class="bell" :class="{ on: route.path === '/thong-bao' }" :aria-label="bellLabel">

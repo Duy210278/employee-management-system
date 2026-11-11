@@ -53,7 +53,7 @@ import type {
 import { QueryCache, QueryClient, useQuery, useQueryClient } from '@tanstack/vue-query';
 import { computed, ref, type Ref } from 'vue';
 import { useToast } from '@/composables/toast';
-import { api, ApiError } from './client';
+import { api, API_BASE, ApiError } from './client';
 
 export const queryClient = new QueryClient({
   queryCache: new QueryCache({
@@ -208,7 +208,7 @@ export const versionApi = {
   approve: (id: number, effectiveFrom: string) => api.post<VersionDetailResponse>(`/versions/${id}/approve`, { effectiveFrom }),
   reschedule: (id: number, effectiveFrom: string) => api.put<VersionDetailResponse>(`/versions/${id}/effective`, { effectiveFrom }),
   remove: (id: number) => api.del<{ ok: true }>(`/versions/${id}`),
-  exportUrl: (id: number) => `/api/v1/versions/${id}/export`,
+  exportUrl: (id: number) => `${API_BASE}/versions/${id}/export`,
 };
 
 export const assessmentApi = {
@@ -225,7 +225,7 @@ export const staffApi = {
   transfer: (staffId: number, body: TransferBodyT) => api.post<RunManageResponse>(`/staff/${staffId}/transfer`, body),
   stop: (staffId: number, body: StopStaffBodyT) => api.post<RunManageResponse>(`/staff/${staffId}/stop`, body),
   remove: (staffId: number, body: DeleteStaffBodyT) => api.del<{ ok: true; fullName: string; runs: number }>(`/staff/${staffId}`, body),
-  exportUrl: '/api/v1/reports/progress.csv',
+  exportUrl: `${API_BASE}/reports/progress.csv`,
 };
 
 export const runApi = {

@@ -40,7 +40,7 @@ declare module 'vue-router' {
 }
 
 export const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     { path: '/dang-nhap', name: 'login', component: LoginPage, meta: { public: true } },
     { path: '/dang-ky', name: 'register', component: RegisterPage, meta: { public: true } },

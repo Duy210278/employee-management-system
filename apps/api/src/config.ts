@@ -21,6 +21,12 @@ const EnvSchema = z.object({
     .string()
     .default('false')
     .transform((v) => v === 'true'),
+  /** Đường dẫn gốc khi chạy sau proxy chung tên miền với dự án lớn, ví dụ /lo-trinh; mặc định chạy ở gốc / */
+  BASE_PATH: z
+    .string()
+    .default('/')
+    .refine((v) => /^\/([a-z0-9-]+(\/[a-z0-9-]+)*)?\/?$/.test(v), 'BASE_PATH dạng /ten-duong-dan')
+    .transform((v) => v.replace(/\/+$/, '')),
   /** Tự chạy migration khi API khởi động; đặt false khi DBA tự chạy script */
   AUTO_MIGRATE: z
     .string()
@@ -53,3 +59,6 @@ export function env(): Env {
 export function resetEnvCache(): void {
   cached = undefined;
 }
+
+/** Tiền tố route của API, không có dấu / ở đầu: "api/v1" hoặc "lo-trinh/api/v1" */
+export const apiPrefix = (): string => `${env().BASE_PATH.replace(/^\//, '')}${env().BASE_PATH ? '/' : ''}api/v1`;

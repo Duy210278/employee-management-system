@@ -1,5 +1,8 @@
 import type { ApiErrorBody } from '@lotrinh/shared';
 
+/** Gốc API theo đường dẫn gốc của giao diện: /api/v1 hoặc /lo-trinh/api/v1 */
+export const API_BASE = `${import.meta.env.BASE_URL}api/v1`;
+
 export class ApiError extends Error {
   constructor(
     readonly status: number,
@@ -13,7 +16,7 @@ export class ApiError extends Error {
 async function request<T>(method: string, path: string, body?: unknown): Promise<T> {
   let res: Response;
   try {
-    res = await fetch(`/api/v1${path}`, {
+    res = await fetch(`${API_BASE}${path}`, {
       method,
       credentials: 'same-origin',
       headers: body !== undefined ? { 'content-type': 'application/json' } : undefined,
