@@ -14,3 +14,5 @@ process.env.HOST_JWT_SECRET = 'test-web-a-secret-for-sso-only';
 process.env.HOST_LOGIN_URL = 'http://127.0.0.1/dang-nhap';
 process.env.HOST_LOGOUT_URL = 'http://127.0.0.1/dang-xuat';
 process.env.PUBLIC_URL = 'http://127.0.0.1';
+// Test luôn gọi /api/v1: không để BASE_PATH của .env (ví dụ /lo-trinh khi chạy với Web A giả) lọt vào
+process.env.BASE_PATH = '/';
