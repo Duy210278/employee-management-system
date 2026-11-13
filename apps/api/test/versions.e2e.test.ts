@@ -27,7 +27,7 @@ async function save(id: number, mutate: (c: VersionContent) => void, changeNote 
   return admin.put(`${API}/versions/${id}/content`).send({ content, changeNote, rowVersion: d.version.rowVersion }).expect(status);
 }
 
-/** Drizzle bọc lỗi PostgreSQL trong cause */
+/** Drizzle bọc lỗi SQL Server trong cause */
 async function dbError(run: () => Promise<unknown>): Promise<string> {
   try {
     await run();

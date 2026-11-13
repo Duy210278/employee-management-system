@@ -7,3 +7,4 @@ coverage/
 storage/
 .DS_Store
 .corepack-bin/
+.vscode/
